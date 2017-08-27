@@ -1,0 +1,64 @@
+common:
+   selection mode: inner
+guides:
+   snap distance: 10
+screenshot:
+   target: both
+   format: png
+   file:   ~/screenshot_%Y_%m_%d_%H_%M_%S.png
+shortcuts:
+   quit:             Escape
+   fixed ratio:      Shift_L
+   from center:      Control_L
+   freeze:           f
+   guide horizontal: g
+   guide vertical:   b
+   snap to guides:   backslash
+   clear:            Delete
+   clear last:       BackSpace
+   clear all:        j
+   copy values:      space
+   screenshot:       s
+   segment line:     z
+   center lines:     x
+   golden sections:  c
+   only mask:        v
+aspect ratio shortcuts:
+   1:       q
+   4/3:     w
+   1/0.618: e
+   3/2:     r
+   16/9:    t
+colors shortcuts:
+   default: 1
+   dark:    2
+   light:   3
+colors:
+   default:
+      main:       { r: 0,    g: 0.5,  b: 1,    a: 0.5  }
+      basic:      { r: 0,    g: 0,    b: 0,    a: 0.25 }
+      guide:      { r: 0.45, g: 0.72, b: 0,    a: 0.33 }
+      text main:  { r: 0,    g: 0.5,  b: 1,    a: 0.6  }
+      text basic: { r: 0,    g: 0,    b: 0,    a: 0.75 }
+      text faded: { r: 0,    g: 0,    b: 0,    a: 0.4  }
+   dark:
+      main:       { r: 0,    g: 0,    b: 0,    a: 0.8  }
+      basic:      { r: 0,    g: 0,    b: 0,    a: 0.5  }
+      guide:      { r: 0,    g: 0,    b: 0,    a: 0.4  }
+      text main:  { r: 0,    g: 0,    b: 0,    a: 0.9  }
+      text basic: { r: 0,    g: 0,    b: 0,    a: 0.75 }
+      text faded: { r: 0,    g: 0,    b: 0,    a: 0.5  }
+   light:
+      main:       { r: 1,    g: 1,    b: 1,    a: 0.8  }
+      basic:      { r: 1,    g: 1,    b: 1,    a: 0.5  }
+      guide:      { r: 1,    g: 1,    b: 1,    a: 0.4  }
+      text main:  { r: 1,    g: 1,    b: 1,    a: 0.9  }
+      text basic: { r: 1,    g: 1,    b: 1,    a: 0.75 }
+      text faded: { r: 1,    g: 1,    b: 1,    a: 0.5  }
+   highlight:
+      main:       { r: 1,    g: 0.23, b: 0,    a: 0.8  }
+      basic:      { r: 1,    g: 0.23, b: 0,    a: 0.5  }
+      guide:      { r: 1,    g: 0.23, b: 0,    a: 0.4  }
+      text main:  { r: 1,    g: 0.23, b: 0,    a: 0.9  }
+      text basic: { r: 1,    g: 0.23, b: 0,    a: 0.75 }
+      text faded: { r: 1,    g: 0.23, b: 0,    a: 0.5  }
