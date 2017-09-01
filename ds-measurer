@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #
-#  ds-measurer, v1.4.1, GTK+
+#  ds-measurer, v1.5, GTK+
 #  Copyright © 2016-2017 Dmitry Sokolov
 #
 #  This file is part of ds-measurer.
@@ -92,7 +92,8 @@ my %image = &cscc("image");
 my %c = &cscc();
 ($c{dsx}, $c{dsy}) = (0, 0);
 my %w = &cscc();
-$w{marks} = [0, 1, 0];
+$w{sline} = 0;
+$w{marks} = $config->{"selection guides"};
 $w{colors} = [&set_colors("default")];
 
 &cursor();
@@ -113,7 +114,7 @@ sub freeze {
 	$m[$#m]{type} = "m";
 	$m[$#m]{id} = ++$last;
 	$all{$last} = \$m[$#m];
-	$m[$#m]{marks} = [@{$w{marks}}];
+	$m[$#m]{marks} = $w{marks};
 	$m[$#m]{colors} = [@{$w{colors}}];
 	&calc_m($m[$#m], $c{x0}, $c{y0}, $c{x1}, $c{y1});
 	&draw_m($m[$#m]);
@@ -305,7 +306,7 @@ sub calc_m {
 }
 sub draw_m {
 	my $S = $_[0];
-	my @marks = $_[1] ? @{$_[1]} : @{$w{marks}};
+	my %marks = $_[1] ? %{$_[1]} : %{$w{marks}};
 	my @colors = $_[2] ? @{$_[2]} : @{$w{colors}};
 	if($$S{frame}) {
 		$$S{context}->save;
@@ -329,42 +330,35 @@ sub draw_m {
 		$$S{context}->stroke;
 	}
 	if(!$$S{frame} || !$$S{onlymask}) {
+		# Направляющие выделения
+		foreach my $m (keys %marks) {
+			if($marks{$m}{show}) {
+				$$S{context}->set_source_rgba(@{$colors[1]});
+				foreach my $l (@{$marks{$m}{x}}) {
+					$$S{context}->move_to($$S{xr} + ceil($$S{wr} * $l), $$S{yr});
+					$$S{context}->line_to($$S{xr} + ceil($$S{wr} * $l), $$S{yr} + $$S{hr});
+				}
+				foreach my $l (@{$marks{$m}{y}}) {
+					$$S{context}->move_to($$S{xr}, $$S{yr} + ceil($$S{hr} * $l));
+					$$S{context}->line_to($$S{xr} + $$S{wr}, $$S{yr} + ceil($$S{hr} * $l));
+				}
+				$$S{context}->stroke;
+			}
+		}
+		# Основной отрезок
+		if($w{sline}) {
+			$$S{context}->set_source_rgba(@{$colors[0]});
+			$$S{context}->move_to($$S{xr}, $$S{yr});
+			$$S{context}->line_to($$S{xr} + $$S{wr}, $$S{yr} + $$S{hr});
+			$$S{context}->stroke;
+		}
 		# Угол
-		if($marks[0] && $$S{w} > 25) {
+		if($w{sline} && $$S{w} > 25) {
 			$$S{context}->set_source_rgba(@{$colors[1]});
 			$$S{context}->arc($$S{xr}, $$S{yr}, 25, 0, $$S{a}) if $$S{x1} - $$S{x0} >= 0 && $$S{y1} - $$S{y0} >= 0;
 			$$S{context}->arc($$S{xr}, $$S{yr}, 25, PI * 2 - $$S{a}, 0) if $$S{x1} - $$S{x0} >= 0 && $$S{y1} - $$S{y0} < 0;
 			$$S{context}->arc($$S{xr}, $$S{yr}, 25, PI, PI + $$S{a}) if $$S{x1} - $$S{x0} < 0 && $$S{y1} - $$S{y0} < 0;
 			$$S{context}->arc($$S{xr}, $$S{yr}, 25, PI - $$S{a}, PI) if $$S{x1} - $$S{x0} < 0 && $$S{y1} - $$S{y0} >= 0;
-			$$S{context}->stroke;
-		}
-		# Линии по центру
-		if($marks[1]) {
-			$$S{context}->set_source_rgba(@{$colors[1]});
-			$$S{context}->move_to($$S{xr} + ceil($$S{wr} / 2), $$S{yr});
-			$$S{context}->line_to($$S{xr} + ceil($$S{wr} / 2), $$S{yr} + $$S{hr});
-			$$S{context}->move_to($$S{xr}, $$S{yr} + ceil($$S{hr} / 2));
-			$$S{context}->line_to($$S{xr} + $$S{wr}, $$S{yr} + ceil($$S{hr} / 2));
-			$$S{context}->stroke;
-		}
-		# Золотое сечение
-		if($marks[2]) {
-			$$S{context}->set_source_rgba(@{$colors[1]});
-			$$S{context}->move_to($$S{xr} + ceil($$S{wr} * 0.382), $$S{yr});
-			$$S{context}->line_to($$S{xr} + ceil($$S{wr} * 0.382), $$S{yr} + $$S{hr});
-			$$S{context}->move_to($$S{xr}, $$S{yr} + ceil($$S{hr} * 0.382));
-			$$S{context}->line_to($$S{xr} + $$S{wr}, $$S{yr} + ceil($$S{hr} * 0.382));
-			$$S{context}->move_to($$S{xr} + ceil($$S{wr} * 0.618), $$S{yr});
-			$$S{context}->line_to($$S{xr} + ceil($$S{wr} * 0.618), $$S{yr} + $$S{hr});
-			$$S{context}->move_to($$S{xr}, $$S{yr} + ceil($$S{hr} * 0.618));
-			$$S{context}->line_to($$S{xr} + $$S{wr}, $$S{yr} + ceil($$S{hr} * 0.618));
-			$$S{context}->stroke;
-		}
-		# Основной отрезок
-		if($marks[0]) {
-			$$S{context}->set_source_rgba(@{$colors[0]});
-			$$S{context}->move_to($$S{xr}, $$S{yr});
-			$$S{context}->line_to($$S{xr} + $$S{wr}, $$S{yr} + $$S{hr});
 			$$S{context}->stroke;
 		}
 		# Текст
@@ -388,7 +382,7 @@ sub draw_m {
 		);
 		$$S{context}->show_text($tt);
 		# Текст, угол
-		if($marks[0]) {
+		if($w{sline}) {
 			$tt = "$$S{ar}°"; $te = $$S{context}->text_extents($tt);
 			$$S{context}->move_to(
 				$$S{xr} + ($$S{x1} - $$S{x0} >= 0 ? $pp[0] : (0 - $te->{"width"} - $pp[1])),
@@ -413,7 +407,7 @@ sub draw_m {
 		);
 		$$S{context}->show_text($tt);
 		# Текст, длина
-		if($marks[0] && $$S{w} > 55 && $$S{h} > 31) {
+		if($w{sline} && $$S{w} > 55 && $$S{h} > 31) {
 			$$S{context}->set_source_rgba(@{$colors[3]});
 			$tt = "$$S{lr}"; $te = $$S{context}->text_extents($tt);
 			$$S{context}->move_to(
@@ -656,21 +650,7 @@ sub key_release {
 	elsif($event->hardware_keycode == key_n2c($config->{"shortcuts"}->{"segment line"})
 	&& ($creating || defined $idx{m})) {
 		my $S = $creating ? \%w : $m[$idx{m}];
-		$$S{marks}[0] = !$$S{marks}[0];
-		&motion;
-	}
-	# Линии по центру
-	elsif($event->hardware_keycode == key_n2c($config->{"shortcuts"}->{"center lines"})
-	&& ($creating || defined $idx{m})) {
-		my $S = $creating ? \%w : $m[$idx{m}];
-		$$S{marks}[1] = !$$S{marks}[1];
-		&motion;
-	}
-	# Золотое сечение
-	elsif($event->hardware_keycode == key_n2c($config->{"shortcuts"}->{"golden sections"})
-	&& ($creating || defined $idx{m})) {
-		my $S = $creating ? \%w : $m[$idx{m}];
-		$$S{marks}[2] = !$$S{marks}[2];
+		$$S{sline} = !$$S{sline};
 		&motion;
 	}
 	# Вспомогательные линии
@@ -681,6 +661,15 @@ sub key_release {
 		&motion;
 	}
 	else {
+		# Направляющие выделения
+		while(my ($key, $value) = each %{$config->{"selection guides"}}) {
+			if($event->hardware_keycode == key_n2c($key) && ($creating || defined $idx{m})) {
+				my $S = $creating ? \%w : $m[$idx{m}];
+				$$S{marks}{$key}{show} = !$$S{marks}{$key}{show};
+				&motion;
+				last;
+			}
+		}
 		# Цветовые схемы
 		while(my ($key, $value) = each %{$config->{"colors shortcuts"}}) {
 			if($event->hardware_keycode == key_n2c($value)) {

@@ -11,8 +11,8 @@ shortcuts:
    fixed ratio:      Shift_L
    from center:      Control_L
    freeze:           f
-   guide horizontal: g
-   guide vertical:   b
+   guide horizontal: bracketleft
+   guide vertical:   bracketright
    snap to guides:   backslash
    clear:            Delete
    clear last:       BackSpace
@@ -20,15 +20,19 @@ shortcuts:
    copy values:      space
    screenshot:       s
    segment line:     z
-   center lines:     x
-   golden sections:  c
-   only mask:        v
+   only mask:        question
 aspect ratio shortcuts:
    1:       q
    4/3:     w
    1/0.618: e
    3/2:     r
    16/9:    t
+   297/210: y
+selection guides:
+   x: { x: [ 0.5                ], y: [ 0.5                ], show: 1 }
+   c: { x: [ 0.38197, 0.61803   ], y: [ 0.38197, 0.61803   ], show: 0 }
+   v: { x: [ 0.33333, 0.66667   ], y: [ 0.33333, 0.66667   ], show: 0 }
+   b: { x: [ 0.2, 0.4, 0.6, 0.8 ], y: [ 0.2, 0.4, 0.6, 0.8 ], show: 0 }
 colors shortcuts:
    default: 1
    dark:    2
