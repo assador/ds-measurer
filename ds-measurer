@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #
-#  ds-measurer, v1.5, GTK+
+#  ds-measurer, v1.5.1, GTK+
 #  Copyright © 2016-2017 Dmitry Sokolov
 #
 #  This file is part of ds-measurer.
@@ -114,7 +114,11 @@ sub freeze {
 	$m[$#m]{type} = "m";
 	$m[$#m]{id} = ++$last;
 	$all{$last} = \$m[$#m];
-	$m[$#m]{marks} = $w{marks};
+	$m[$#m]{sline} = $w{sline};
+	$m[$#m]{marks} = {%{$w{marks}}};
+	for my $key (keys %{$w{marks}}) {
+		$m[$#m]{marks}{$key} = {%{$w{marks}{$key}}};
+	}
 	$m[$#m]{colors} = [@{$w{colors}}];
 	&calc_m($m[$#m], $c{x0}, $c{y0}, $c{x1}, $c{y1});
 	&draw_m($m[$#m]);
@@ -346,14 +350,14 @@ sub draw_m {
 			}
 		}
 		# Основной отрезок
-		if($w{sline}) {
+		if($$S{sline}) {
 			$$S{context}->set_source_rgba(@{$colors[0]});
 			$$S{context}->move_to($$S{xr}, $$S{yr});
 			$$S{context}->line_to($$S{xr} + $$S{wr}, $$S{yr} + $$S{hr});
 			$$S{context}->stroke;
 		}
 		# Угол
-		if($w{sline} && $$S{w} > 25) {
+		if($$S{sline} && $$S{w} > 25) {
 			$$S{context}->set_source_rgba(@{$colors[1]});
 			$$S{context}->arc($$S{xr}, $$S{yr}, 25, 0, $$S{a}) if $$S{x1} - $$S{x0} >= 0 && $$S{y1} - $$S{y0} >= 0;
 			$$S{context}->arc($$S{xr}, $$S{yr}, 25, PI * 2 - $$S{a}, 0) if $$S{x1} - $$S{x0} >= 0 && $$S{y1} - $$S{y0} < 0;
@@ -382,7 +386,7 @@ sub draw_m {
 		);
 		$$S{context}->show_text($tt);
 		# Текст, угол
-		if($w{sline}) {
+		if($$S{sline}) {
 			$tt = "$$S{ar}°"; $te = $$S{context}->text_extents($tt);
 			$$S{context}->move_to(
 				$$S{xr} + ($$S{x1} - $$S{x0} >= 0 ? $pp[0] : (0 - $te->{"width"} - $pp[1])),
@@ -407,7 +411,7 @@ sub draw_m {
 		);
 		$$S{context}->show_text($tt);
 		# Текст, длина
-		if($w{sline} && $$S{w} > 55 && $$S{h} > 31) {
+		if($$S{sline} && $$S{w} > 55 && $$S{h} > 31) {
 			$$S{context}->set_source_rgba(@{$colors[3]});
 			$tt = "$$S{lr}"; $te = $$S{context}->text_extents($tt);
 			$$S{context}->move_to(
@@ -647,24 +651,22 @@ sub key_release {
 		});
 	}
 	# Основной отрезок
-	elsif($event->hardware_keycode == key_n2c($config->{"shortcuts"}->{"segment line"})
-	&& ($creating || defined $idx{m})) {
-		my $S = $creating ? \%w : $m[$idx{m}];
+	elsif($event->hardware_keycode == key_n2c($config->{"shortcuts"}->{"segment line"})) {
+		my $S = !$creating && defined $idx{m} ? $m[$idx{m}] : \%w;
 		$$S{sline} = !$$S{sline};
 		&motion;
 	}
 	# Вспомогательные линии
-	elsif($event->hardware_keycode == key_n2c($config->{"shortcuts"}->{"only mask"})
-	&& ($creating || defined $idx{m})) {
-		my $S = $creating ? \%w : $m[$idx{m}];
+	elsif($event->hardware_keycode == key_n2c($config->{"shortcuts"}->{"only mask"})) {
+		my $S = !$creating && defined $idx{m} ? $m[$idx{m}] : \%w;
 		$$S{onlymask} = !$$S{onlymask};
 		&motion;
 	}
 	else {
 		# Направляющие выделения
-		while(my ($key, $value) = each %{$config->{"selection guides"}}) {
-			if($event->hardware_keycode == key_n2c($key) && ($creating || defined $idx{m})) {
-				my $S = $creating ? \%w : $m[$idx{m}];
+		for my $key (keys %{$config->{"selection guides"}}) {
+			if($event->hardware_keycode == key_n2c($key)) {
+				my $S = !$creating && defined $idx{m} ? $m[$idx{m}] : \%w;
 				$$S{marks}{$key}{show} = !$$S{marks}{$key}{show};
 				&motion;
 				last;
