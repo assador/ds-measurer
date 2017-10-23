@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #
-#  ds-measurer, v1.5.1, GTK+
+#  ds-measurer, v1.6.1, GTK+
 #  Copyright © 2016-2017 Dmitry Sokolov
 #
 #  This file is part of ds-measurer.
@@ -58,6 +58,8 @@ $config->{"screenshot"}->{"file"} =~ s/^~/$ENV{"HOME"}/;
 
 my (@m, @g, %all, $cb, $cr);
 my ($last, $creating, $move, $fromcenter, $fixedratio, $arm, $sf) = (0, 0, 0, 0, 0, 1, 0);
+my @pp = (3, 4, 5, 12); # Константы отступов для текста
+my @primes = (2);
 my %idx = (m => undef, g => undef); # Индексы активных выделений / направляющих
 my %pack = (m => \@m, g => \@g); # Для обращений к массивам выделений / направляющих по переменной $type
 my %calc = (m => \&calc_m, g => \&calc_g); # Для обращений к функциям расчёта по переменной $type
@@ -88,17 +90,55 @@ $window->set_colormap($window->get_screen->get_rgba_colormap);
 $window->show_all;
 $da->window->set_cursor(Gtk2::Gdk::Cursor::new(undef, "blank-cursor"));
 
+supplement_primes(
+	$window->get_screen->get_width > $window->get_screen->get_height ?
+		$window->get_screen->get_width : $window->get_screen->get_height
+);
 my %image = &cscc("image");
 my %c = &cscc();
 ($c{dsx}, $c{dsy}) = (0, 0);
 my %w = &cscc();
 $w{sline} = 0;
+$w{type} = "m";
 $w{marks} = $config->{"selection guides"};
 $w{colors} = [&set_colors("default")];
 
 &cursor();
 Gtk2->main;
 
+sub supplement_primes {
+	my $new = shift;
+	return if $primes[$#primes] >= $new;
+	@primes = ();
+	my @sieve = (1) x ($new * 2);
+	$sieve[0] = $sieve[1] = 0;
+	for(my $i = 2; $i ** 2 <= $new * 2; $i++) {
+		if($sieve[$i]) {
+			for(my $y = $i ** 2, my $z = 1; $y <= $new * 2; $y = $i ** 2 + $i * $z++) {
+				$sieve[$y] = 0;
+			}
+		}
+	}
+	for(my $i = 0; $i < scalar @sieve; $i++) {
+		if($sieve[$i]) {
+			push @primes, $i;
+		}
+	}
+}
+sub reduce_fraction {
+	my ($n, $d) = @_;
+	supplement_primes($n > $d ? $n : $d);
+	foreach my $p (@primes) {
+		if($n > 1 && $d > 1) {
+			while(!($n % $p) && !($d % $p)) {
+				$n = $n / $p;
+				$d = $d / $p;
+			}
+		}
+		last if $p > $n && $p > $d;
+	}
+	return ($n, $d);
+}
 sub cscc {
 	my ($t, $w, $h) = ($_[0] || "recording", $_[1] || $window->get_screen->get_width, $_[2] || $window->get_screen->get_height);
 	my ($surface, $context);
@@ -303,6 +343,7 @@ sub calc_m {
 		# Расчёт ширины, высоты, длины, угла и значений для прорисовки
 		($$S{w}, $$S{h}) = (abs $$S{x1} - $$S{x0}, abs $$S{y1} - $$S{y0});
 		($$S{l}, $$S{a}) = (($$S{w} ** 2 + $$S{h} ** 2) ** 0.5, atan2($$S{h}, $$S{w}));
+		$$S{aratio} = [reduce_fraction($$S{w}, $$S{h})];
 		$$S{lr} = round($$S{l}); $$S{ar} = nearest(0.01, $$S{a} * 180 / PI); $$S{ar} =~ s/,/\./;
 	}
 	($$S{xr}, $$S{wr}) = $$S{x1} - $$S{x0} >= 0 ? ($$S{x0} + $go, $$S{x1} - $$S{x0} - ($go + $go)) : ($$S{x0} - $go, $$S{x1} - $$S{x0} + ($go + $go));
@@ -370,7 +411,6 @@ sub draw_m {
 		$$S{context}->set_source_rgba(@{$colors[4]});
 		$$S{context}->select_font_face("sans", "normal", "normal");
 		$$S{context}->set_font_size(11);
-		my @pp = (3, 4, 5);
 		# Текст, ширина
 		$tt = $$S{w}; $te = $$S{context}->text_extents($tt);
 		$$S{context}->move_to(
@@ -396,7 +436,7 @@ sub draw_m {
 		}
 		# Текст, координаты начальные
 		$$S{context}->set_source_rgba(@{$colors[5]});
-		$tt = "($$S{x0}, $$S{y0})"; $te = $$S{context}->text_extents($tt);
+		$tt = "$$S{x0}, $$S{y0}"; $te = $$S{context}->text_extents($tt);
 		$$S{context}->move_to(
 			$$S{xr} + ($$S{x1} - $$S{x0} >= 0 ? (0 - $te->{"width"} - $pp[1]) : $pp[0]),
 			$$S{yr} - ($$S{y1} - $$S{y0} >= 0 ? $pp[2] : (0 - $te->{"height"} - $pp[1]))
@@ -404,12 +444,34 @@ sub draw_m {
 		$$S{context}->show_text($tt);
 		# Текст, координаты текущие
 		$$S{context}->set_source_rgba(@{$colors[3]});
-		$tt = "($$S{x1}, $$S{y1})"; $te = $$S{context}->text_extents($tt);
+		$tt = "$$S{x1}, $$S{y1}"; $te = $$S{context}->text_extents($tt);
 		$$S{context}->move_to(
 			$$S{xr} + $$S{wr} + ($$S{x1} - $$S{x0} >= 0 ? $pp[0] : (0 - $te->{"width"} - $pp[1])),
-			$$S{yr} + $$S{hr} - ($$S{y1} - $$S{y0} >= 0 ? (0 - $te->{"height"} - $pp[1]) : $pp[2])
+			$$S{yr} + $$S{hr} - ($$S{y1} - $$S{y0} >= 0 ? (0 - $te->{"height"} - $pp[0]) : $pp[2])
 		);
 		$$S{context}->show_text($tt);
+		# Текст, соотношение сторон
+		$$S{context}->set_source_rgba(@{$colors[5]});
+		$tt = "$$S{aratio}[0] : $$S{aratio}[1]"; $te = $$S{context}->text_extents($tt);
+		$$S{context}->move_to(
+			$$S{xr} + $$S{wr} + ($$S{x1} - $$S{x0} >= 0 ? $pp[0] : (0 - $te->{"width"} - $pp[1])),
+			$$S{yr} + $$S{hr} - ($$S{y1} - $$S{y0} >= 0 ? (0 - $te->{"height"} * 2 - $pp[2] * 2) : ($pp[2] + $te->{"height"} + $pp[2]))
+		);
+		$$S{context}->show_text($tt);
+		# Текст, соотношение сторон, десятичная дробь
+		if($$S{aratio}[1]) {
+			my $tt_x = $$S{aratio}[0] / $$S{aratio}[1];
+			$tt = nearest(0.001, $tt_x);
+			if($$S{x1} - $$S{x0} >= 0) {$tt .= " ~" if $tt != $tt_x;}
+				else {$tt = "~ " . $tt if $tt != $tt_x;}
+			$te = $$S{context}->text_extents($tt);
+			$$S{context}->move_to(
+				$$S{xr} + $$S{wr} + ($$S{x1} - $$S{x0} >= 0 ? $pp[0] : (0 - $te->{"width"} - $pp[1])),
+				$$S{yr} + $$S{hr} - ($$S{y1} - $$S{y0} >= 0 ? (0 - $te->{"height"} * 3 - $pp[2] * 3) : ($pp[2] + $te->{"height"} * 2 + $pp[2] * 2))
+			);
+			$$S{context}->set_source_rgba(@{$colors[5]});
+			$$S{context}->show_text($tt);
+		}
 		# Текст, длина
 		if($$S{sline} && $$S{w} > 55 && $$S{h} > 31) {
 			$$S{context}->set_source_rgba(@{$colors[3]});
