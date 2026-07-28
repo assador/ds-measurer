@@ -1,0 +1,50 @@
+#include "config.hpp"
+#include <yaml-cpp/yaml.h>
+#include <iostream>
+
+bool Config::load_from_file(const std::string& filepath) {
+	try {
+		YAML::Node doc = YAML::LoadFile(filepath);
+
+		if (doc["common"]["selection mode"]) {
+			selection_mode = doc["common"]["selection mode"].as<std::string>();
+		}
+		if (doc["guides"]["snap distance"]) {
+			snap_distance = doc["guides"]["snap distance"].as<int>();
+		}
+		if (doc["shortcuts"]) {
+			auto sc = doc["shortcuts"];
+			if (sc["quit"]) keys.quit = sc["quit"].as<std::string>();
+			if (sc["freeze"]) keys.freeze = sc["freeze"].as<std::string>();
+			if (sc["clear"]) keys.clear = sc["clear"].as<std::string>();
+			if (sc["clear last"]) keys.clear_last = sc["clear last"].as<std::string>();
+			if (sc["clear all"]) keys.clear_all = sc["clear all"].as<std::string>();
+			if (sc["copy values"]) keys.copy_values = sc["copy values"].as<std::string>();
+			if (sc["screenshot"]) keys.screenshot = sc["screenshot"].as<std::string>();
+		}
+		auto parse_color = [](const YAML::Node& node) -> Color {
+			return Color{
+				node["r"].as<double>(), node["g"].as<double>(),
+				node["b"].as<double>(), node["a"].as<double>()
+			};
+		};
+		if (doc["colors"]) {
+			if (doc["colors"]["default"]) {
+				auto d = doc["colors"]["default"];
+				if (d["main"]) theme_default.main = parse_color(d["main"]);
+				if (d["basic"]) theme_default.basic = parse_color(d["basic"]);
+				if (d["guide"]) theme_default.guide = parse_color(d["guide"]);
+				if (d["text main"]) theme_default.text_main = parse_color(d["text main"]);
+				if (d["text basic"]) theme_default.text_basic = parse_color(d["text basic"]);
+				if (d["text faded"]) theme_default.text_faded = parse_color(d["text faded"]);
+			}
+		}
+		current_theme = theme_default;
+		return true;
+
+	} catch (const std::exception& e) {
+		std::cerr << "Failed to load config " << filepath << ": " << e.what() << "\n";
+		std::cerr << "We use built-in defaults.\n";
+		return false;
+	}
+}

@@ -1,0 +1,19 @@
+#pragma once
+
+#include "types.hpp"
+
+typedef struct _cairo cairo_t;
+
+class Cursor {
+public:
+	Point pos;
+	Color color{0.0, 0.0, 0.0, 1.0};
+	bool is_visible{true};
+
+	void draw(cairo_t* cr, double screen_w, double screen_h) const;
+
+	void update(double x, double y) {
+		pos.x = x;
+		pos.y = y;
+	}
+};

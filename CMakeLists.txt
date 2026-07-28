@@ -1,5 +1,4 @@
 cmake_minimum_required(VERSION 3.20)
-
 project(ds-measurer LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
@@ -12,9 +11,15 @@ pkg_check_modules(LAYER_SHELL REQUIRED gtk4-layer-shell-0)
 
 find_package(yaml-cpp REQUIRED)
 
-add_executable(${PROJECT_NAME} src/main.cpp)
-
+add_executable(${PROJECT_NAME}
+	src/main.cpp
+	src/config.cpp
+	src/cursor.cpp
+	src/measurement.cpp
+	src/ui.cpp
+)
 target_include_directories(${PROJECT_NAME} PRIVATE
+	${CMAKE_CURRENT_SOURCE_DIR}/include
 	${GTK4_INCLUDE_DIRS}
 	${LAYER_SHELL_INCLUDE_DIRS}
 )

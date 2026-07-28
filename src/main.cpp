@@ -1,10 +1,9 @@
-#include "types.hpp"
 #include "config.hpp"
+#include "app_state.hpp"
 #include <gtk/gtk.h>
 #include <gtk4-layer-shell.h>
 #include <filesystem>
 #include <cstdlib>
-#include <iostream>
 
 static AppState g_state;
 static Config g_config;
