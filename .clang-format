@@ -1,0 +1,11 @@
+BasedOnStyle: LLVM
+IndentWidth: 4
+TabWidth: 4
+UseTab: Always
+IndentCaseLabels: true
+
+AlignAfterOpenBracket: BlockIndent
+BinPackParameters: false
+
+DerivePointerAlignment: false
+PointerAlignment: Left

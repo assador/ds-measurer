@@ -1,0 +1,29 @@
+# Build directory & artifacts
+build/
+bin/
+out/
+
+# Executables & Binaries
+ds-measurer
+*.o
+*.a
+*.so
+*.dylib
+
+# CMake cache and generated files (on top of build/)
+CMakeCache.txt
+CMakeFiles/
+CMakeConfigureLog.yaml
+cmake_install.cmake
+Makefile
+
+# Language Server / IDE
+.clangd/
+.cache/
+.vscode/
+.idea/
+
+# OS specific
+.DS_Store
+*.swp
+*~
