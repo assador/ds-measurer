@@ -19,8 +19,12 @@ struct GridConfig {
 };
 
 struct Point {
-	double x{0.0};
-	double y{0.0};
+	int x{0};
+	int y{0};
+
+	Point(double dx, double dy) : x(static_cast<int>(dx)), y(static_cast<int>(dy)) {}
+	Point(int ix, int iy) : x(ix), y(iy) {}
+	Point() = default;
 
 	double distance_to(const Point& other) const {
 		return std::hypot(other.x - x, other.y - y);

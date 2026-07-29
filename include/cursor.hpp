@@ -10,9 +10,9 @@ public:
 	Color color{0.0, 0.0, 0.0, 1.0};
 	bool is_visible{true};
 
-	void draw(cairo_t* cr, double screen_w, double screen_h) const;
+	void draw(cairo_t* cr, int screen_w, int screen_h) const;
 
-	void update(double x, double y) {
+	void update(int x, int y) {
 		pos.x = x;
 		pos.y = y;
 	}

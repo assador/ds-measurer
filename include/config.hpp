@@ -2,6 +2,7 @@
 
 #include "types.hpp"
 #include <vector>
+#include <string>
 
 struct ColorScheme {
 	Color main{0.0, 0.5, 1.0, 0.5};
