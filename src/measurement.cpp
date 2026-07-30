@@ -2,6 +2,15 @@
 #include "ui.hpp"
 #include <format>
 
+Measurement::Measurement(Point p1, Point p2, const SelectionGuides& guides)
+	: start(p1), end(p2) {
+	grids.reserve(4);
+	grids.emplace_back(guides.x);
+	grids.emplace_back(guides.c);
+	grids.emplace_back(guides.v);
+	grids.emplace_back(guides.b);
+}
+
 void Measurement::draw(cairo_t* cr, const ColorScheme& colors) const {
 	cairo_set_line_width(cr, 1.0);
 
@@ -19,7 +28,7 @@ void Measurement::draw(cairo_t* cr, const ColorScheme& colors) const {
 
 // SEC Bounding box
 
-	if (grid.show_bounding_box) {
+	if (box_config.show_bounding_box) {
 		set_cairo_color(cr, colors.basic);
 		cairo_rectangle(
 			cr,
@@ -41,23 +50,28 @@ void Measurement::draw(cairo_t* cr, const ColorScheme& colors) const {
 
 	if (end.x >= start.x) {
 		align.h = TextAlignH::LEFT; align.hr = TextAlignH::RIGHT;
-		offset.h = 5.0; offset.hs = 2.0;
+		offset.h = 5.0;
 	} else {
 		align.h = TextAlignH::RIGHT; align.hr = TextAlignH::LEFT;
-		offset.h = -5.0; offset.hs = -2.0;
+		offset.h = -5.0;
 	}
 	if (end.y >= start.y) {
 		align.v = TextAlignV::BOTTOM; align.vr = TextAlignV::TOP;
-		offset.v = 5.0; offset.vs = 2.0;
+		offset.v = 5.0;
 	} else {
 		align.v = TextAlignV::TOP; align.vr = TextAlignV::BOTTOM;
-		offset.v = -5.0; offset.vs = -2.0;
+		offset.v = -5.0;
 	}
 
 	// hypot length
 	std::string hypot_str = std::to_string(static_cast<int>(length()));
 	set_cairo_color(cr, colors.text_main);
-	draw_label(cr, hypot_str, cx + offset.hs, cy - offset.vs, align.h, align.v);
+	draw_label(cr, hypot_str, cx + offset.h, cy - offset.v, align.h, align.v);
+
+	// angle
+	std::string angle_str = std::format("{:.6g} °", angle_deg());
+	set_cairo_color(cr, colors.text_basic);
+	draw_label(cr, angle_str, start.x + offset.h, start.y - offset.v, align.h, align.v);
 
 	// width / height
 	set_cairo_color(cr, colors.text_basic);
@@ -76,9 +90,15 @@ void Measurement::draw(cairo_t* cr, const ColorScheme& colors) const {
 	// aspect ratio
 	auto [rw, rh] = aspect_ratio();
 	std::string ar_f_str = std::to_string(rw) + " : " + std::to_string(rh);
-	std::string ar_n_str = std::format("{:.10f}", static_cast<double>(rw) / rh);
+	std::string ar_n_str = std::format("{:.6g}", static_cast<double>(rw) / rh);
 
 	set_cairo_color(cr, colors.text_faded);
 	draw_label(cr, ar_f_str, end.x + offset.h, end.y + offset.v * 4, align.h, align.vr);
 	draw_label(cr, ar_n_str, end.x + offset.h, end.y + offset.v * 7, align.h, align.vr);
+
+// SEC Grids
+
+	for (const auto& grid : grids) {
+		grid.draw(cr, x_min, y_min, x_max - x_min, y_max - y_min, colors);
+	}
 }

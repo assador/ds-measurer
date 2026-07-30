@@ -60,7 +60,11 @@ static void on_drag_begin(
 	auto* widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(gesture));
 
 	state->active_measurement =
-		std::make_unique<Measurement>(Point{start_x, start_y}, Point{start_x, start_y})
+		std::make_unique<Measurement>(
+			Point{start_x, start_y},
+			Point{start_x, start_y},
+			state->config.guides
+		)
 	;
 	state->cursor.update(start_x, start_y);
 	gtk_widget_queue_draw(widget);

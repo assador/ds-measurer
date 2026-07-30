@@ -16,6 +16,7 @@ add_executable(${PROJECT_NAME}
 	src/config.cpp
 	src/cursor.cpp
 	src/measurement.cpp
+	src/grid.cpp
 	src/ui.cpp
 	src/window.cpp
 	src/shortcuts.cpp

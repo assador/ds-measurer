@@ -2,6 +2,7 @@
 
 #include "types.hpp"
 #include "config.hpp"
+#include "grid.hpp"
 #include <cmath>
 #include <numeric>
 #include <utility>
@@ -9,13 +10,14 @@
 typedef struct _cairo cairo_t;
 
 class Measurement {
-  public:
+public:
 	Point start;
 	Point end;
-	GridConfig grid;
+	BoxConfig box_config;
+	std::vector<Grid> grids;
 	bool is_frozen{false};
 
-	Measurement(Point p1, Point p2) : start(p1), end(p2) {}
+	Measurement(Point p1, Point p2, const SelectionGuides& guides = SelectionGuides{});
 
 	int width() const { return std::abs(end.x - start.x) + 1; }
 	int height() const { return std::abs(end.y - start.y) + 1; }

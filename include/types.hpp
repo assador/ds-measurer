@@ -10,9 +10,18 @@ struct Color {
 	double a{1.0};
 };
 
-struct GridConfig {
-	bool show_thirds{false};
+enum class GridType {
+	CENTER,
+	GOLDEN,
+	THIRDS,
+	FIFTHS,
+	NONE
+};
+
+struct BoxConfig {
+	bool show_center{false};
 	bool show_golden{false};
+	bool show_thirds{false};
 	bool show_fifths{false};
 	bool show_angle{true};
 	bool show_bounding_box{true};
@@ -41,7 +50,7 @@ enum class TextAlignH { LEFT, CENTER, RIGHT };
 enum class TextAlignV { TOP, BASELINE, MIDDLE, BOTTOM };
 
 struct TextOffset {
-	double h{5.0}, v{5.0}, hs{2.0}, vs{2.0};
+	double h{5.0}, v{5.0}, hs{3.0}, vs{3.0};
 };
 struct TextAlign {
 	TextAlignH h{TextAlignH::LEFT}, hr{TextAlignH::RIGHT};
