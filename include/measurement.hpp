@@ -9,7 +9,7 @@
 typedef struct _cairo cairo_t;
 
 class Measurement {
-public:
+  public:
 	Point start;
 	Point end;
 	GridConfig grid;

@@ -13,16 +13,13 @@ inline void set_cairo_color(cairo_t* cr, const Color& color) {
 	cairo_set_source_rgba(cr, color.r, color.g, color.b, color.a);
 }
 
-enum class TextHalign { LEFT, CENTER, RIGHT };
-enum class TextValign { TOP, BASELINE, MIDDLE, BOTTOM };
-
 inline void draw_label(
 	cairo_t* cr,
 	const std::string& text,
 	double x,
 	double y,
-	TextHalign halign = TextHalign::LEFT,
-	TextValign valign = TextValign::BASELINE
+	TextAlignH halign = TextAlignH::LEFT,
+	TextAlignV valign = TextAlignV::BASELINE
 ) {
 	cairo_text_extents_t extents;
 	cairo_text_extents(cr, text.c_str(), &extents);
@@ -31,27 +28,27 @@ inline void draw_label(
 	double ry = y;
 
 	switch (halign) {
-		case TextHalign::CENTER:
+		case TextAlignH::CENTER:
 			rx -= (extents.width / 2.0 + extents.x_bearing);
 			break;
-		case TextHalign::RIGHT:
+		case TextAlignH::RIGHT:
 			rx -= (extents.width + extents.x_bearing);
 			break;
-		case TextHalign::LEFT:
+		case TextAlignH::LEFT:
 			rx -= extents.x_bearing;
 			break;
 	}
 	switch (valign) {
-		case TextValign::MIDDLE:
+		case TextAlignV::MIDDLE:
 			ry -= (extents.height / 2.0 + extents.y_bearing);
 			break;
-		case TextValign::BOTTOM:
+		case TextAlignV::BOTTOM:
 			ry -= (extents.height + extents.y_bearing);
 			break;
-		case TextValign::TOP:
+		case TextAlignV::TOP:
 			ry -= extents.y_bearing;
 			break;
-		case TextValign::BASELINE:
+		case TextAlignV::BASELINE:
 			break;
 	}
 

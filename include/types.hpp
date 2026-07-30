@@ -36,3 +36,14 @@ struct TextStyle {
 	std::string font_family = "Sans";
 	double font_size = 12.0;
 };
+
+enum class TextAlignH { LEFT, CENTER, RIGHT };
+enum class TextAlignV { TOP, BASELINE, MIDDLE, BOTTOM };
+
+struct TextOffset {
+	double h{5.0}, v{5.0}, hs{2.0}, vs{2.0};
+};
+struct TextAlign {
+	TextAlignH h{TextAlignH::LEFT}, hr{TextAlignH::RIGHT};
+	TextAlignV v{TextAlignV::TOP}, vr{TextAlignV::BOTTOM};
+};
