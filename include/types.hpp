@@ -4,9 +4,9 @@
 #include <string>
 
 struct Color {
-	double r{1.0};
-	double g{1.0};
-	double b{1.0};
+	double r{0.0};
+	double g{0.0};
+	double b{0.0};
 	double a{1.0};
 };
 
@@ -41,7 +41,7 @@ struct Point {
 };
 
 struct TextStyle {
-	Color color = {1.0, 1.0, 1.0, 1.0};
+	Color color = {0.0, 0.0, 0.0, 1.0};
 	std::string font_family = "Sans";
 	double font_size = 12.0;
 };

@@ -5,12 +5,12 @@
 void Grid::draw(
 	cairo_t* cr,
 	int x, int y, int w, int h,
-	const ColorScheme& colors
+	const Color& color
 ) const {
 	if (!rule.show || w <= 0 || h <= 0) return;
 
 	cairo_set_line_width(cr, 1.0);
-	set_cairo_color(cr, colors.basic);
+	set_cairo_color(cr, color);
 
 	for (double rx : rule.x) {
 		int px = std::lround(x + w * rx);

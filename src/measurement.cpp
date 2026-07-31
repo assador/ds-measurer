@@ -99,6 +99,6 @@ void Measurement::draw(cairo_t* cr, const ColorScheme& colors) const {
 // SEC Grids
 
 	for (const auto& grid : grids) {
-		grid.draw(cr, x_min, y_min, x_max - x_min, y_max - y_min, colors);
+		grid.draw(cr, x_min, y_min, x_max - x_min, y_max - y_min, colors.basic);
 	}
 }

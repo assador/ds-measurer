@@ -22,22 +22,30 @@ bool Config::load_from_file(const std::string& filepath) {
 			if (sc["copy values"]) keys.copy_values = sc["copy values"].as<std::string>();
 			if (sc["screenshot"]) keys.screenshot = sc["screenshot"].as<std::string>();
 		}
+
 		auto parse_color = [](const YAML::Node& node) -> Color {
 			return Color{
-				node["r"].as<double>(), node["g"].as<double>(),
-				node["b"].as<double>(), node["a"].as<double>()
+				node["r"].as<double>(),
+				node["g"].as<double>(),
+				node["b"].as<double>(),
+				node["a"].as<double>()
 			};
 		};
+		auto parse_theme = [&](const YAML::Node& node, ColorScheme& theme) {
+			if (!node) return;
+			if (node["main"]) theme.main = parse_color(node["main"]);
+			if (node["basic"]) theme.basic = parse_color(node["basic"]);
+			if (node["guide"]) theme.guide = parse_color(node["guide"]);
+			if (node["text main"]) theme.text_main = parse_color(node["text main"]);
+			if (node["text basic"]) theme.text_basic = parse_color(node["text basic"]);
+			if (node["text faded"]) theme.text_faded = parse_color(node["text faded"]);
+		};
 		if (doc["colors"]) {
-			if (doc["colors"]["default"]) {
-				auto d = doc["colors"]["default"];
-				if (d["main"]) theme_default.main = parse_color(d["main"]);
-				if (d["basic"]) theme_default.basic = parse_color(d["basic"]);
-				if (d["guide"]) theme_default.guide = parse_color(d["guide"]);
-				if (d["text main"]) theme_default.text_main = parse_color(d["text main"]);
-				if (d["text basic"]) theme_default.text_basic = parse_color(d["text basic"]);
-				if (d["text faded"]) theme_default.text_faded = parse_color(d["text faded"]);
-			}
+			auto colors = doc["colors"];
+			parse_theme(colors["default"], theme_default);
+			parse_theme(colors["dark"], theme_dark);
+			parse_theme(colors["white"], theme_white);
+			parse_theme(colors["black"], theme_black);
 		}
 		current_theme = theme_default;
 		return true;

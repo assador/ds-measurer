@@ -35,6 +35,12 @@ struct Keybindings {
 	std::string ratio_3_2{"r"};
 	std::string ratio_16_9{"t"};
 	std::string ratio_a4{"y"};
+
+	std::string theme_1{"1"};
+	std::string theme_2{"2"};
+	std::string theme_3{"3"};
+	std::string theme_4{"4"};
+	std::string theme_5{"5"};
 };
 
 struct SelectionGuideRule {
@@ -74,21 +80,30 @@ public:
 	};
 
 	ColorScheme theme_dark{
-		{0.0, 0.0, 0.0, 0.8},
-		{0.0, 0.0, 0.0, 0.5},
-		{0.0, 0.0, 0.0, 0.4},
-		{0.0, 0.0, 0.0, 0.9},
-		{0.0, 0.0, 0.0, 0.75},
-		{0.0, 0.0, 0.0, 0.5}
+		{0.2, 0.6, 1.0, 0.5},
+		{1.0, 1.0, 1.0, 0.25},
+		{0.45, 0.72, 0.0, 0.33},
+		{0.2, 0.6, 1.0, 0.6},
+		{1.0, 1.0, 1.0, 0.75},
+		{1.0, 1.0, 1.0, 0.4}
 	};
 
-	ColorScheme theme_light{
+	ColorScheme theme_white{
 		{1.0, 1.0, 1.0, 0.8},
 		{1.0, 1.0, 1.0, 0.5},
 		{1.0, 1.0, 1.0, 0.4},
 		{1.0, 1.0, 1.0, 0.9},
 		{1.0, 1.0, 1.0, 0.75},
 		{1.0, 1.0, 1.0, 0.5}
+	};
+
+	ColorScheme theme_black{
+		{0.0, 0.0, 0.0, 0.8},
+		{0.0, 0.0, 0.0, 0.5},
+		{0.0, 0.0, 0.0, 0.4},
+		{0.0, 0.0, 0.0, 0.9},
+		{0.0, 0.0, 0.0, 0.75},
+		{0.0, 0.0, 0.0, 0.5}
 	};
 
 	ColorScheme theme_highlight{

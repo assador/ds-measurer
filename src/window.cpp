@@ -47,7 +47,7 @@ static void on_draw(
 	if (state->active_measurement) {
 		state->active_measurement->draw(cr, state->config.current_theme);
 	}
-	state->cursor.draw(cr, static_cast<double>(width), static_cast<double>(height));
+	state->cursor.draw(cr, width, height, state->config.current_theme.basic);
 }
 
 static void on_drag_begin(
@@ -105,17 +105,14 @@ static void on_drag_end(
 }
 
 static gboolean on_key_pressed(
-	GtkEventControllerKey* controller,
+	GtkEventControllerKey*,
 	guint keyval,
-	guint keycode,
-	GdkModifierType state,
+	guint,
+	GdkModifierType,
 	gpointer user_data
 ) {
 	auto* state_ptr = static_cast<AppState*>(user_data);
-	auto* app = GTK_APPLICATION(g_object_get_data(G_OBJECT(controller), "app"));
-	auto* widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(controller));
-
-	return ShortcutManager::handle_key(keyval, widget, app, *state_ptr);
+	return ShortcutManager::handle_key(keyval, *state_ptr);
 }
 
 void setup_main_window(
@@ -147,6 +144,9 @@ void setup_main_window(
 
 	GdkDisplay* display = gdk_display_get_default();
 	GtkWidget* drawing_area = gtk_drawing_area_new();
+
+	state.drawing_area = drawing_area;
+
 	gtk_window_set_child(GTK_WINDOW(window), drawing_area);
 	gtk_drawing_area_set_draw_func(GTK_DRAWING_AREA(drawing_area), on_draw, &state, nullptr);
 
@@ -165,7 +165,6 @@ void setup_main_window(
 	gtk_widget_add_controller(drawing_area, GTK_EVENT_CONTROLLER(drag_gesture));
 
 	GtkEventController* key_controller = gtk_event_controller_key_new();
-	g_object_set_data(G_OBJECT(key_controller), "app", app);
 	g_signal_connect(key_controller, "key-pressed", G_CALLBACK(on_key_pressed), &state);
 	gtk_widget_add_controller(window, key_controller);
 

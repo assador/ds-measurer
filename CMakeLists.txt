@@ -13,6 +13,7 @@ find_package(yaml-cpp REQUIRED)
 
 add_executable(${PROJECT_NAME}
 	src/main.cpp
+	src/app_state.cpp
 	src/config.cpp
 	src/cursor.cpp
 	src/measurement.cpp
@@ -31,3 +32,14 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 	${LAYER_SHELL_LIBRARIES}
 	yaml-cpp::yaml-cpp
 )
+
+set(CONFIG_SRC "${CMAKE_CURRENT_SOURCE_DIR}/config/ds-measurer.yaml")
+set(CONFIG_DST "${CMAKE_CURRENT_BINARY_DIR}/ds-measurer.yaml")
+
+add_custom_command(
+	OUTPUT ${CONFIG_DST}
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CONFIG_SRC} ${CONFIG_DST}
+    DEPENDS ${CONFIG_SRC}
+    COMMENT "Copying updated ds-measurer.yaml to build directory"
+)
+target_sources(${PROJECT_NAME} PRIVATE ${CONFIG_DST})

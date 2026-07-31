@@ -10,6 +10,6 @@ public:
 	void draw(
 		cairo_t* cr,
 		int x, int y, int w, int h,
-		const ColorScheme& colors
+		const Color& color
 	) const;
 };

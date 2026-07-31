@@ -36,7 +36,8 @@ selection guides:
 colors shortcuts:
    default: 1
    dark:    2
-   light:   3
+   white:   3
+   black:   4
 colors:
    default:
       main:       { r: 0,    g: 0.5,  b: 1,    a: 0.5  }
@@ -46,19 +47,26 @@ colors:
       text basic: { r: 0,    g: 0,    b: 0,    a: 0.75 }
       text faded: { r: 0,    g: 0,    b: 0,    a: 0.4  }
    dark:
-      main:       { r: 0,    g: 0,    b: 0,    a: 0.8  }
-      basic:      { r: 0,    g: 0,    b: 0,    a: 0.5  }
-      guide:      { r: 0,    g: 0,    b: 0,    a: 0.4  }
-      text main:  { r: 0,    g: 0,    b: 0,    a: 0.9  }
-      text basic: { r: 0,    g: 0,    b: 0,    a: 0.75 }
-      text faded: { r: 0,    g: 0,    b: 0,    a: 0.5  }
-   light:
+      main:       { r: 0.2,  g: 0.6,  b: 1,    a: 0.5  }
+      basic:      { r: 1,    g: 1,    b: 1,    a: 0.25 }
+      guide:      { r: 0.45, g: 0.72, b: 0,    a: 0.33 }
+      text main:  { r: 0.2,  g: 0.6,  b: 1,    a: 0.6  }
+      text basic: { r: 1,    g: 1,    b: 1,    a: 0.75 }
+      text faded: { r: 1,    g: 1,    b: 1,    a: 0.4  }
+   white:
       main:       { r: 1,    g: 1,    b: 1,    a: 0.8  }
       basic:      { r: 1,    g: 1,    b: 1,    a: 0.5  }
       guide:      { r: 1,    g: 1,    b: 1,    a: 0.4  }
       text main:  { r: 1,    g: 1,    b: 1,    a: 0.9  }
       text basic: { r: 1,    g: 1,    b: 1,    a: 0.75 }
       text faded: { r: 1,    g: 1,    b: 1,    a: 0.5  }
+   black:
+      main:       { r: 0,    g: 0,    b: 0,    a: 0.8  }
+      basic:      { r: 0,    g: 0,    b: 0,    a: 0.5  }
+      guide:      { r: 0,    g: 0,    b: 0,    a: 0.4  }
+      text main:  { r: 0,    g: 0,    b: 0,    a: 0.9  }
+      text basic: { r: 0,    g: 0,    b: 0,    a: 0.75 }
+      text faded: { r: 0,    g: 0,    b: 0,    a: 0.5  }
    highlight:
       main:       { r: 1,    g: 0.23, b: 0,    a: 0.8  }
       basic:      { r: 1,    g: 0.23, b: 0,    a: 0.5  }

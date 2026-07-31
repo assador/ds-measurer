@@ -6,13 +6,23 @@
 #include <gtk/gtk.h>
 #include <filesystem>
 #include <cstdlib>
+#include <unistd.h>
 
 static Config config;
 static AppState state(config);
 
 // SEC Config
 
+#include <filesystem>
+
 namespace fs = std::filesystem;
+
+fs::path get_executable_dir() {
+	char result[PATH_MAX];
+	ssize_t count = readlink("/proc/self/exe", result, PATH_MAX);
+	if (count != -1) return fs::path(std::string(result, count)).parent_path();
+	return fs::current_path();
+}
 
 std::string resolve_config_path() {
 	if (const char* home = std::getenv("HOME")) {
@@ -21,6 +31,11 @@ std::string resolve_config_path() {
 		fs::path home_path = fs::path(home) / ".ds-measurer.yaml";
 		if (fs::exists(home_path)) return home_path.string();
 	}
+	if (fs::exists("/etc/ds-measurer/ds-measurer.yaml")) {
+		return "/etc/ds-measurer/ds-measurer.yaml";
+	}
+	fs::path exe_dir_config = get_executable_dir() / "ds-measurer.yaml";
+	if (fs::exists(exe_dir_config)) return exe_dir_config.string();
 	return "ds-measurer.yaml";
 }
 
@@ -28,7 +43,6 @@ std::string resolve_config_path() {
 
 int main(int argc, char** argv) {
 	config.load_from_file(resolve_config_path());
-	state.cursor.color = config.current_theme.basic;
 	ShortcutManager::init(config.keys);
 
 	GtkApplication* app = gtk_application_new(

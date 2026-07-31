@@ -1,7 +1,7 @@
 #include "cursor.hpp"
 #include "ui.hpp"
 
-void Cursor::draw(cairo_t* cr, int screen_w, int screen_h) const {
+void Cursor::draw(cairo_t* cr, int screen_w, int screen_h, const Color& color) const {
 	if (!is_visible) return;
 
 	cairo_set_line_width(cr, 1.0);
