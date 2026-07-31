@@ -96,6 +96,11 @@ void Measurement::draw(cairo_t* cr, const ColorScheme& colors) const {
 	draw_label(cr, ar_f_str, end.x + offset.h, end.y + offset.v * 4, align.h, align.vr);
 	draw_label(cr, ar_n_str, end.x + offset.h, end.y + offset.v * 7, align.h, align.vr);
 
+	// debugging
+	set_cairo_color(cr, colors.text_main);
+	draw_label(cr, std::to_string(is_changing), end.x + offset.h, end.y + offset.v * 12, align.h, align.vr);
+	draw_label(cr, std::to_string(is_moving), end.x + offset.h, end.y + offset.v * 15, align.h, align.vr);
+
 // SEC Grids
 
 	for (const auto& grid : grids) {

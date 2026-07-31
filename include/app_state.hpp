@@ -7,9 +7,19 @@
 
 typedef struct _GtkWidget GtkWidget;
 
+struct MouseState {
+	bool is_dragging{false};
+	Point click_pos;
+	Point initial_p1;
+	Point initial_p2;
+};
+
 struct AppState {
 	Config& config;
 	Cursor cursor;
+	MouseState lmb;
+	MouseState rmb;
+
 	std::vector<Measurement> frozen_measurements;
 	std::unique_ptr<Measurement> active_measurement;
 

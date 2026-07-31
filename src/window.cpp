@@ -1,6 +1,5 @@
 #include "window.hpp"
 #include "shortcuts.hpp"
-// #include <gtk/gtk.h>
 #include <gtk4-layer-shell.h>
 
 static GdkCursor* create_invisible_cursor(GdkDisplay* display) {
@@ -23,7 +22,91 @@ static void on_motion(
 	auto* widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(controller));
 
 	state->cursor.update(static_cast<int>(x), static_cast<int>(y));
+
+	if (state->active_measurement) {
+		if (state->active_measurement->is_moving) {
+			int dx = static_cast<int>(x) - state->rmb.click_pos.x;
+			int dy = static_cast<int>(y) - state->rmb.click_pos.y;
+
+			state->active_measurement->start = {
+				state->rmb.initial_p1.x + dx,
+				state->rmb.initial_p1.y + dy,
+			};
+			state->active_measurement->end = {
+				state->rmb.initial_p2.x + dx,
+				state->rmb.initial_p2.y + dy,
+			};
+		}
+		else if (state->active_measurement->is_changing) {
+			state->active_measurement->end = Point{x, y};
+		}
+	}
+
 	gtk_widget_queue_draw(widget);
+}
+
+static gboolean on_legacy_event(
+	GtkEventControllerLegacy* controller,
+	GdkEvent* event,
+	gpointer user_data
+) {
+	auto* state = static_cast<AppState*>(user_data);
+	auto* widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(controller));
+	GdkEventType type = gdk_event_get_event_type(event);
+
+	if (type == GDK_BUTTON_PRESS) {
+		guint button = gdk_button_event_get_button(event);
+		double x = 0, y = 0;
+		gdk_event_get_position(event, &x, &y);
+
+		if (button == GDK_BUTTON_PRIMARY) {
+			state->lmb.is_dragging = true;
+			state->lmb.click_pos = Point{static_cast<int>(x), static_cast<int>(y)};
+
+			if (!state->active_measurement) {
+				state->active_measurement = std::make_unique<Measurement>(
+					Point{x, y},
+					Point{x, y},
+					state->config.guides
+				);
+			}
+			state->active_measurement->is_changing = true;
+
+			gtk_widget_queue_draw(widget);
+			return GDK_EVENT_STOP;
+		}
+		else if (button == GDK_BUTTON_SECONDARY) {
+			state->rmb.is_dragging = true;
+			state->rmb.click_pos = Point{static_cast<int>(x), static_cast<int>(y)};
+
+			if (state->active_measurement) {
+				state->active_measurement->is_moving = true;
+				state->rmb.initial_p1 = state->active_measurement->start;
+				state->rmb.initial_p2 = state->active_measurement->end;
+			}
+
+			gtk_widget_queue_draw(widget);
+			return GDK_EVENT_STOP;
+		}
+	}
+	else if (type == GDK_BUTTON_RELEASE) {
+		guint button = gdk_button_event_get_button(event);
+
+		if (button == GDK_BUTTON_PRIMARY) {
+			state->lmb.is_dragging = false;
+			if (state->active_measurement) state->active_measurement->is_changing = false;
+			gtk_widget_queue_draw(widget);
+			return GDK_EVENT_STOP;
+		}
+		else if (button == GDK_BUTTON_SECONDARY) {
+			state->rmb.is_dragging = false;
+			if (state->active_measurement) state->active_measurement->is_moving = false;
+			gtk_widget_queue_draw(widget);
+			return GDK_EVENT_STOP;
+		}
+	}
+
+	return GDK_EVENT_PROPAGATE;
 }
 
 static void on_draw(
@@ -48,60 +131,6 @@ static void on_draw(
 		state->active_measurement->draw(cr, state->config.current_theme);
 	}
 	state->cursor.draw(cr, width, height, state->config.current_theme.basic);
-}
-
-static void on_drag_begin(
-	GtkGestureDrag* gesture,
-	double start_x,
-	double start_y,
-	gpointer user_data
-) {
-	auto* state = static_cast<AppState*>(user_data);
-	auto* widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(gesture));
-
-	state->active_measurement =
-		std::make_unique<Measurement>(
-			Point{start_x, start_y},
-			Point{start_x, start_y},
-			state->config.guides
-		)
-	;
-	state->cursor.update(start_x, start_y);
-	gtk_widget_queue_draw(widget);
-}
-
-static void on_drag_update(
-	GtkGestureDrag* gesture,
-	double offset_x,
-	double offset_y,
-	gpointer user_data
-) {
-	auto* state = static_cast<AppState*>(user_data);
-	auto* widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(gesture));
-
-	if (state->active_measurement) {
-		double start_x, start_y;
-		gtk_gesture_drag_get_start_point(gesture, &start_x, &start_y);
-		double curr_x = start_x + offset_x;
-		double curr_y = start_y + offset_y;
-
-		state->active_measurement->end = Point{curr_x, curr_y};
-		state->cursor.update(curr_x, curr_y);
-	}
-	gtk_widget_queue_draw(widget);
-}
-
-static void on_drag_end(
-	GtkGestureDrag* gesture,
-	double offset_x,
-	double offset_y,
-	gpointer user_data
-) {
-	auto* state = static_cast<AppState*>(user_data);
-	auto* widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(gesture));
-
-	state->active_measurement.reset();
-	gtk_widget_queue_draw(widget);
 }
 
 static gboolean on_key_pressed(
@@ -158,11 +187,9 @@ void setup_main_window(
 	g_signal_connect(motion_controller, "motion", G_CALLBACK(on_motion), &state);
 	gtk_widget_add_controller(drawing_area, motion_controller);
 
-	GtkGesture* drag_gesture = gtk_gesture_drag_new();
-	g_signal_connect(drag_gesture, "drag-begin", G_CALLBACK(on_drag_begin), &state);
-	g_signal_connect(drag_gesture, "drag-update", G_CALLBACK(on_drag_update), &state);
-	g_signal_connect(drag_gesture, "drag-end", G_CALLBACK(on_drag_end), &state);
-	gtk_widget_add_controller(drawing_area, GTK_EVENT_CONTROLLER(drag_gesture));
+	GtkEventController* legacy_controller = gtk_event_controller_legacy_new();
+	g_signal_connect(legacy_controller, "event", G_CALLBACK(on_legacy_event), &state);
+	gtk_widget_add_controller(drawing_area, legacy_controller);
 
 	GtkEventController* key_controller = gtk_event_controller_key_new();
 	g_signal_connect(key_controller, "key-pressed", G_CALLBACK(on_key_pressed), &state);

@@ -15,7 +15,8 @@ public:
 	Point end;
 	BoxConfig box_config;
 	std::vector<Grid> grids;
-	bool is_frozen{false};
+	bool is_changing{false};
+	bool is_moving{false};
 
 	Measurement(Point p1, Point p2, const SelectionGuides& guides = SelectionGuides{});
 
@@ -36,5 +37,13 @@ public:
 		int g = std::gcd(w, h);
 		return {w / g, h / g};
 	}
+	void move_by(int dx, int dy) {
+		start.x += dx;
+		start.y += dy;
+		end.x += dx;
+		end.y += dy;
+	}
+	void move_by(const Point& delta) { move_by(delta.x, delta.y); }
+
 	void draw(cairo_t* cr, const ColorScheme& colors) const;
 };

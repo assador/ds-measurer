@@ -23,7 +23,6 @@ void ShortcutManager::init(const Keybindings& keys) {
 
 	add(keys.freeze, [](AppState& state) {
 		if (state.active_measurement) {
-			state.active_measurement->is_frozen = true;
 			state.frozen_measurements.push_back(
 				std::move(*state.active_measurement)
 			);
