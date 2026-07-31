@@ -2,6 +2,21 @@
 #include "shortcuts.hpp"
 #include <gtk4-layer-shell.h>
 
+static void check_and_process(AppState* state) {
+	if (!state->lmb.is_dragging && !state->rmb.is_dragging) {
+		if (state->active_measurement) {
+			state->active_measurement->is_changing = false;
+			state->active_measurement->is_moving = false;
+		}
+		if (state->draft_measurement) {
+			if (state->active_measurement == state->draft_measurement.get()) {
+				state->active_measurement = nullptr;
+			}
+			state->draft_measurement.reset();
+		}
+	}
+}
+
 static GdkCursor* create_invisible_cursor(GdkDisplay* display) {
 	guchar* pixels = static_cast<guchar*>(g_malloc0(4));
 	GBytes* bytes = g_bytes_new_take(pixels, 4);
@@ -64,11 +79,12 @@ static gboolean on_legacy_event(
 			state->lmb.click_pos = Point{static_cast<int>(x), static_cast<int>(y)};
 
 			if (!state->active_measurement) {
-				state->active_measurement = std::make_unique<Measurement>(
+				state->draft_measurement = std::make_unique<Measurement>(
 					Point{x, y},
 					Point{x, y},
 					state->config.guides
 				);
+				state->active_measurement = state->draft_measurement.get();
 			}
 			state->active_measurement->is_changing = true;
 
@@ -105,7 +121,7 @@ static gboolean on_legacy_event(
 			return GDK_EVENT_STOP;
 		}
 	}
-
+	check_and_process(state);
 	return GDK_EVENT_PROPAGATE;
 }
 
@@ -125,10 +141,15 @@ static void on_draw(
 	cairo_restore(cr);
 
 	for (const auto& m : state->frozen_measurements) {
-		m.draw(cr, state->config.current_theme);
+		m->draw(
+			cr,
+			state->active_measurement == m.get()
+				? state->config.theme_highlight
+				: state->config.current_theme
+		);
 	}
-	if (state->active_measurement) {
-		state->active_measurement->draw(cr, state->config.current_theme);
+	if (state->draft_measurement) {
+		state->draft_measurement->draw(cr, state->config.current_theme);
 	}
 	state->cursor.draw(cr, width, height, state->config.current_theme.basic);
 }

@@ -22,13 +22,30 @@ void ShortcutManager::init(const Keybindings& keys) {
 	add(keys.quit, [](AppState&) { g_application_quit(g_application_get_default()); });
 
 	add(keys.freeze, [](AppState& state) {
-		if (state.active_measurement) {
+		if (state.draft_measurement) {
 			state.frozen_measurements.push_back(
-				std::move(*state.active_measurement)
+				std::make_unique<Measurement>(*state.draft_measurement)
 			);
-			state.active_measurement.reset();
 			state.queue_draw();
 		}
+	});
+
+	add(keys.select_measurement, [](AppState& state) {
+		if (state.frozen_measurements.empty()) return;
+
+		size_t current_index = 0;
+		bool found = false;
+
+		for (size_t i = 0; i < state.frozen_measurements.size(); ++i) {
+			if (state.frozen_measurements[i].get() == state.active_measurement) {
+				current_index = i;
+				found = true;
+				break;
+			}
+		}
+		size_t next_index = found ? (current_index + 1) % state.frozen_measurements.size() : 0;
+		state.active_measurement = state.frozen_measurements[next_index].get();
+		state.queue_draw();
 	});
 
 	auto set_theme = [&add](const std::string& key, ColorScheme Config::* theme_ptr) {
@@ -43,21 +60,40 @@ void ShortcutManager::init(const Keybindings& keys) {
 	set_theme(keys.theme_3, &Config::theme_white);
 	set_theme(keys.theme_4, &Config::theme_black);
 
+	add(keys.clear, [](AppState& state) {
+		if (!state.active_measurement || state.frozen_measurements.empty()) return;
+		for (auto it = state.frozen_measurements.begin(); it != state.frozen_measurements.end(); ++it) {
+			if (it->get() == state.active_measurement) {
+				state.active_measurement = nullptr;
+				state.frozen_measurements.erase(it);
+				state.queue_draw();
+				return;
+			}
+		}
+	});
+
 	add(keys.clear_last, [](AppState& state) {
 		if (!state.frozen_measurements.empty()) {
+			if (state.active_measurement == state.frozen_measurements.back().get()) {
+				state.active_measurement = nullptr;
+			}
 			state.frozen_measurements.pop_back();
 			state.queue_draw();
 		}
 	});
 
-	auto clear_all = [](AppState& state) {
+	add(keys.clear_all, [](AppState& state) {
 		state.frozen_measurements.clear();
-		state.active_measurement.reset();
+		state.active_measurement = nullptr;
+		state.draft_measurement.reset();
 		state.queue_draw();
-	};
+	});
 
-	add(keys.clear, clear_all);
-	add(keys.clear_all, clear_all);
+	add(keys.relax, [](AppState& state) {
+		state.active_measurement = nullptr;
+		state.draft_measurement.reset();
+		state.queue_draw();
+	});
 }
 
 gboolean ShortcutManager::handle_key(guint keyval, AppState& state) {

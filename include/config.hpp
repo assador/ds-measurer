@@ -14,20 +14,22 @@ struct ColorScheme {
 };
 
 struct Keybindings {
-	std::string quit{"Escape"};
+	std::string clear_all{"j"};
+	std::string clear_last{"BackSpace"};
+	std::string clear{"Delete"};
+	std::string copy_values{"space"};
 	std::string fixed_ratio{"Shift_L"};
-	std::string from_center{"Control_L"};
 	std::string freeze{"f"};
+	std::string from_center{"Control_L"};
 	std::string guide_horizontal{"bracketleft"};
 	std::string guide_vertical{"bracketright"};
-	std::string snap_to_guides{"backslash"};
-	std::string clear{"Delete"};
-	std::string clear_last{"BackSpace"};
-	std::string clear_all{"j"};
-	std::string copy_values{"space"};
+	std::string only_mask{"question"};
+	std::string quit{"Escape"};
+	std::string relax{"`"};
 	std::string screenshot{"s"};
 	std::string segment_line{"z"};
-	std::string only_mask{"question"};
+	std::string select_measurement{"Tab"};
+	std::string snap_to_guides{"backslash"};
 
 	std::string ratio_1_1{"q"};
 	std::string ratio_4_3{"w"};

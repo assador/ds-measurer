@@ -7,20 +7,22 @@ screenshot:
    format: png
    file:   ~/screenshot_%Y_%m_%d_%H_%M_%S.png
 shortcuts:
-   quit:             Escape
-   fixed ratio:      Shift_L
-   from center:      Control_L
-   freeze:           f
-   guide horizontal: bracketleft
-   guide vertical:   bracketright
-   snap to guides:   backslash
-   clear:            Delete
-   clear last:       BackSpace
-   clear all:        j
-   copy values:      space
-   screenshot:       s
-   segment line:     z
-   only mask:        question
+   clear all:          j
+   clear last:         BackSpace
+   clear:              Delete
+   copy values:        space
+   fixed ratio:        Shift_L
+   freeze:             f
+   from center:        Control_L
+   guide horizontal:   bracketleft
+   guide vertical:     bracketright
+   only mask:          question
+   quit:               Escape
+   relax:              grave
+   screenshot:         s
+   segment line:       z
+   select measurement: Tab
+   snap to guides:     backslash
 aspect ratio shortcuts:
    1:       q
    4/3:     w

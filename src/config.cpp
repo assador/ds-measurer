@@ -14,13 +14,15 @@ bool Config::load_from_file(const std::string& filepath) {
 		}
 		if (doc["shortcuts"]) {
 			auto sc = doc["shortcuts"];
-			if (sc["quit"]) keys.quit = sc["quit"].as<std::string>();
-			if (sc["freeze"]) keys.freeze = sc["freeze"].as<std::string>();
-			if (sc["clear"]) keys.clear = sc["clear"].as<std::string>();
-			if (sc["clear last"]) keys.clear_last = sc["clear last"].as<std::string>();
 			if (sc["clear all"]) keys.clear_all = sc["clear all"].as<std::string>();
+			if (sc["clear last"]) keys.clear_last = sc["clear last"].as<std::string>();
+			if (sc["clear"]) keys.clear = sc["clear"].as<std::string>();
 			if (sc["copy values"]) keys.copy_values = sc["copy values"].as<std::string>();
+			if (sc["freeze"]) keys.freeze = sc["freeze"].as<std::string>();
+			if (sc["quit"]) keys.quit = sc["quit"].as<std::string>();
+			if (sc["relax"]) keys.relax = sc["relax"].as<std::string>();
 			if (sc["screenshot"]) keys.screenshot = sc["screenshot"].as<std::string>();
+			if (sc["select measurement"]) keys.select_measurement = sc["select measurement"].as<std::string>();
 		}
 
 		auto parse_color = [](const YAML::Node& node) -> Color {

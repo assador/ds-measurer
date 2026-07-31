@@ -20,8 +20,9 @@ struct AppState {
 	MouseState lmb;
 	MouseState rmb;
 
-	std::vector<Measurement> frozen_measurements;
-	std::unique_ptr<Measurement> active_measurement;
+	std::vector<std::unique_ptr<Measurement>> frozen_measurements;
+	std::unique_ptr<Measurement> draft_measurement;
+	Measurement* active_measurement = nullptr;
 
 	GtkWidget* drawing_area = nullptr;
 
