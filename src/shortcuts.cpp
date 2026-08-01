@@ -14,14 +14,17 @@ static std::vector<ActionBinding> g_bindings;
 void ShortcutManager::init(const Keybindings& keys) {
 	g_bindings.clear();
 
-	auto add = [](const std::string& key_name, std::function<void(AppState&)> action) {
-		guint kv = gdk_keyval_from_name(key_name.c_str());
-		if (kv != GDK_KEY_VoidSymbol) g_bindings.push_back({kv, std::move(action)});
+	auto add = [&keys](const std::string& kn, std::function<void(AppState&)> action) {
+		auto it = keys.find(kn);
+		if (it != keys.end() && !it->second.empty()) {
+			guint kv = gdk_keyval_from_name(it->second.c_str());
+			if (kv != GDK_KEY_VoidSymbol) g_bindings.push_back({kv, std::move(action)});
+		}
 	};
 
-	add(keys.quit, [](AppState&) { g_application_quit(g_application_get_default()); });
+	add("quit", [](AppState&) { g_application_quit(g_application_get_default()); });
 
-	add(keys.freeze, [](AppState& state) {
+	add("freeze", [](AppState& state) {
 		if (state.draft_measurement) {
 			state.frozen_measurements.push_back(
 				std::make_unique<Measurement>(*state.draft_measurement)
@@ -30,7 +33,7 @@ void ShortcutManager::init(const Keybindings& keys) {
 		}
 	});
 
-	add(keys.select_measurement, [](AppState& state) {
+	add("select_measurement", [](AppState& state) {
 		if (state.frozen_measurements.empty()) return;
 
 		size_t current_index = 0;
@@ -48,19 +51,7 @@ void ShortcutManager::init(const Keybindings& keys) {
 		state.queue_draw();
 	});
 
-	auto set_theme = [&add](const std::string& key, ColorScheme Config::* theme_ptr) {
-		add(key, [theme_ptr](AppState& state) {
-			state.config.current_theme = state.config.*theme_ptr;
-			state.queue_draw();
-		});
-	};
-
-	set_theme(keys.theme_1, &Config::theme_default);
-	set_theme(keys.theme_2, &Config::theme_dark);
-	set_theme(keys.theme_3, &Config::theme_white);
-	set_theme(keys.theme_4, &Config::theme_black);
-
-	add(keys.clear, [](AppState& state) {
+	add("clear", [](AppState& state) {
 		if (!state.active_measurement || state.frozen_measurements.empty()) return;
 		for (auto it = state.frozen_measurements.begin(); it != state.frozen_measurements.end(); ++it) {
 			if (it->get() == state.active_measurement) {
@@ -72,7 +63,7 @@ void ShortcutManager::init(const Keybindings& keys) {
 		}
 	});
 
-	add(keys.clear_last, [](AppState& state) {
+	add("clear_last", [](AppState& state) {
 		if (!state.frozen_measurements.empty()) {
 			if (state.active_measurement == state.frozen_measurements.back().get()) {
 				state.active_measurement = nullptr;
@@ -82,18 +73,30 @@ void ShortcutManager::init(const Keybindings& keys) {
 		}
 	});
 
-	add(keys.clear_all, [](AppState& state) {
+	add("clear_all", [](AppState& state) {
 		state.frozen_measurements.clear();
 		state.active_measurement = nullptr;
 		state.draft_measurement.reset();
 		state.queue_draw();
 	});
 
-	add(keys.relax, [](AppState& state) {
+	add("relax", [](AppState& state) {
 		state.active_measurement = nullptr;
 		state.draft_measurement.reset();
 		state.queue_draw();
 	});
+
+	for (const auto& [key, _] : keys) {
+		if (key.rfind("theme_", 0) == 0) {
+			std::string name = key.substr(6);
+			add(key, [name](AppState& state) {
+				if (state.config.themes.contains(name)) {
+					state.config.current_theme = &state.config.themes.at(name);
+					state.queue_draw();
+				}
+			});
+		}
+	}
 }
 
 gboolean ShortcutManager::handle_key(guint keyval, AppState& state) {

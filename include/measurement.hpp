@@ -17,6 +17,7 @@ public:
 	std::vector<Grid> grids;
 	bool is_changing{false};
 	bool is_moving{false};
+	bool is_hypot_visible{true};
 
 	Measurement(Point p1, Point p2, const SelectionGuides& guides = SelectionGuides{});
 

@@ -1,6 +1,7 @@
 #include "config.hpp"
 #include <yaml-cpp/yaml.h>
 #include <iostream>
+#include <algorithm>
 
 bool Config::load_from_file(const std::string& filepath) {
 	try {
@@ -13,16 +14,22 @@ bool Config::load_from_file(const std::string& filepath) {
 			snap_distance = doc["guides"]["snap distance"].as<int>();
 		}
 		if (doc["shortcuts"]) {
-			auto sc = doc["shortcuts"];
-			if (sc["clear all"]) keys.clear_all = sc["clear all"].as<std::string>();
-			if (sc["clear last"]) keys.clear_last = sc["clear last"].as<std::string>();
-			if (sc["clear"]) keys.clear = sc["clear"].as<std::string>();
-			if (sc["copy values"]) keys.copy_values = sc["copy values"].as<std::string>();
-			if (sc["freeze"]) keys.freeze = sc["freeze"].as<std::string>();
-			if (sc["quit"]) keys.quit = sc["quit"].as<std::string>();
-			if (sc["relax"]) keys.relax = sc["relax"].as<std::string>();
-			if (sc["screenshot"]) keys.screenshot = sc["screenshot"].as<std::string>();
-			if (sc["select measurement"]) keys.select_measurement = sc["select measurement"].as<std::string>();
+			for (const auto& node : doc["shortcuts"]) {
+				std::string key = node.first.as<std::string>();
+				std::replace(key.begin(), key.end(), ' ', '_');
+				keys[key] = node.second.as<std::string>();
+			}
+		}
+		if (doc["selection guides"]) {
+			for (const auto& node : doc["selection guides"]) {
+				std::string key = node.first.as<std::string>();
+				const auto& val = node.second;
+				SelectionGuideRule rule;
+				if (val["x"]) rule.x = val["x"].as<std::vector<double>>();
+				if (val["y"]) rule.y = val["y"].as<std::vector<double>>();
+				if (val["show"]) rule.show = val["show"].as<bool>();
+				guides[key] = rule;
+			}
 		}
 
 		auto parse_color = [](const YAML::Node& node) -> Color {
@@ -43,15 +50,26 @@ bool Config::load_from_file(const std::string& filepath) {
 			if (node["text faded"]) theme.text_faded = parse_color(node["text faded"]);
 		};
 		if (doc["colors"]) {
-			auto colors = doc["colors"];
-			parse_theme(colors["default"], theme_default);
-			parse_theme(colors["dark"], theme_dark);
-			parse_theme(colors["white"], theme_white);
-			parse_theme(colors["black"], theme_black);
+			for (const auto& node : doc["colors"]) {
+				std::string key = node.first.as<std::string>();
+				ColorScheme scheme;
+				parse_theme(node.second, scheme);
+				themes[key] = scheme;
+			}
 		}
-		current_theme = theme_default;
-		return true;
 
+		if (auto it = themes.find("default"); it != themes.end()) current_theme = &it->second;
+		else if (!themes.empty()) current_theme = &themes.begin()->second;
+
+		if (doc["colors shortcuts"]) {
+			for (const auto& node : doc["colors shortcuts"]) {
+				std::string key = node.first.as<std::string>();
+				std::string val = node.second.as<std::string>();
+				keys["theme_" + key] = val;
+			}
+		}
+
+		return true;
 	} catch (const std::exception& e) {
 		std::cerr << "Failed to load config " << filepath << ": " << e.what() << "\n";
 		std::cerr << "We use built-in defaults.\n";

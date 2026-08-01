@@ -4,11 +4,10 @@
 
 Measurement::Measurement(Point p1, Point p2, const SelectionGuides& guides)
 	: start(p1), end(p2) {
-	grids.reserve(4);
-	grids.emplace_back(guides.x);
-	grids.emplace_back(guides.c);
-	grids.emplace_back(guides.v);
-	grids.emplace_back(guides.b);
+	grids.reserve(guides.size());
+	for (const auto& [name, rule] : guides) {
+		grids.emplace_back(rule);
+	}
 }
 
 void Measurement::draw(cairo_t* cr, const ColorScheme& colors) const {

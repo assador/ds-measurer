@@ -140,18 +140,23 @@ static void on_draw(
 	cairo_paint(cr);
 	cairo_restore(cr);
 
+	const ColorScheme* highlight_theme =
+		state->config.themes.contains("highlight")
+			? &state->config.themes.at("highlight")
+			: state->config.current_theme
+	;
 	for (const auto& m : state->frozen_measurements) {
 		m->draw(
 			cr,
 			state->active_measurement == m.get()
-				? state->config.theme_highlight
-				: state->config.current_theme
+				? *highlight_theme
+				: *state->config.current_theme
 		);
 	}
 	if (state->draft_measurement) {
-		state->draft_measurement->draw(cr, state->config.current_theme);
+		state->draft_measurement->draw(cr, *state->config.current_theme);
 	}
-	state->cursor.draw(cr, width, height, state->config.current_theme.basic);
+	state->cursor.draw(cr, width, height, state->config.current_theme->basic);
 }
 
 static gboolean on_key_pressed(
