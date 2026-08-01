@@ -3,17 +3,16 @@
 #include <gtk4-layer-shell.h>
 
 static void check_and_process(AppState* state) {
-	if (!state->lmb.is_dragging && !state->rmb.is_dragging) {
-		if (state->active_measurement) {
-			state->active_measurement->is_changing = false;
-			state->active_measurement->is_moving = false;
+	if (state->lmb.is_dragging || state->rmb.is_dragging) return;
+	if (state->active_measurement) {
+		state->active_measurement->is_changing = false;
+		state->active_measurement->is_moving = false;
+	}
+	if (state->draft_measurement) {
+		if (state->active_measurement == state->draft_measurement.get()) {
+			state->active_measurement = nullptr;
 		}
-		if (state->draft_measurement) {
-			if (state->active_measurement == state->draft_measurement.get()) {
-				state->active_measurement = nullptr;
-			}
-			state->draft_measurement.reset();
-		}
+		state->draft_measurement.reset();
 	}
 }
 
@@ -39,24 +38,15 @@ static void on_motion(
 	state->cursor.update(static_cast<int>(x), static_cast<int>(y));
 
 	if (state->active_measurement) {
-		if (state->active_measurement->is_moving) {
+		auto& m = *state->active_measurement;
+		if (m.is_moving) {
 			int dx = static_cast<int>(x) - state->rmb.click_pos.x;
 			int dy = static_cast<int>(y) - state->rmb.click_pos.y;
-
-			state->active_measurement->start = {
-				state->rmb.initial_p1.x + dx,
-				state->rmb.initial_p1.y + dy,
-			};
-			state->active_measurement->end = {
-				state->rmb.initial_p2.x + dx,
-				state->rmb.initial_p2.y + dy,
-			};
-		}
-		else if (state->active_measurement->is_changing) {
-			state->active_measurement->end = Point{x, y};
+			m.move_from(state->rmb.initial_p1, state->rmb.initial_p2, dx, dy);
+		} else if (m.is_changing) {
+			m.end = Point{x, y};
 		}
 	}
-
 	gtk_widget_queue_draw(widget);
 }
 
@@ -96,9 +86,10 @@ static gboolean on_legacy_event(
 			state->rmb.click_pos = Point{static_cast<int>(x), static_cast<int>(y)};
 
 			if (state->active_measurement) {
-				state->active_measurement->is_moving = true;
-				state->rmb.initial_p1 = state->active_measurement->start;
-				state->rmb.initial_p2 = state->active_measurement->end;
+				auto& m = *state->active_measurement;
+				m.is_moving = true;
+				state->rmb.initial_p1 = m.start;
+				state->rmb.initial_p2 = m.end;
 			}
 
 			gtk_widget_queue_draw(widget);

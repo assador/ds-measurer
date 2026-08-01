@@ -104,9 +104,7 @@ void ShortcutManager::init(const Keybindings& keys, const std::vector<std::strin
 			kv,
 			[key](AppState& state) {
 				if (!state.active_measurement) return;
-				auto it = state.active_measurement->grids.find(key);
-				if (it == state.active_measurement->grids.end()) return;
-				it->second.rule.show = !it->second.rule.show;
+				state.active_measurement->toggle_grid(key);
 				state.queue_draw();
 			}
 		});

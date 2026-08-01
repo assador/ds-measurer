@@ -48,6 +48,11 @@ public:
 	}
 	void move_by(const Point& delta) { move_by(delta.x, delta.y); }
 
+	void move_from(const Point& p1, const Point& p2, int dx, int dy) {
+		start = Point{p1.x + dx, p1.y + dy};
+		end = Point{p2.x + dx, p2.y + dy};
+	}
+
 	bool toggle_grid(const std::string& key) {
 		auto it = grids.find(key);
 		if (it == grids.end()) return false;
