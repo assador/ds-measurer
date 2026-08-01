@@ -140,9 +140,10 @@ static void on_draw(
 	cairo_paint(cr);
 	cairo_restore(cr);
 
+	auto it = state->config.themes.find("highlight");
 	const ColorScheme* highlight_theme =
-		state->config.themes.contains("highlight")
-			? &state->config.themes.at("highlight")
+		(it != state->config.themes.end())
+			? &it->second
 			: state->config.current_theme
 	;
 	for (const auto& m : state->frozen_measurements) {

@@ -5,8 +5,8 @@
 Measurement::Measurement(Point p1, Point p2, const SelectionGuides& guides)
 	: start(p1), end(p2) {
 	grids.reserve(guides.size());
-	for (const auto& [name, rule] : guides) {
-		grids.emplace_back(rule);
+	for (const auto& [key, rule] : guides) {
+		grids.emplace(key, Grid{rule});
 	}
 }
 
@@ -97,7 +97,7 @@ void Measurement::draw(cairo_t* cr, const ColorScheme& colors) const {
 
 // SEC Grids
 
-	for (const auto& grid : grids) {
+	for (const auto& [_, grid] : grids) {
 		grid.draw(cr, x_min, y_min, x_max - x_min, y_max - y_min, colors.basic);
 	}
 }

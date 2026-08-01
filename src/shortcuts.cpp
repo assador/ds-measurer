@@ -11,15 +11,14 @@ struct ActionBinding {
 
 static std::vector<ActionBinding> g_bindings;
 
-void ShortcutManager::init(const Keybindings& keys) {
+void ShortcutManager::init(const Keybindings& keys, const std::vector<std::string>& guide_keys) {
 	g_bindings.clear();
 
 	auto add = [&keys](const std::string& kn, std::function<void(AppState&)> action) {
 		auto it = keys.find(kn);
-		if (it != keys.end() && !it->second.empty()) {
-			guint kv = gdk_keyval_from_name(it->second.c_str());
-			if (kv != GDK_KEY_VoidSymbol) g_bindings.push_back({kv, std::move(action)});
-		}
+		if (it == keys.end() || it->second.empty()) return;
+		guint kv = gdk_keyval_from_name(it->second.c_str());
+		if (kv != GDK_KEY_VoidSymbol) g_bindings.push_back({kv, std::move(action)});
 	};
 
 	add("quit", [](AppState&) { g_application_quit(g_application_get_default()); });
@@ -90,12 +89,27 @@ void ShortcutManager::init(const Keybindings& keys) {
 		if (key.rfind("theme_", 0) == 0) {
 			std::string name = key.substr(6);
 			add(key, [name](AppState& state) {
-				if (state.config.themes.contains(name)) {
-					state.config.current_theme = &state.config.themes.at(name);
+				auto it = state.config.themes.find(name);
+				if (it != state.config.themes.end()) {
+					state.config.current_theme = &it->second;
 					state.queue_draw();
 				}
 			});
 		}
+	}
+	for (const auto& key : guide_keys) {
+		guint kv = gdk_keyval_from_name(key.c_str());
+		if (kv == GDK_KEY_VoidSymbol) continue;
+		g_bindings.push_back({
+			kv,
+			[key](AppState& state) {
+				if (!state.active_measurement) return;
+				auto it = state.active_measurement->grids.find(key);
+				if (it == state.active_measurement->grids.end()) return;
+				it->second.rule.show = !it->second.rule.show;
+				state.queue_draw();
+			}
+		});
 	}
 }
 

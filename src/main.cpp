@@ -6,6 +6,7 @@
 #include <gtk/gtk.h>
 #include <filesystem>
 #include <cstdlib>
+#include <ranges>
 #include <unistd.h>
 
 static Config config;
@@ -43,7 +44,9 @@ std::string resolve_config_path() {
 
 int main(int argc, char** argv) {
 	config.load_from_file(resolve_config_path());
-	ShortcutManager::init(config.keys);
+
+	auto guide_keys = config.guides | std::views::keys;
+	ShortcutManager::init(config.keys, {guide_keys.begin(), guide_keys.end()});
 
 	GtkApplication* app = gtk_application_new(
 		"org.assador.ds.Measurer",

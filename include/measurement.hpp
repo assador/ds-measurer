@@ -9,12 +9,14 @@
 
 typedef struct _cairo cairo_t;
 
+using Grids = std::unordered_map<std::string, Grid>;
+
 class Measurement {
 public:
 	Point start;
 	Point end;
+	Grids grids;
 	BoxConfig box_config;
-	std::vector<Grid> grids;
 	bool is_changing{false};
 	bool is_moving{false};
 	bool is_hypot_visible{true};
@@ -45,6 +47,13 @@ public:
 		end.y += dy;
 	}
 	void move_by(const Point& delta) { move_by(delta.x, delta.y); }
+
+	bool toggle_grid(const std::string& key) {
+		auto it = grids.find(key);
+		if (it == grids.end()) return false;
+		it->second.rule.show = !it->second.rule.show;
+		return true;
+	}
 
 	void draw(cairo_t* cr, const ColorScheme& colors) const;
 };
