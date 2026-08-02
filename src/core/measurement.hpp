@@ -1,13 +1,11 @@
 #pragma once
 
-#include "types.hpp"
-#include "config.hpp"
-#include "grid.hpp"
+#include "core/types.hpp"
+#include "core/grid.hpp"
+#include "config/config.hpp"
 #include <cmath>
 #include <numeric>
 #include <utility>
-
-typedef struct _cairo cairo_t;
 
 using Grids = std::unordered_map<std::string, Grid>;
 
@@ -59,6 +57,4 @@ public:
 		it->second.rule.show = !it->second.rule.show;
 		return true;
 	}
-
-	void draw(cairo_t* cr, const ColorScheme& colors) const;
 };

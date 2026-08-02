@@ -11,19 +11,18 @@ pkg_check_modules(LAYER_SHELL REQUIRED gtk4-layer-shell-0)
 
 find_package(yaml-cpp REQUIRED)
 
-add_executable(${PROJECT_NAME}
+set(SOURCES
 	src/main.cpp
-	src/app_state.cpp
-	src/config.cpp
-	src/cursor.cpp
-	src/measurement.cpp
-	src/grid.cpp
-	src/ui.cpp
-	src/window.cpp
-	src/shortcuts.cpp
+	src/core/measurement.cpp
+	src/config/config.cpp
+	src/ui/shortcuts.cpp
+	src/ui/ui.cpp
+	src/ui/window.cpp
 )
+add_executable(${PROJECT_NAME} ${SOURCES})
+
 target_include_directories(${PROJECT_NAME} PRIVATE
-	${CMAKE_CURRENT_SOURCE_DIR}/include
+	${CMAKE_CURRENT_SOURCE_DIR}/src
 	${GTK4_INCLUDE_DIRS}
 	${LAYER_SHELL_INCLUDE_DIRS}
 )

@@ -1,9 +1,31 @@
 #pragma once
 
-#include "types.hpp"
+#include "core/cursor.hpp"
+#include "core/grid.hpp"
+#include "core/measurement.hpp"
+#include "core/types.hpp"
 #include <cairo.h>
 
 void set_label(cairo_t* cr, const TextStyle& style);
+
+void draw_cursor(
+	cairo_t* cr,
+	const Cursor& c,
+	int screen_w,
+	int screen_h,
+	const Color& color
+);
+void draw_grid(
+	cairo_t* cr,
+	const Grid& g,
+	int x, int y, int w, int h,
+	const Color& color
+);
+void draw_measurement(
+	cairo_t* cr,
+	const Measurement& m,
+	const ColorScheme& colors
+);
 
 inline double coord_to_pixel(int coord) {
 	return static_cast<double>(coord) + 0.5;

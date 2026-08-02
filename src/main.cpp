@@ -1,8 +1,8 @@
-#include "config.hpp"
-#include "app_state.hpp"
-#include "window.hpp"
-#include "shortcuts.hpp"
-#include "shobzaebis.hpp"
+#include "core/app_state.hpp"
+#include "core/shobzaebis.hpp"
+#include "config/config.hpp"
+#include "ui/window.hpp"
+#include "ui/shortcuts.hpp"
 #include <gtk/gtk.h>
 #include <filesystem>
 #include <cstdlib>

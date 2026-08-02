@@ -1,9 +1,10 @@
 #pragma once
 
-#include "cursor.hpp"
-#include "measurement.hpp"
+#include "core/cursor.hpp"
+#include "core/measurement.hpp"
 #include <vector>
 #include <memory>
+#include <functional>
 
 typedef struct _GtkWidget GtkWidget;
 
@@ -24,9 +25,10 @@ struct AppState {
 	std::unique_ptr<Measurement> draft_measurement;
 	Measurement* active_measurement = nullptr;
 
-	GtkWidget* drawing_area = nullptr;
-
 	explicit AppState(Config& cfg) : config(cfg) {}
 
-	void queue_draw() const;
+	std::function<void()> request_draw;
+	void queue_draw() const {
+		if (request_draw) request_draw();
+	}
 };

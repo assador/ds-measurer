@@ -1,6 +1,6 @@
 #pragma once
 
-#include "app_state.hpp"
+#include "core/app_state.hpp"
 #include <glib.h>
 
 class ShortcutManager {

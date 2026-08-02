@@ -1,4 +1,4 @@
-#include "config.hpp"
+#include "config/config.hpp"
 #include <yaml-cpp/yaml.h>
 #include <iostream>
 #include <algorithm>

@@ -1,5 +1,6 @@
-#include "window.hpp"
-#include "shortcuts.hpp"
+#include "ui/shortcuts.hpp"
+#include "ui/ui.hpp"
+#include "ui/window.hpp"
 #include <gtk4-layer-shell.h>
 
 static void check_and_process(AppState* state) {
@@ -102,17 +103,18 @@ static gboolean on_legacy_event(
 		if (button == GDK_BUTTON_PRIMARY) {
 			state->lmb.is_dragging = false;
 			if (state->active_measurement) state->active_measurement->is_changing = false;
+			check_and_process(state);
 			gtk_widget_queue_draw(widget);
 			return GDK_EVENT_STOP;
 		}
 		else if (button == GDK_BUTTON_SECONDARY) {
 			state->rmb.is_dragging = false;
 			if (state->active_measurement) state->active_measurement->is_moving = false;
+			check_and_process(state);
 			gtk_widget_queue_draw(widget);
 			return GDK_EVENT_STOP;
 		}
 	}
-	check_and_process(state);
 	return GDK_EVENT_PROPAGATE;
 }
 
@@ -138,17 +140,18 @@ static void on_draw(
 			: state->config.current_theme
 	;
 	for (const auto& m : state->frozen_measurements) {
-		m->draw(
+		draw_measurement(
 			cr,
+			*m,
 			state->active_measurement == m.get()
 				? *highlight_theme
 				: *state->config.current_theme
 		);
 	}
 	if (state->draft_measurement) {
-		state->draft_measurement->draw(cr, *state->config.current_theme);
+		draw_measurement(cr, *state->draft_measurement, *state->config.current_theme);
 	}
-	state->cursor.draw(cr, width, height, state->config.current_theme->basic);
+	draw_cursor(cr, state->cursor, width, height, state->config.current_theme->basic);
 }
 
 static gboolean on_key_pressed(
@@ -192,7 +195,7 @@ void setup_main_window(
 	GdkDisplay* display = gdk_display_get_default();
 	GtkWidget* drawing_area = gtk_drawing_area_new();
 
-	state.drawing_area = drawing_area;
+	state.request_draw = [drawing_area]() { gtk_widget_queue_draw(drawing_area); };
 
 	gtk_window_set_child(GTK_WINDOW(window), drawing_area);
 	gtk_drawing_area_set_draw_func(GTK_DRAWING_AREA(drawing_area), on_draw, &state, nullptr);

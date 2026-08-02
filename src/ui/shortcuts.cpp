@@ -1,8 +1,8 @@
-#include "shortcuts.hpp"
-#include <functional>
+#include "ui/shortcuts.hpp"
 #include <gtk/gtk.h>
 #include <string>
 #include <vector>
+#include <functional>
 
 struct ActionBinding {
 	guint keyval{0};
