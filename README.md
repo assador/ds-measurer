@@ -2,3 +2,7 @@
 The program is designed to measure the screen area — the width, height, coordinates of the start and end points of the measurement, the angle and length of the segment between them. The process takes place in graphical mode: on a separate transparent layer on top of the current screen rendering the cursor and selection guide lines and the current numerical values are displayed. Composite output mode is required. During measuring you can make screenshots of the selection to the clipboard and/or file on the disk, save the current numerical values of the selection to the clipboard, switch to the selection mode from the center, limit the selection to any given aspect ratio, include auxiliary guides (center, golden ratio, diagonal), change their colors, etc. The script comes with a configuration file in YAML format where you can customize the rendering colors, keyboard shortcuts for different functions, a set of selection fixing aspect ratios, screenshot file format and mask, etc.
 
 No flags are provided at execute; just: **ds-measurer**
+
+## Third-Party Libraries
+
+* [tinyexpr](https://github.com/codeplea/tinyexpr) by Lewis Van Winkle (zlib License) — tiny recursive descent expression parser, compiler, and evaluation engine for math expressions.

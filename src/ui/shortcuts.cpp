@@ -1,8 +1,10 @@
 #include "ui/shortcuts.hpp"
-#include <gtk/gtk.h>
+#include <functional>
+#include <iostream>
+#include <ostream>
 #include <string>
 #include <vector>
-#include <functional>
+#include <gtk/gtk.h>
 
 struct ActionBinding {
 	guint keyval{0};
@@ -11,7 +13,11 @@ struct ActionBinding {
 
 static std::vector<ActionBinding> g_bindings;
 
-void ShortcutManager::init(const Keybindings& keys, const std::vector<std::string>& guide_keys) {
+void ShortcutManager::init(
+	const Keybindings& keys,
+	const std::vector<std::string>& ratio_keys,
+	const std::vector<std::string>& guide_keys
+) {
 	g_bindings.clear();
 
 	auto add = [&keys](const std::string& kn, std::function<void(AppState&)> action) {
@@ -85,6 +91,17 @@ void ShortcutManager::init(const Keybindings& keys, const std::vector<std::strin
 		state.queue_draw();
 	});
 
+	add("reset_ratio", [](AppState& state) {
+		state.reset_ratio();
+		state.queue_draw();
+	});
+
+	add("segment_line", [](AppState& state) {
+		if (!state.active_measurement) return;
+		state.active_measurement->is_hypot_visible = !state.active_measurement->is_hypot_visible;
+		state.queue_draw();
+	});
+
 	for (const auto& [key, _] : keys) {
 		if (key.rfind("theme_", 0) == 0) {
 			std::string name = key.substr(6);
@@ -96,6 +113,19 @@ void ShortcutManager::init(const Keybindings& keys, const std::vector<std::strin
 				}
 			});
 		}
+	}
+	for (const auto& key : ratio_keys) {
+		guint kv = gdk_keyval_from_name(key.c_str());
+		if (kv == GDK_KEY_VoidSymbol) continue;
+		g_bindings.push_back({
+			kv,
+			[key](AppState& state) {
+				if (!state.active_measurement) return;
+				state.toggle_ratio(key);
+				state.queue_draw();
+				std::cout << std::to_string(state.ratio.value_or(0.0)) << std::endl;
+			}
+		});
 	}
 	for (const auto& key : guide_keys) {
 		guint kv = gdk_keyval_from_name(key.c_str());

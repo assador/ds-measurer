@@ -1,7 +1,7 @@
 #pragma once
 
-#include "core/app_state.hpp"
 #include "config/config.hpp"
+#include "core/app_state.hpp"
 
 typedef struct _GtkApplication GtkApplication;
 

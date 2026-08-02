@@ -1,9 +1,9 @@
 #pragma once
 
-#include "core/types.hpp"
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include "core/types.hpp"
 
 struct ColorScheme {
 	Color main{0.0, 0.5, 1.0, 0.5};
@@ -20,6 +20,7 @@ struct SelectionGuideRule {
 };
 
 using Keybindings = std::unordered_map<std::string, std::string>;
+using AspectRatios = std::unordered_map<std::string, double>;
 using ColorSchemes = std::unordered_map<std::string, ColorScheme>;
 using SelectionGuides = std::unordered_map<std::string, SelectionGuideRule>;
 
@@ -35,6 +36,7 @@ public:
 	} screenshot;
 
 	Keybindings keys;
+	AspectRatios ratios;
 	ColorSchemes themes;
 	SelectionGuides guides;
 

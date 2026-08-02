@@ -19,17 +19,18 @@ shortcuts:
    only mask:          question
    quit:               Escape
    relax:              grave
+   reset ratio:        \
    screenshot:         s
    segment line:       z
    select measurement: Tab
    snap to guides:     backslash
 aspect ratio shortcuts:
-   1:       q
-   4/3:     w
-   1/0.618: e
-   3/2:     r
-   16/9:    t
-   297/210: y
+   q: "1"
+   w: "4 / 3"
+   e: "(1 + sqrt(5)) / 2"
+   r: "3 / 2"
+   t: "16 / 9"
+   y: "sqrt(2)"
 selection guides:
    x: { x: [ 0.5                ], y: [ 0.5                ], show: yes }
    c: { x: [ 0.38197, 0.61803   ], y: [ 0.38197, 0.61803   ], show: no }

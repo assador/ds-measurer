@@ -1,10 +1,10 @@
 #pragma once
 
+#include <cairo.h>
 #include "core/cursor.hpp"
 #include "core/grid.hpp"
 #include "core/measurement.hpp"
 #include "core/types.hpp"
-#include <cairo.h>
 
 void set_label(cairo_t* cr, const TextStyle& style);
 

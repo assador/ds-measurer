@@ -1,11 +1,11 @@
 #pragma once
 
-#include "core/types.hpp"
-#include "core/grid.hpp"
-#include "config/config.hpp"
 #include <cmath>
 #include <numeric>
 #include <utility>
+#include "config/config.hpp"
+#include "core/grid.hpp"
+#include "core/types.hpp"
 
 using Grids = std::unordered_map<std::string, Grid>;
 
@@ -14,7 +14,6 @@ public:
 	Point start;
 	Point end;
 	Grids grids;
-	BoxConfig box_config;
 	bool is_changing{false};
 	bool is_moving{false};
 	bool is_hypot_visible{true};

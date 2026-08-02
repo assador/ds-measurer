@@ -45,8 +45,13 @@ std::string resolve_config_path() {
 int main(int argc, char** argv) {
 	config.load_from_file(resolve_config_path());
 
+	auto ratio_keys = config.ratios | std::views::keys;
 	auto guide_keys = config.guides | std::views::keys;
-	ShortcutManager::init(config.keys, {guide_keys.begin(), guide_keys.end()});
+	ShortcutManager::init(
+		config.keys,
+		{ratio_keys.begin(), ratio_keys.end()},
+		{guide_keys.begin(), guide_keys.end()}
+	);
 
 	GtkApplication* app = gtk_application_new(
 		"org.assador.ds.Measurer",

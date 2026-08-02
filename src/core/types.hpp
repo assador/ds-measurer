@@ -18,15 +18,6 @@ enum class GridType {
 	NONE
 };
 
-struct BoxConfig {
-	bool show_center{false};
-	bool show_golden{false};
-	bool show_thirds{false};
-	bool show_fifths{false};
-	bool show_angle{true};
-	bool show_bounding_box{true};
-};
-
 struct Point {
 	int x{0};
 	int y{0};

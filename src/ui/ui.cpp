@@ -84,24 +84,24 @@ void draw_measurement(
 
 	// SEC Hypot
 
-	set_cairo_color(cr, colors.main);
-	cairo_move_to(cr, coord_to_pixel(m.start.x), coord_to_pixel(m.start.y));
-	cairo_line_to(cr, coord_to_pixel(m.end.x), coord_to_pixel(m.end.y));
-	cairo_stroke(cr);
+	if (m.is_hypot_visible) {
+		set_cairo_color(cr, colors.main);
+		cairo_move_to(cr, coord_to_pixel(m.start.x), coord_to_pixel(m.start.y));
+		cairo_line_to(cr, coord_to_pixel(m.end.x), coord_to_pixel(m.end.y));
+		cairo_stroke(cr);
+	}
 
 	// SEC Bounding box
 
-	if (m.box_config.show_bounding_box) {
-		set_cairo_color(cr, colors.basic);
-		cairo_rectangle(
-			cr,
-			coord_to_pixel(x_min),
-			coord_to_pixel(y_min),
-			x_max - x_min,
-			y_max - y_min
-		);
-		cairo_stroke(cr);
-	}
+	set_cairo_color(cr, colors.basic);
+	cairo_rectangle(
+		cr,
+		coord_to_pixel(x_min),
+		coord_to_pixel(y_min),
+		x_max - x_min,
+		y_max - y_min
+	);
+	cairo_stroke(cr);
 
 	// SEC Labels
 
@@ -126,15 +126,16 @@ void draw_measurement(
 		offset.v = -5.0;
 	}
 
-	// hypot length
-	std::string hypot_str = std::to_string(static_cast<int>(m.length()));
-	set_cairo_color(cr, colors.text_main);
-	draw_label(cr, hypot_str, cx + offset.h, cy - offset.v, align.h, align.v);
-
-	// angle
-	std::string angle_str = std::format("{:.6g} °", m.angle_deg());
-	set_cairo_color(cr, colors.text_basic);
-	draw_label(cr, angle_str, m.start.x + offset.h, m.start.y - offset.v, align.h, align.v);
+	if (m.is_hypot_visible) {
+		// hypot length
+		std::string hypot_str = std::to_string(static_cast<int>(m.length()));
+		set_cairo_color(cr, colors.text_main);
+		draw_label(cr, hypot_str, cx + offset.h, cy - offset.v, align.h, align.v);
+		// angle
+		std::string angle_str = std::format("{:.6g} °", m.angle_deg());
+		set_cairo_color(cr, colors.text_basic);
+		draw_label(cr, angle_str, m.start.x + offset.h, m.start.y - offset.v, align.h, align.v);
+	}
 
 	// width / height
 	set_cairo_color(cr, colors.text_basic);

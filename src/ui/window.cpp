@@ -1,7 +1,7 @@
-#include "ui/shortcuts.hpp"
-#include "ui/ui.hpp"
 #include "ui/window.hpp"
 #include <gtk4-layer-shell.h>
+#include "ui/shortcuts.hpp"
+#include "ui/ui.hpp"
 
 static void check_and_process(AppState* state) {
 	if (state->lmb.is_dragging || state->rmb.is_dragging) return;
@@ -45,7 +45,17 @@ static void on_motion(
 			int dy = static_cast<int>(y) - state->rmb.click_pos.y;
 			m.move_from(state->rmb.initial_p1, state->rmb.initial_p2, dx, dy);
 		} else if (m.is_changing) {
-			m.end = Point{x, y};
+			Point target{x, y};
+			if (state->ratio.has_value()) {
+				double r = *state->ratio;
+				double dx = target.x - m.start.x;
+				double dy = target.y - m.start.y;
+				double abs_dx = std::abs(dx);
+				double abs_dy = std::abs(dy);
+				if (abs_dx >= abs_dy) target.x = m.start.x + std::copysign(abs_dy * r, dx);
+				else target.y = m.start.y + std::copysign(abs_dx / r, dy);
+			}
+			m.end = target;
 		}
 	}
 	gtk_widget_queue_draw(widget);

@@ -1,7 +1,22 @@
 #include "config/config.hpp"
-#include <yaml-cpp/yaml.h>
 #include <iostream>
-#include <algorithm>
+#include <string>
+#include <yaml-cpp/yaml.h>
+#include "vendor/tinyexpr.h"
+
+double parse_math_expression(const std::string& expr_str, double fallback = 1.0) {
+	int error = 0;
+	double result = te_interp(expr_str.c_str(), &error);
+	if (error != 0) {
+		std::cerr
+			<< "Failed to parse math expression '"
+			<< expr_str << "' (error at char " << error
+			<< "). Using fallback: " << fallback << "\n"
+		;
+		return fallback;
+	}
+	return result;
+}
 
 bool Config::load_from_file(const std::string& filepath) {
 	try {
@@ -18,6 +33,13 @@ bool Config::load_from_file(const std::string& filepath) {
 				std::string key = node.first.as<std::string>();
 				std::replace(key.begin(), key.end(), ' ', '_');
 				keys[key] = node.second.as<std::string>();
+			}
+		}
+		if (doc["aspect ratio shortcuts"]) {
+			for (const auto& node : doc["aspect ratio shortcuts"]) {
+				std::string key = node.first.as<std::string>();
+				const auto& val = node.second.as<std::string>();
+				ratios[key] = parse_math_expression(val);
 			}
 		}
 		if (doc["selection guides"]) {
