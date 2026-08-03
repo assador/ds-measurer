@@ -2,6 +2,7 @@
 
 #include <cmath>
 #include <numeric>
+#include <optional>
 #include <utility>
 #include "config/config.hpp"
 #include "core/grid.hpp"
@@ -14,8 +15,6 @@ public:
 	Point start;
 	Point end;
 	Grids grids;
-	bool is_changing{false};
-	bool is_moving{false};
 	bool is_hypot_visible{true};
 
 	Measurement(Point p1, Point p2, const SelectionGuides& guides = SelectionGuides{});
@@ -50,10 +49,28 @@ public:
 		end = Point{p2.x + dx, p2.y + dy};
 	}
 
-	bool toggle_grid(const std::string& key) {
+	void toggle_grid(const std::string& key) {
 		auto it = grids.find(key);
-		if (it == grids.end()) return false;
+		if (it == grids.end()) return;
 		it->second.rule.show = !it->second.rule.show;
-		return true;
+	}
+
+	void apply_ratio_with(const Point& target, std::optional<double> ratio) {
+		if (!ratio.has_value()) {
+			end = target;
+			return;
+		}
+		double r = *ratio;
+		double dx = target.x - start.x;
+		double dy = target.y - start.y;
+		double abs_dx = std::abs(dx);
+		double abs_dy = std::abs(dy);
+		if (abs_dx >= abs_dy) {
+			end.x = start.x + static_cast<int>(std::copysign(abs_dy * r, dx));
+			end.y = target.y;
+		} else {
+			end.x = target.x;
+			end.y = start.y + static_cast<int>(std::copysign(abs_dx / r, dy));
+		}
 	}
 };

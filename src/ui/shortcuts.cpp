@@ -1,7 +1,5 @@
 #include "ui/shortcuts.hpp"
 #include <functional>
-#include <iostream>
-#include <ostream>
 #include <string>
 #include <vector>
 #include <gtk/gtk.h>
@@ -93,6 +91,15 @@ void ShortcutManager::init(
 
 	add("reset_ratio", [](AppState& state) {
 		state.reset_ratio();
+		if (!state.active_measurement) return;
+		auto& m = state.active_measurement;
+		m->apply_ratio_with(
+			m == state.draft_measurement.get()
+				? state.cursor.pos
+				: m->end
+			,
+			state.ratio
+		);
 		state.queue_draw();
 	});
 
@@ -120,10 +127,17 @@ void ShortcutManager::init(
 		g_bindings.push_back({
 			kv,
 			[key](AppState& state) {
-				if (!state.active_measurement) return;
 				state.toggle_ratio(key);
+				if (!state.active_measurement) return;
+				auto& m = state.active_measurement;
+				m->apply_ratio_with(
+					m == state.draft_measurement.get()
+						? state.cursor.pos
+						: m->end
+					,
+					state.ratio
+				);
 				state.queue_draw();
-				std::cout << std::to_string(state.ratio.value_or(0.0)) << std::endl;
 			}
 		});
 	}

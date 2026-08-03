@@ -19,11 +19,11 @@ shortcuts:
    only mask:          question
    quit:               Escape
    relax:              grave
-   reset ratio:        \
+   reset ratio:        backslash
    screenshot:         s
    segment line:       z
    select measurement: Tab
-   snap to guides:     backslash
+   snap to guides:     p
 aspect ratio shortcuts:
    q: "1"
    w: "4 / 3"

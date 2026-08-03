@@ -5,10 +5,6 @@
 
 static void check_and_process(AppState* state) {
 	if (state->lmb.is_dragging || state->rmb.is_dragging) return;
-	if (state->active_measurement) {
-		state->active_measurement->is_changing = false;
-		state->active_measurement->is_moving = false;
-	}
 	if (state->draft_measurement) {
 		if (state->active_measurement == state->draft_measurement.get()) {
 			state->active_measurement = nullptr;
@@ -40,22 +36,12 @@ static void on_motion(
 
 	if (state->active_measurement) {
 		auto& m = *state->active_measurement;
-		if (m.is_moving) {
+		if (state->rmb.is_dragging) {
 			int dx = static_cast<int>(x) - state->rmb.click_pos.x;
 			int dy = static_cast<int>(y) - state->rmb.click_pos.y;
 			m.move_from(state->rmb.initial_p1, state->rmb.initial_p2, dx, dy);
-		} else if (m.is_changing) {
-			Point target{x, y};
-			if (state->ratio.has_value()) {
-				double r = *state->ratio;
-				double dx = target.x - m.start.x;
-				double dy = target.y - m.start.y;
-				double abs_dx = std::abs(dx);
-				double abs_dy = std::abs(dy);
-				if (abs_dx >= abs_dy) target.x = m.start.x + std::copysign(abs_dy * r, dx);
-				else target.y = m.start.y + std::copysign(abs_dx / r, dy);
-			}
-			m.end = target;
+		} else if (state->lmb.is_dragging) {
+			m.apply_ratio_with(Point{x, y}, state->ratio);
 		}
 	}
 	gtk_widget_queue_draw(widget);
@@ -87,8 +73,6 @@ static gboolean on_legacy_event(
 				);
 				state->active_measurement = state->draft_measurement.get();
 			}
-			state->active_measurement->is_changing = true;
-
 			gtk_widget_queue_draw(widget);
 			return GDK_EVENT_STOP;
 		}
@@ -98,7 +82,6 @@ static gboolean on_legacy_event(
 
 			if (state->active_measurement) {
 				auto& m = *state->active_measurement;
-				m.is_moving = true;
 				state->rmb.initial_p1 = m.start;
 				state->rmb.initial_p2 = m.end;
 			}
@@ -112,14 +95,12 @@ static gboolean on_legacy_event(
 
 		if (button == GDK_BUTTON_PRIMARY) {
 			state->lmb.is_dragging = false;
-			if (state->active_measurement) state->active_measurement->is_changing = false;
 			check_and_process(state);
 			gtk_widget_queue_draw(widget);
 			return GDK_EVENT_STOP;
 		}
 		else if (button == GDK_BUTTON_SECONDARY) {
 			state->rmb.is_dragging = false;
-			if (state->active_measurement) state->active_measurement->is_moving = false;
 			check_and_process(state);
 			gtk_widget_queue_draw(widget);
 			return GDK_EVENT_STOP;
