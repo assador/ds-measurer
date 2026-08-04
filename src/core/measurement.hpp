@@ -55,21 +55,34 @@ public:
 		it->second.rule.show = !it->second.rule.show;
 	}
 
-	void reset_ratio_with(const Point& target) {
-		end = target;
-	}
+	void apply_modifiers(
+		const Point& source,
+		const Point& target,
+		bool from_center,
+		bool fixed_ratio,
+		double ratio
+	) {
+		if (fixed_ratio) {
+			double dx = target.x - source.x;
+			double dy = target.y - source.y;
+			double abs_dx = std::abs(dx);
+			double abs_dy = std::abs(dy);
 
-	void apply_ratio_with(const Point& target, double ratio) {
-		double dx = target.x - start.x;
-		double dy = target.y - start.y;
-		double abs_dx = std::abs(dx);
-		double abs_dy = std::abs(dy);
-		if (abs_dx >= abs_dy) {
-			end.x = start.x + static_cast<int>(std::copysign(abs_dy * ratio, dx));
-			end.y = target.y;
+			if (abs_dx >= abs_dy) {
+				end.x = source.x + static_cast<int>(std::copysign(abs_dy * ratio, dx));
+				end.y = target.y;
+			} else {
+				end.x = target.x;
+				end.y = source.y + static_cast<int>(std::copysign(abs_dx / ratio, dy));
+			}
 		} else {
-			end.x = target.x;
-			end.y = start.y + static_cast<int>(std::copysign(abs_dx / ratio, dy));
+			end = target;
+		}
+		if (from_center) {
+			start.x = source.x * 2 - end.x;
+			start.y = source.y * 2 - end.y;
+		} else {
+			start = source;
 		}
 	}
 };

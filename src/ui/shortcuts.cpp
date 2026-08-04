@@ -2,6 +2,7 @@
 #include <cstdint>
 #include <vector>
 #include "config/config.hpp"
+#include "core/measurement.hpp"
 
 struct ActionBinding {
 	uint32_t keycode{0};
@@ -23,6 +24,17 @@ static void add_binding(uint32_t keycode, Fn&& action) {
 			}
 		}
 	});
+}
+
+static void redraw_measurement_with_modifiers(Measurement& m, AppState& s) {
+	m.apply_modifiers(
+		s.lmb.initial_p1,
+		s.cursor.pos,
+		s.is_pressed_from_center,
+		s.is_pressed_fixed_ratio,
+		s.ratio
+	);
+	s.queue_draw();
 }
 
 void ShortcutManager::init(const Config& config) {
@@ -112,12 +124,14 @@ void ShortcutManager::init(const Config& config) {
 		state.is_pressed_fixed_ratio = is_pressed;
 		auto& active = state.active_measurement;
 		if (!active || !state.lmb.is_dragging) return;
-		if (is_pressed) {
-			active->apply_ratio_with(state.cursor.pos, state.ratio);
-		} else {
-			active->reset_ratio_with(state.cursor.pos);
-		}
-		state.queue_draw();
+		redraw_measurement_with_modifiers(*active, state);
+	});
+
+	add("from_center", [](AppState& state, bool is_pressed) {
+		state.is_pressed_from_center = is_pressed;
+		auto& active = state.active_measurement;
+		if (!active || !state.lmb.is_dragging) return;
+		redraw_measurement_with_modifiers(*active, state);
 	});
 
 	for (const auto& [kc, ratio] : config.ratios) {
@@ -128,8 +142,7 @@ void ShortcutManager::init(const Config& config) {
 				!state.lmb.is_dragging ||
 				!state.is_pressed_fixed_ratio
 			) return;
-			state.active_measurement->apply_ratio_with(state.cursor.pos, state.ratio);
-			state.queue_draw();
+			redraw_measurement_with_modifiers(*state.active_measurement, state);
 		});
 	}
 	for (const auto& [kc, rule] : config.guides) {

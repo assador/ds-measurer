@@ -1,5 +1,6 @@
 #include "ui/ui.hpp"
 #include <format>
+#include <string>
 
 void set_label(
 	cairo_t* cr,
@@ -82,13 +83,27 @@ void draw_measurement(
 	int y_min = std::min(m.start.y, m.end.y);
 	int y_max = std::max(m.start.y, m.end.y);
 
-	// SEC Hypot
+	int dx = m.end.x - m.start.x;
+	int dy = m.end.y - m.start.y;
+
+	double phi = std::atan2(dy, dx);
+	if (dx < 0 && dy < 0) phi += 2 * M_PI;
+	double base = (dx >= 0) ? 0.0 : M_PI;
+
+	// SEC Hypot and arc
 
 	if (m.is_hypot_visible) {
+		// hypot
 		set_cairo_color(cr, colors.main);
 		cairo_move_to(cr, coord_to_pixel(m.start.x), coord_to_pixel(m.start.y));
 		cairo_line_to(cr, coord_to_pixel(m.end.x), coord_to_pixel(m.end.y));
 		cairo_stroke(cr);
+		// arc
+		if (m.width() > 20) {
+			set_cairo_color(cr, colors.basic);
+			cairo_arc(cr, m.start.x, m.start.y, 20, std::min(base, phi), std::max(base, phi));
+			cairo_stroke(cr);
+		}
 	}
 
 	// SEC Bounding box

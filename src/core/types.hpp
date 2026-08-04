@@ -11,14 +11,6 @@ struct Color {
 	double a{1.0};
 };
 
-enum class GridType : std::uint8_t {
-	CENTER,
-	GOLDEN,
-	THIRDS,
-	FIFTHS,
-	NONE
-};
-
 struct Point {
 	int x{0};
 	int y{0};

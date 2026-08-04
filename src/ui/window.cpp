@@ -41,8 +41,13 @@ static void on_motion(
 			int dy = static_cast<int>(y) - state->rmb.click_pos.y;
 			m.move_from(state->rmb.initial_p1, state->rmb.initial_p2, dx, dy);
 		} else if (state->lmb.is_dragging) {
-			if (!state->is_pressed_fixed_ratio) m.reset_ratio_with(Point{x, y});
-			else m.apply_ratio_with(Point{x, y}, state->ratio);
+			m.apply_modifiers(
+				state->lmb.initial_p1,
+				Point{x, y},
+				state->is_pressed_from_center,
+				state->is_pressed_fixed_ratio,
+				state->ratio
+			);
 		}
 	}
 	gtk_widget_queue_draw(widget);
@@ -74,6 +79,9 @@ static gboolean on_legacy_event(
 				);
 				state->active_measurement = state->draft_measurement.get();
 			}
+			auto& m = *state->active_measurement;
+			state->lmb.initial_p1 = m.start;
+			state->lmb.initial_p2 = m.end;
 			gtk_widget_queue_draw(widget);
 			return GDK_EVENT_STOP;
 		}

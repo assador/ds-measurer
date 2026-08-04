@@ -22,6 +22,7 @@ struct AppState {
 
 	double ratio{1.1};
 	bool is_pressed_fixed_ratio{false};
+	bool is_pressed_from_center{false};
 
 	std::vector<std::unique_ptr<Measurement>> frozen_measurements;
 	std::unique_ptr<Measurement> draft_measurement;
