@@ -1,8 +1,36 @@
 #include "config/config.hpp"
+#include <algorithm>
+#include <cstdint>
+#include <filesystem>
 #include <iostream>
 #include <string>
+#include <gtk/gtk.h>
 #include <yaml-cpp/yaml.h>
 #include "vendor/tinyexpr.h"
+
+namespace fs = std::filesystem;
+
+fs::path get_executable_dir() {
+	char result[PATH_MAX];
+	ssize_t count = readlink("/proc/self/exe", result, PATH_MAX);
+	if (count != -1) return fs::path(std::string(result, count)).parent_path();
+	return fs::current_path();
+}
+
+std::string resolve_config_path() {
+	if (const char* home = std::getenv("HOME")) {
+		fs::path xdg_path = fs::path(home) / ".config" / "ds-measurer" / "ds-measurer.yaml";
+		if (fs::exists(xdg_path)) return xdg_path.string();
+		fs::path home_path = fs::path(home) / ".ds-measurer.yaml";
+		if (fs::exists(home_path)) return home_path.string();
+	}
+	if (fs::exists("/etc/ds-measurer/ds-measurer.yaml")) {
+		return "/etc/ds-measurer/ds-measurer.yaml";
+	}
+	fs::path exe_dir_config = get_executable_dir() / "ds-measurer.yaml";
+	if (fs::exists(exe_dir_config)) return exe_dir_config.string();
+	return "ds-measurer.yaml";
+}
 
 double parse_math_expression(const std::string& expr_str, double fallback = 1.0) {
 	int error = 0;
@@ -18,6 +46,24 @@ double parse_math_expression(const std::string& expr_str, double fallback = 1.0)
 	return result;
 }
 
+static uint32_t key_name_to_keycode(const std::string& name) {
+	guint kv = gdk_keyval_from_name(name.c_str());
+	if (kv == GDK_KEY_VoidSymbol) return 0;
+
+	GdkDisplay* display = gdk_display_get_default();
+	if (!display) return 0;
+
+	GdkKeymapKey* keys_array = nullptr;
+	int n_keys = 0;
+	uint32_t keycode = 0;
+
+	if (gdk_display_map_keyval(display, kv, &keys_array, &n_keys) && n_keys > 0) {
+		keycode = static_cast<uint32_t>(keys_array[0].keycode);
+		g_free(keys_array);
+	}
+	return keycode;
+}
+
 bool Config::load_from_file(const std::string& filepath) {
 	try {
 		YAML::Node doc = YAML::LoadFile(filepath);
@@ -30,36 +76,43 @@ bool Config::load_from_file(const std::string& filepath) {
 		}
 		if (doc["shortcuts"]) {
 			for (const auto& node : doc["shortcuts"]) {
-				std::string key = node.first.as<std::string>();
-				std::replace(key.begin(), key.end(), ' ', '_');
-				keys[key] = node.second.as<std::string>();
+				auto key = node.first.as<std::string>();
+				std::ranges::replace(key, ' ', '_');
+				guint kc = key_name_to_keycode(node.second.as<std::string>());
+				if (kc != 0) keys[key] = kc;
 			}
 		}
 		if (doc["aspect ratio shortcuts"]) {
 			for (const auto& node : doc["aspect ratio shortcuts"]) {
-				std::string key = node.first.as<std::string>();
-				const auto& val = node.second.as<std::string>();
-				ratios[key] = parse_math_expression(val);
+				guint kc = key_name_to_keycode(node.first.as<std::string>());
+				if (kc != 0) ratios[kc] = parse_math_expression(node.second.as<std::string>());
 			}
 		}
 		if (doc["selection guides"]) {
 			for (const auto& node : doc["selection guides"]) {
-				std::string key = node.first.as<std::string>();
-				const auto& val = node.second;
-				SelectionGuideRule rule;
-				if (val["x"]) rule.x = val["x"].as<std::vector<double>>();
-				if (val["y"]) rule.y = val["y"].as<std::vector<double>>();
-				if (val["show"]) rule.show = val["show"].as<bool>();
-				guides[key] = rule;
+				guint kc = key_name_to_keycode(node.first.as<std::string>());
+				if (kc != 0) {
+					const auto& val = node.second;
+					SelectionGuideRule rule;
+					if (val["x"]) rule.x = val["x"].as<std::vector<double>>();
+					if (val["y"]) rule.y = val["y"].as<std::vector<double>>();
+					if (val["show"]) rule.show = val["show"].as<bool>();
+					guides[kc] = rule;
+				}
 			}
 		}
-
+		if (doc["colors shortcuts"]) {
+			for (const auto& node : doc["colors shortcuts"]) {
+				guint kc = key_name_to_keycode(node.second.as<std::string>());
+				if (kc != 0) theme_names[kc] = node.first.as<std::string>();
+			}
+		}
 		auto parse_color = [](const YAML::Node& node) -> Color {
 			return Color{
-				node["r"].as<double>(),
-				node["g"].as<double>(),
-				node["b"].as<double>(),
-				node["a"].as<double>()
+				.r=node["r"].as<double>(),
+				.g=node["g"].as<double>(),
+				.b=node["b"].as<double>(),
+				.a=node["a"].as<double>()
 			};
 		};
 		auto parse_theme = [&](const YAML::Node& node, ColorScheme& theme) {
@@ -73,22 +126,16 @@ bool Config::load_from_file(const std::string& filepath) {
 		};
 		if (doc["colors"]) {
 			for (const auto& node : doc["colors"]) {
-				std::string key = node.first.as<std::string>();
+				auto key = node.first.as<std::string>();
 				ColorScheme scheme;
 				parse_theme(node.second, scheme);
-				themes[key] = scheme;
+				color_schemes[key] = scheme;
 			}
 		}
-
-		if (auto it = themes.find("default"); it != themes.end()) current_theme = &it->second;
-		else if (!themes.empty()) current_theme = &themes.begin()->second;
-
-		if (doc["colors shortcuts"]) {
-			for (const auto& node : doc["colors shortcuts"]) {
-				std::string key = node.first.as<std::string>();
-				std::string val = node.second.as<std::string>();
-				keys["theme_" + key] = val;
-			}
+		if (auto it = color_schemes.find("default"); it != color_schemes.end()) {
+			current_color_scheme = &it->second;
+		} else if (!color_schemes.empty()) {
+			current_color_scheme = &color_schemes.begin()->second;
 		}
 
 		return true;

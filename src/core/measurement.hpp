@@ -1,14 +1,14 @@
 #pragma once
 
 #include <cmath>
+#include <cstdint>
 #include <numeric>
-#include <optional>
 #include <utility>
 #include "config/config.hpp"
 #include "core/grid.hpp"
 #include "core/types.hpp"
 
-using Grids = std::unordered_map<std::string, Grid>;
+using Grids = std::unordered_map<uint32_t, Grid>;
 
 class Measurement {
 public:
@@ -49,28 +49,27 @@ public:
 		end = Point{p2.x + dx, p2.y + dy};
 	}
 
-	void toggle_grid(const std::string& key) {
-		auto it = grids.find(key);
+	void toggle_grid(uint32_t kc) {
+		auto it = grids.find(kc);
 		if (it == grids.end()) return;
 		it->second.rule.show = !it->second.rule.show;
 	}
 
-	void apply_ratio_with(const Point& target, std::optional<double> ratio) {
-		if (!ratio.has_value()) {
-			end = target;
-			return;
-		}
-		double r = *ratio;
+	void reset_ratio_with(const Point& target) {
+		end = target;
+	}
+
+	void apply_ratio_with(const Point& target, double ratio) {
 		double dx = target.x - start.x;
 		double dy = target.y - start.y;
 		double abs_dx = std::abs(dx);
 		double abs_dy = std::abs(dy);
 		if (abs_dx >= abs_dy) {
-			end.x = start.x + static_cast<int>(std::copysign(abs_dy * r, dx));
+			end.x = start.x + static_cast<int>(std::copysign(abs_dy * ratio, dx));
 			end.y = target.y;
 		} else {
 			end.x = target.x;
-			end.y = start.y + static_cast<int>(std::copysign(abs_dx / r, dy));
+			end.y = start.y + static_cast<int>(std::copysign(abs_dx / ratio, dy));
 		}
 	}
 };

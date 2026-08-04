@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cmath>
+#include <cstdint>
 #include <string>
 
 struct Color {
@@ -10,7 +11,7 @@ struct Color {
 	double a{1.0};
 };
 
-enum class GridType {
+enum class GridType : std::uint8_t {
 	CENTER,
 	GOLDEN,
 	THIRDS,
@@ -26,19 +27,19 @@ struct Point {
 	Point(int ix, int iy) : x(ix), y(iy) {}
 	Point() = default;
 
-	double distance_to(const Point& other) const {
+	[[nodiscard]] double distance_to(const Point& other) const {
 		return std::hypot(other.x - x, other.y - y);
 	}
 };
 
 struct TextStyle {
-	Color color = {0.0, 0.0, 0.0, 1.0};
+	Color color = {.r=0.0, .g=0.0, .b=0.0, .a=1.0};
 	std::string font_family = "Sans";
 	double font_size = 12.0;
 };
 
-enum class TextAlignH { LEFT, CENTER, RIGHT };
-enum class TextAlignV { TOP, BASELINE, MIDDLE, BOTTOM };
+enum class TextAlignH : std::uint8_t { LEFT, CENTER, RIGHT };
+enum class TextAlignV : std::uint8_t { TOP, BASELINE, MIDDLE, BOTTOM };
 
 struct TextOffset {
 	double h{5.0}, v{5.0}, hs{3.0}, vs{3.0};

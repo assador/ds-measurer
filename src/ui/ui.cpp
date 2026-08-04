@@ -56,12 +56,12 @@ void draw_grid(
 	set_cairo_color(cr, color);
 
 	for (double rx : g.rule.x) {
-		int px = std::lround(x + w * rx);
+		int px = static_cast<int>(std::round(x + w * rx));
 		cairo_move_to(cr, coord_to_pixel(px), y);
 		cairo_line_to(cr, coord_to_pixel(px), y + h);
 	}
 	for (double ry : g.rule.y) {
-		int py = std::lround(y + h * ry);
+		int py = static_cast<int>(std::round(y + h * ry));
 		cairo_move_to(cr, x, coord_to_pixel(py));
 		cairo_line_to(cr, x + w, coord_to_pixel(py));
 	}

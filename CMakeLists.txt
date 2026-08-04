@@ -12,9 +12,10 @@ pkg_check_modules(LAYER_SHELL REQUIRED gtk4-layer-shell-0)
 find_package(yaml-cpp REQUIRED)
 
 set(SOURCES
-	src/main.cpp
-	src/core/measurement.cpp
 	src/config/config.cpp
+	src/core/app.cpp
+	src/core/measurement.cpp
+	src/main.cpp
 	src/ui/shortcuts.cpp
 	src/ui/ui.cpp
 	src/ui/window.cpp

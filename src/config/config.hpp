@@ -1,17 +1,17 @@
 #pragma once
 
-#include <string>
+#include <cstdint>
 #include <unordered_map>
 #include <vector>
 #include "core/types.hpp"
 
 struct ColorScheme {
-	Color main{0.0, 0.5, 1.0, 0.5};
-	Color basic{0.0, 0.0, 0.0, 0.25};
-	Color guide{0.45, 0.72, 0.0, 0.33};
-	Color text_main{0.0, 0.5, 1.0, 0.6};
-	Color text_basic{0.0, 0.0, 0.0, 0.75};
-	Color text_faded{0.0, 0.0, 0.0, 0.4};
+	Color main{.r=0.0, .g=0.5, .b=1.0, .a=0.5};
+	Color basic{.r=0.0, .g=0.0, .b=0.0, .a=0.25};
+	Color guide{.r=0.45, .g=0.72, .b=0.0, .a=0.33};
+	Color text_main{.r=0.0, .g=0.5, .b=1.0, .a=0.6};
+	Color text_basic{.r=0.0, .g=0.0, .b=0.0, .a=0.75};
+	Color text_faded{.r=0.0, .g=0.0, .b=0.0, .a=0.4};
 };
 struct SelectionGuideRule {
 	std::vector<double> x;
@@ -19,10 +19,13 @@ struct SelectionGuideRule {
 	bool show{false};
 };
 
-using Keybindings = std::unordered_map<std::string, std::string>;
-using AspectRatios = std::unordered_map<std::string, double>;
+using Keybindings = std::unordered_map<std::string, uint32_t>;
+using AspectRatios = std::unordered_map<uint32_t, double>;
+using SelectionGuides = std::unordered_map<uint32_t, SelectionGuideRule>;
 using ColorSchemes = std::unordered_map<std::string, ColorScheme>;
-using SelectionGuides = std::unordered_map<std::string, SelectionGuideRule>;
+using ThemeNames = std::unordered_map<uint32_t, std::string>;
+
+std::string resolve_config_path();
 
 class Config {
 public:
@@ -37,10 +40,11 @@ public:
 
 	Keybindings keys;
 	AspectRatios ratios;
-	ColorSchemes themes;
 	SelectionGuides guides;
+	ColorSchemes color_schemes;
+	ThemeNames theme_names;
 
-	ColorScheme* current_theme = nullptr;
+	ColorScheme* current_color_scheme = nullptr;
 
 	bool load_from_file(const std::string& filepath);
 };

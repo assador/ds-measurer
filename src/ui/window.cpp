@@ -14,7 +14,7 @@ static void check_and_process(AppState* state) {
 }
 
 static GdkCursor* create_invisible_cursor(GdkDisplay* display) {
-	guchar* pixels = static_cast<guchar*>(g_malloc0(4));
+	auto* pixels = static_cast<guchar*>(g_malloc0(4));
 	GBytes* bytes = g_bytes_new_take(pixels, 4);
 	GdkTexture* texture = gdk_memory_texture_new(1, 1, GDK_MEMORY_R8G8B8A8_PREMULTIPLIED, bytes, 4);
 	g_bytes_unref(bytes);
@@ -41,7 +41,8 @@ static void on_motion(
 			int dy = static_cast<int>(y) - state->rmb.click_pos.y;
 			m.move_from(state->rmb.initial_p1, state->rmb.initial_p2, dx, dy);
 		} else if (state->lmb.is_dragging) {
-			m.apply_ratio_with(Point{x, y}, state->ratio);
+			if (!state->is_pressed_fixed_ratio) m.reset_ratio_with(Point{x, y});
+			else m.apply_ratio_with(Point{x, y}, state->ratio);
 		}
 	}
 	gtk_widget_queue_draw(widget);
@@ -124,11 +125,11 @@ static void on_draw(
 	cairo_paint(cr);
 	cairo_restore(cr);
 
-	auto it = state->config.themes.find("highlight");
+	auto it = state->config.color_schemes.find("highlight");
 	const ColorScheme* highlight_theme =
-		(it != state->config.themes.end())
+		(it != state->config.color_schemes.end())
 			? &it->second
-			: state->config.current_theme
+			: state->config.current_color_scheme
 	;
 	for (const auto& m : state->frozen_measurements) {
 		draw_measurement(
@@ -136,24 +137,32 @@ static void on_draw(
 			*m,
 			state->active_measurement == m.get()
 				? *highlight_theme
-				: *state->config.current_theme
+				: *state->config.current_color_scheme
 		);
 	}
 	if (state->draft_measurement) {
-		draw_measurement(cr, *state->draft_measurement, *state->config.current_theme);
+		draw_measurement(cr, *state->draft_measurement, *state->config.current_color_scheme);
 	}
-	draw_cursor(cr, state->cursor, width, height, state->config.current_theme->basic);
+	draw_cursor(cr, state->cursor, width, height, state->config.current_color_scheme->basic);
 }
 
 static gboolean on_key_pressed(
 	GtkEventControllerKey*,
-	guint keyval,
 	guint,
+	guint keycode,
 	GdkModifierType,
 	gpointer user_data
 ) {
-	auto* state_ptr = static_cast<AppState*>(user_data);
-	return ShortcutManager::handle_key(keyval, *state_ptr);
+	return ShortcutManager::handle_key(keycode, true, *static_cast<AppState*>(user_data));
+}
+static gboolean on_key_released(
+	GtkEventControllerKey*,
+	guint,
+	guint keycode,
+	GdkModifierType,
+	gpointer user_data
+) {
+	return ShortcutManager::handle_key(keycode, false, *static_cast<AppState*>(user_data));
 }
 
 void setup_main_window(
@@ -205,6 +214,7 @@ void setup_main_window(
 
 	GtkEventController* key_controller = gtk_event_controller_key_new();
 	g_signal_connect(key_controller, "key-pressed", G_CALLBACK(on_key_pressed), &state);
+	g_signal_connect(key_controller, "key-released", G_CALLBACK(on_key_released), &state);
 	gtk_widget_add_controller(window, key_controller);
 
 	gtk_window_present(GTK_WINDOW(window));

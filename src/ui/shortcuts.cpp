@@ -1,31 +1,42 @@
 #include "ui/shortcuts.hpp"
-#include <functional>
-#include <string>
+#include <cstdint>
 #include <vector>
-#include <gtk/gtk.h>
+#include "config/config.hpp"
 
 struct ActionBinding {
-	guint keyval{0};
-	std::function<void(AppState&)> action;
+	uint32_t keycode{0};
+	std::function<void(AppState&, bool)> action;
 };
 
 static std::vector<ActionBinding> g_bindings;
 
-void ShortcutManager::init(
-	const Keybindings& keys,
-	const std::vector<std::string>& ratio_keys,
-	const std::vector<std::string>& guide_keys
-) {
+template <typename Fn>
+static void add_binding(uint32_t keycode, Fn&& action) {
+	if (keycode == 0) return;
+	g_bindings.push_back({
+		keycode,
+		[action = std::forward<Fn>(action)](AppState& state, bool is_pressed) {
+			if constexpr (std::is_invocable_v<Fn, AppState&, bool>) {
+				action(state, is_pressed);
+			} else if (is_pressed) {
+				action(state);
+			}
+		}
+	});
+}
+
+void ShortcutManager::init(const Config& config) {
 	g_bindings.clear();
 
-	auto add = [&keys](const std::string& kn, std::function<void(AppState&)> action) {
-		auto it = keys.find(kn);
-		if (it == keys.end() || it->second.empty()) return;
-		guint kv = gdk_keyval_from_name(it->second.c_str());
-		if (kv != GDK_KEY_VoidSymbol) g_bindings.push_back({kv, std::move(action)});
+	auto add = [&](const std::string& name, auto&& action) {
+		if (auto it = config.keys.find(name); it != config.keys.end()) {
+			add_binding(it->second, std::forward<decltype(action)>(action));
+		}
 	};
 
-	add("quit", [](AppState&) { g_application_quit(g_application_get_default()); });
+	add("quit", [](AppState& state) {
+		state.request_quit();
+	});
 
 	add("freeze", [](AppState& state) {
 		if (state.draft_measurement) {
@@ -37,29 +48,30 @@ void ShortcutManager::init(
 	});
 
 	add("select_measurement", [](AppState& state) {
-		if (state.frozen_measurements.empty()) return;
-
+		auto& frozen = state.frozen_measurements;
+		if (frozen.empty()) return;
 		size_t current_index = 0;
 		bool found = false;
-
-		for (size_t i = 0; i < state.frozen_measurements.size(); ++i) {
-			if (state.frozen_measurements[i].get() == state.active_measurement) {
+		for (size_t i = 0; i < frozen.size(); ++i) {
+			if (frozen[i].get() == state.active_measurement) {
 				current_index = i;
 				found = true;
 				break;
 			}
 		}
-		size_t next_index = found ? (current_index + 1) % state.frozen_measurements.size() : 0;
-		state.active_measurement = state.frozen_measurements[next_index].get();
+		size_t next_index = found ? (current_index + 1) % frozen.size() : 0;
+		state.active_measurement = frozen[next_index].get();
 		state.queue_draw();
 	});
 
 	add("clear", [](AppState& state) {
-		if (!state.active_measurement || state.frozen_measurements.empty()) return;
-		for (auto it = state.frozen_measurements.begin(); it != state.frozen_measurements.end(); ++it) {
-			if (it->get() == state.active_measurement) {
-				state.active_measurement = nullptr;
-				state.frozen_measurements.erase(it);
+		auto& active = state.active_measurement;
+		if (!active) return;
+		auto& frozen = state.frozen_measurements;
+		for (auto it = frozen.begin(); it != frozen.end(); ++it) {
+			if (it->get() == active) {
+				active = nullptr;
+				frozen.erase(it);
 				state.queue_draw();
 				return;
 			}
@@ -67,13 +79,13 @@ void ShortcutManager::init(
 	});
 
 	add("clear_last", [](AppState& state) {
-		if (!state.frozen_measurements.empty()) {
-			if (state.active_measurement == state.frozen_measurements.back().get()) {
-				state.active_measurement = nullptr;
-			}
-			state.frozen_measurements.pop_back();
-			state.queue_draw();
+		auto& frozen = state.frozen_measurements;
+		if (frozen.empty()) return;
+		if (state.active_measurement == frozen.back().get()) {
+			state.active_measurement = nullptr;
 		}
+		frozen.pop_back();
+		state.queue_draw();
 	});
 
 	add("clear_all", [](AppState& state) {
@@ -89,76 +101,61 @@ void ShortcutManager::init(
 		state.queue_draw();
 	});
 
-	add("reset_ratio", [](AppState& state) {
-		state.reset_ratio();
-		if (!state.active_measurement) return;
-		auto& m = state.active_measurement;
-		m->apply_ratio_with(
-			m == state.draft_measurement.get()
-				? state.cursor.pos
-				: m->end
-			,
-			state.ratio
-		);
-		state.queue_draw();
-	});
-
 	add("segment_line", [](AppState& state) {
-		if (!state.active_measurement) return;
-		state.active_measurement->is_hypot_visible = !state.active_measurement->is_hypot_visible;
+		auto& active = state.active_measurement;
+		if (!active) return;
+		active->is_hypot_visible = !active->is_hypot_visible;
 		state.queue_draw();
 	});
 
-	for (const auto& [key, _] : keys) {
-		if (key.rfind("theme_", 0) == 0) {
-			std::string name = key.substr(6);
-			add(key, [name](AppState& state) {
-				auto it = state.config.themes.find(name);
-				if (it != state.config.themes.end()) {
-					state.config.current_theme = &it->second;
-					state.queue_draw();
-				}
-			});
+	add("fixed_ratio", [](AppState& state, bool is_pressed) {
+		state.is_pressed_fixed_ratio = is_pressed;
+		auto& active = state.active_measurement;
+		if (!active || !state.lmb.is_dragging) return;
+		if (is_pressed) {
+			active->apply_ratio_with(state.cursor.pos, state.ratio);
+		} else {
+			active->reset_ratio_with(state.cursor.pos);
 		}
-	}
-	for (const auto& key : ratio_keys) {
-		guint kv = gdk_keyval_from_name(key.c_str());
-		if (kv == GDK_KEY_VoidSymbol) continue;
-		g_bindings.push_back({
-			kv,
-			[key](AppState& state) {
-				state.toggle_ratio(key);
-				if (!state.active_measurement) return;
-				auto& m = state.active_measurement;
-				m->apply_ratio_with(
-					m == state.draft_measurement.get()
-						? state.cursor.pos
-						: m->end
-					,
-					state.ratio
-				);
-				state.queue_draw();
-			}
+		state.queue_draw();
+	});
+
+	for (const auto& [kc, ratio] : config.ratios) {
+		add_binding(kc, [ratio](AppState& state) {
+			state.ratio = ratio;
+			if (
+				!state.active_measurement ||
+				!state.lmb.is_dragging ||
+				!state.is_pressed_fixed_ratio
+			) return;
+			state.active_measurement->apply_ratio_with(state.cursor.pos, state.ratio);
+			state.queue_draw();
 		});
 	}
-	for (const auto& key : guide_keys) {
-		guint kv = gdk_keyval_from_name(key.c_str());
-		if (kv == GDK_KEY_VoidSymbol) continue;
-		g_bindings.push_back({
-			kv,
-			[key](AppState& state) {
-				if (!state.active_measurement) return;
-				state.active_measurement->toggle_grid(key);
+	for (const auto& [kc, rule] : config.guides) {
+		add_binding(kc, [kc](AppState& state) {
+			if (!state.active_measurement) return;
+			state.active_measurement->toggle_grid(kc);
+			state.queue_draw();
+		});
+	}
+	for (const auto& [kc, theme_name] : config.theme_names) {
+		add_binding(kc, [theme_name](AppState& state) {
+			if (
+				auto it = state.config.color_schemes.find(theme_name);
+				it != state.config.color_schemes.end()
+			) {
+				state.config.current_color_scheme = &it->second;
 				state.queue_draw();
 			}
 		});
 	}
 }
 
-gboolean ShortcutManager::handle_key(guint keyval, AppState& state) {
+gboolean ShortcutManager::handle_key(uint32_t keycode, bool is_pressed, AppState& state) {
 	for (const auto& binding : g_bindings) {
-		if (binding.keyval == keyval) {
-			binding.action(state);
+		if (binding.keycode == keycode) {
+			binding.action(state, is_pressed);
 			return TRUE;
 		}
 	}

@@ -2,8 +2,8 @@
 
 #include <functional>
 #include <memory>
-#include <optional>
 #include <vector>
+#include "config/config.hpp"
 #include "core/cursor.hpp"
 #include "core/measurement.hpp"
 
@@ -20,8 +20,8 @@ struct AppState {
 	MouseState lmb;
 	MouseState rmb;
 
-	std::optional<double> ratio = std::nullopt;
-	std::string active_ratio_key;
+	double ratio{1.1};
+	bool is_pressed_fixed_ratio{false};
 
 	std::vector<std::unique_ptr<Measurement>> frozen_measurements;
 	std::unique_ptr<Measurement> draft_measurement;
@@ -29,23 +29,11 @@ struct AppState {
 
 	explicit AppState(Config& cfg) : config(cfg) {}
 
-	void reset_ratio() {
-		ratio = std::nullopt;
-		active_ratio_key.clear();
-	}
-	void toggle_ratio(const std::string& key) {
-		if (active_ratio_key == key && ratio.has_value()) {
-			reset_ratio();
-			return;
-		}
-		auto it = config.ratios.find(key);
-		if (it == config.ratios.end()) return;
-		ratio = it->second;
-		active_ratio_key = key;
-	}
-
 	std::function<void()> request_draw;
 	void queue_draw() const {
 		if (request_draw) request_draw();
 	}
+	void request_quit();
 };
+
+int run_application(int argc, char** argv, AppState& state, Config& config);

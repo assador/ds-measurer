@@ -1,0 +1,13 @@
+HeaderFilterRegex: '.*/src/.*'
+WarningsAsErrors: ''
+
+Checks: '
+  bugprone-*,
+  performance-*,
+  modernize-*,
+  -bugprone-easily-swappable-parameters,
+  -bugprone-casting-through-void,
+  -modernize-avoid-c-arrays,
+  -modernize-use-trailing-return-type,
+  -readability-braces-around-statements
+'
