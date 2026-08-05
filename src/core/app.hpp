@@ -5,7 +5,11 @@
 #include <vector>
 #include "config/config.hpp"
 #include "core/cursor.hpp"
+#include "core/guide.hpp"
 #include "core/measurement.hpp"
+#include "core/types.hpp"
+
+enum class Mode : std::uint8_t { Measurements, Guides, Count };
 
 struct MouseState {
 	bool is_dragging{false};
@@ -20,12 +24,18 @@ struct AppState {
 	MouseState lmb;
 	MouseState rmb;
 
-	double ratio{1.1};
-	bool is_pressed_fixed_ratio{false};
-	bool is_pressed_from_center{false};
+	Mode mode{Mode::Measurements};
 
-	std::vector<std::unique_ptr<Measurement>> frozen_measurements;
+	double ratio{1.1};
+	bool is_fixed_ratio{false};
+	bool is_from_center{false};
+
+	bool show_guides{true};
+	
+	std::vector<std::unique_ptr<Guide>> guides;
+	std::vector<std::unique_ptr<Measurement>> measurements;
 	std::unique_ptr<Measurement> draft_measurement;
+	Guide* active_guide = nullptr;
 	Measurement* active_measurement = nullptr;
 
 	explicit AppState(Config& cfg) : config(cfg) {}

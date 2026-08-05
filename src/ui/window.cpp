@@ -1,5 +1,6 @@
 #include "ui/window.hpp"
 #include <gtk4-layer-shell.h>
+#include "core/types.hpp"
 #include "ui/shortcuts.hpp"
 #include "ui/ui.hpp"
 
@@ -44,8 +45,8 @@ static void on_motion(
 			m.apply_modifiers(
 				state->lmb.initial_p1,
 				Point{x, y},
-				state->is_pressed_from_center,
-				state->is_pressed_fixed_ratio,
+				state->is_from_center,
+				state->is_fixed_ratio,
 				state->ratio
 			);
 		}
@@ -139,7 +140,20 @@ static void on_draw(
 			? &it->second
 			: state->config.current_color_scheme
 	;
-	for (const auto& m : state->frozen_measurements) {
+	if (state->show_guides) {
+		for (const auto& g : state->guides) {
+			draw_guide(
+				cr,
+				*g,
+				width,
+				height,
+				state->active_guide == g.get()
+					? state->config.current_color_scheme->highlight
+					: state->config.current_color_scheme->guide
+			);
+		}
+	}
+	for (const auto& m : state->measurements) {
 		draw_measurement(
 			cr,
 			*m,

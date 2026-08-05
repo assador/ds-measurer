@@ -26,7 +26,7 @@ void draw_cursor(
 	int screen_h,
 	const Color& color
 ) {
-	if (!c.is_visible) return;
+	if (!c.show) return;
 
 	cairo_set_line_width(cr, 1.0);
 	set_cairo_color(cr, color);
@@ -69,6 +69,30 @@ void draw_grid(
 	cairo_stroke(cr);
 }
 
+// SEC Guide
+
+void draw_guide(
+	cairo_t* cr,
+	const Guide& g,
+	int screen_w,
+	int screen_h,
+	const Color& color
+) {
+	cairo_set_line_width(cr, 1.0);
+	set_cairo_color(cr, color);
+
+	double px = coord_to_pixel(g.position);
+
+	if (g.orientation == Orientation::Horizontal) {
+		cairo_move_to(cr, 0, px);
+		cairo_line_to(cr, screen_w, px);
+	} else if (g.orientation == Orientation::Vertical) {
+		cairo_move_to(cr, px, 0);
+		cairo_line_to(cr, px, screen_h);
+	}
+	cairo_stroke(cr);
+}
+
 // SEC Measurement
 
 void draw_measurement(
@@ -92,7 +116,7 @@ void draw_measurement(
 
 	// SEC Hypot and arc
 
-	if (m.is_hypot_visible) {
+	if (m.show_hypot) {
 		// hypot
 		set_cairo_color(cr, colors.main);
 		cairo_move_to(cr, coord_to_pixel(m.start.x), coord_to_pixel(m.start.y));
@@ -127,21 +151,21 @@ void draw_measurement(
 	TextOffset offset;
 
 	if (m.end.x >= m.start.x) {
-		align.h = TextAlignH::LEFT; align.hr = TextAlignH::RIGHT;
+		align.h = TextAlignH::Left; align.hr = TextAlignH::Right;
 		offset.h = 5.0;
 	} else {
-		align.h = TextAlignH::RIGHT; align.hr = TextAlignH::LEFT;
+		align.h = TextAlignH::Right; align.hr = TextAlignH::Left;
 		offset.h = -5.0;
 	}
 	if (m.end.y >= m.start.y) {
-		align.v = TextAlignV::BOTTOM; align.vr = TextAlignV::TOP;
+		align.v = TextAlignV::Bottom; align.vr = TextAlignV::Top;
 		offset.v = 5.0;
 	} else {
-		align.v = TextAlignV::TOP; align.vr = TextAlignV::BOTTOM;
+		align.v = TextAlignV::Top; align.vr = TextAlignV::Bottom;
 		offset.v = -5.0;
 	}
 
-	if (m.is_hypot_visible) {
+	if (m.show_hypot) {
 		// hypot length
 		std::string hypot_str = std::to_string(static_cast<int>(m.length()));
 		set_cairo_color(cr, colors.text_main);
@@ -154,8 +178,8 @@ void draw_measurement(
 
 	// width / height
 	set_cairo_color(cr, colors.text_basic);
-	draw_label(cr, std::to_string(m.width()), cx, m.end.y + offset.v, TextAlignH::CENTER, align.vr);
-	draw_label(cr, std::to_string(m.height()), m.end.x + offset.h, cy, align.h, TextAlignV::MIDDLE);
+	draw_label(cr, std::to_string(m.width()), cx, m.end.y + offset.v, TextAlignH::Center, align.vr);
+	draw_label(cr, std::to_string(m.height()), m.end.x + offset.h, cy, align.h, TextAlignV::Middle);
 
 	// coords of start / end points
 	std::string coords_start_str = std::to_string(m.start.x) + ", " + std::to_string(m.start.y);
@@ -178,6 +202,6 @@ void draw_measurement(
 	// SEC Grids
 
 	for (const auto& [_, grid] : m.grids) {
-		draw_grid(cr, grid, x_min, y_min, x_max - x_min, y_max - y_min, colors.basic);
+		draw_grid(cr, grid, x_min, y_min, x_max - x_min, y_max - y_min, colors.guide);
 	}
 }

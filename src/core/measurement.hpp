@@ -15,7 +15,7 @@ public:
 	Point start;
 	Point end;
 	Grids grids;
-	bool is_hypot_visible{true};
+	bool show_hypot{true};
 
 	Measurement(Point p1, Point p2, const SelectionGuides& guides = SelectionGuides{});
 
@@ -56,33 +56,34 @@ public:
 	}
 
 	void apply_modifiers(
-		const Point& source,
-		const Point& target,
+		const Point& i_start,
+		const Point& i_end,
 		bool from_center,
 		bool fixed_ratio,
 		double ratio
 	) {
 		if (fixed_ratio) {
-			double dx = target.x - source.x;
-			double dy = target.y - source.y;
+			double dx = i_end.x - i_start.x;
+			double dy = i_end.y - i_start.y;
 			double abs_dx = std::abs(dx);
 			double abs_dy = std::abs(dy);
 
 			if (abs_dx >= abs_dy) {
-				end.x = source.x + static_cast<int>(std::copysign(abs_dy * ratio, dx));
-				end.y = target.y;
+				end.x = i_start.x + static_cast<int>(std::copysign(abs_dy * ratio, dx));
+				end.y = i_end.y;
 			} else {
-				end.x = target.x;
-				end.y = source.y + static_cast<int>(std::copysign(abs_dx / ratio, dy));
+				end.x = i_end.x;
+				end.y = i_start.y + static_cast<int>(std::copysign(abs_dx / ratio, dy));
 			}
 		} else {
-			end = target;
+			end = i_end;
 		}
 		if (from_center) {
-			start.x = source.x * 2 - end.x;
-			start.y = source.y * 2 - end.y;
+			// with the end already calculated 
+			start.x = i_start.x * 2 - end.x;
+			start.y = i_start.y * 2 - end.y;
 		} else {
-			start = source;
+			start = i_start;
 		}
 	}
 };

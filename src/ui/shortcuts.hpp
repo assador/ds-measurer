@@ -1,6 +1,7 @@
 #pragma once
 
 #include <glib.h>
+#include "config/config.hpp"
 #include "core/app.hpp"
 
 class ShortcutManager {

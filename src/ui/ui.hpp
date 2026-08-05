@@ -3,6 +3,7 @@
 #include <cairo.h>
 #include "core/cursor.hpp"
 #include "core/grid.hpp"
+#include "core/guide.hpp"
 #include "core/measurement.hpp"
 #include "core/types.hpp"
 
@@ -21,6 +22,15 @@ void draw_grid(
 	int x, int y, int w, int h,
 	const Color& color
 );
+
+void draw_guide(
+	cairo_t* cr,
+	const Guide& g,
+	int screen_w,
+	int screen_h,
+	const Color& color
+);
+
 void draw_measurement(
 	cairo_t* cr,
 	const Measurement& m,
@@ -40,8 +50,8 @@ inline void draw_label(
 	const std::string& text,
 	double x,
 	double y,
-	TextAlignH halign = TextAlignH::LEFT,
-	TextAlignV valign = TextAlignV::BASELINE
+	TextAlignH halign = TextAlignH::Left,
+	TextAlignV valign = TextAlignV::Baseline
 ) {
 	cairo_text_extents_t extents;
 	cairo_text_extents(cr, text.c_str(), &extents);
@@ -50,27 +60,27 @@ inline void draw_label(
 	double ry = y;
 
 	switch (halign) {
-		case TextAlignH::CENTER:
+		case TextAlignH::Center:
 			rx -= (extents.width / 2.0 + extents.x_bearing);
 			break;
-		case TextAlignH::RIGHT:
+		case TextAlignH::Right:
 			rx -= (extents.width + extents.x_bearing);
 			break;
-		case TextAlignH::LEFT:
+		case TextAlignH::Left:
 			rx -= extents.x_bearing;
 			break;
 	}
 	switch (valign) {
-		case TextAlignV::MIDDLE:
+		case TextAlignV::Middle:
 			ry -= (extents.height / 2.0 + extents.y_bearing);
 			break;
-		case TextAlignV::BOTTOM:
+		case TextAlignV::Bottom:
 			ry -= (extents.height + extents.y_bearing);
 			break;
-		case TextAlignV::TOP:
+		case TextAlignV::Top:
 			ry -= extents.y_bearing;
 			break;
-		case TextAlignV::BASELINE:
+		case TextAlignV::Baseline:
 			break;
 	}
 

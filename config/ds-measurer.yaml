@@ -22,8 +22,10 @@ shortcuts:
    reset ratio:        backslash
    screenshot:         s
    segment line:       z
-   select measurement: Tab
+   select:             Tab
+   show guides:        g
    snap to guides:     p
+   toggle mode:        m
 aspect ratio shortcuts:
    q: "1"
    w: "4 / 3"
@@ -46,42 +48,48 @@ colors:
    default:
       main:       { r: 0,    g: 0.5,  b: 1,    a: 0.5  }
       basic:      { r: 0,    g: 0,    b: 0,    a: 0.25 }
-      guide:      { r: 0.45, g: 0.72, b: 0,    a: 0.33 }
+      guide:      { r: 0,    g: 0,    b: 0,    a: 0.15 }
+      highlight:  { r: 0,    g: 0.5,  b: 1,    a: 1    }
       text main:  { r: 0,    g: 0.5,  b: 1,    a: 0.6  }
       text basic: { r: 0,    g: 0,    b: 0,    a: 0.75 }
       text faded: { r: 0,    g: 0,    b: 0,    a: 0.4  }
    dark:
       main:       { r: 0.2,  g: 0.6,  b: 1,    a: 0.5  }
       basic:      { r: 1,    g: 1,    b: 1,    a: 0.25 }
-      guide:      { r: 0.45, g: 0.72, b: 0,    a: 0.33 }
+      guide:      { r: 1,    g: 1,    b: 1,    a: 0.15 }
+      highlight:  { r: 0.2,  g: 0.6,  b: 1,    a: 1    }
       text main:  { r: 0.2,  g: 0.6,  b: 1,    a: 0.6  }
       text basic: { r: 1,    g: 1,    b: 1,    a: 0.75 }
       text faded: { r: 1,    g: 1,    b: 1,    a: 0.4  }
    white:
       main:       { r: 1,    g: 1,    b: 1,    a: 0.8  }
       basic:      { r: 1,    g: 1,    b: 1,    a: 0.5  }
-      guide:      { r: 1,    g: 1,    b: 1,    a: 0.4  }
+      guide:      { r: 1,    g: 1,    b: 1,    a: 0.3  }
+      highlight:  { r: 1,    g: 1,    b: 1,    a: 1    }
       text main:  { r: 1,    g: 1,    b: 1,    a: 0.9  }
       text basic: { r: 1,    g: 1,    b: 1,    a: 0.75 }
       text faded: { r: 1,    g: 1,    b: 1,    a: 0.5  }
    black:
       main:       { r: 0,    g: 0,    b: 0,    a: 0.8  }
       basic:      { r: 0,    g: 0,    b: 0,    a: 0.5  }
-      guide:      { r: 0,    g: 0,    b: 0,    a: 0.4  }
+      guide:      { r: 0,    g: 0,    b: 0,    a: 0.3  }
+      highlight:  { r: 0,    g: 0,    b: 0,    a: 1    }
       text main:  { r: 0,    g: 0,    b: 0,    a: 0.9  }
       text basic: { r: 0,    g: 0,    b: 0,    a: 0.75 }
       text faded: { r: 0,    g: 0,    b: 0,    a: 0.5  }
    matrix:
       main:       { r: 0,    g: 1,    b: 0,    a: 0.8  }
       basic:      { r: 0,    g: 1,    b: 0,    a: 0.5  }
-      guide:      { r: 0,    g: 1,    b: 0,    a: 0.4  }
+      guide:      { r: 0,    g: 1,    b: 0,    a: 0.3  }
+      highlight:  { r: 0,    g: 1,    b: 0,    a: 0.8  }
       text main:  { r: 0,    g: 1,    b: 0,    a: 0.9  }
       text basic: { r: 0,    g: 1,    b: 0,    a: 0.75 }
       text faded: { r: 0,    g: 1,    b: 0,    a: 0.5  }
    highlight:
       main:       { r: 1,    g: 0.23, b: 0,    a: 0.8  }
       basic:      { r: 1,    g: 0.23, b: 0,    a: 0.5  }
-      guide:      { r: 1,    g: 0.23, b: 0,    a: 0.4  }
+      guide:      { r: 1,    g: 0.23, b: 0,    a: 0.3  }
+      highlight:  { r: 1,    g: 0.23, b: 0,    a: 1    }
       text main:  { r: 1,    g: 0.23, b: 0,    a: 0.9  }
       text basic: { r: 1,    g: 0.23, b: 0,    a: 0.75 }
       text faded: { r: 1,    g: 0.23, b: 0,    a: 0.5  }

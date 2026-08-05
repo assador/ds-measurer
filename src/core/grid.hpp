@@ -1,6 +1,6 @@
 #pragma once
 
-#include "config/config.hpp"
+#include "core/types.hpp"
 
 class Grid {
 public:
