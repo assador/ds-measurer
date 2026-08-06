@@ -19,6 +19,7 @@ int run_application(int argc, char** argv, AppState& state, Config& config) {
 		G_CALLBACK(+[](GtkApplication* app, gpointer user_data) {
 			auto* state = static_cast<AppState*>(user_data);
 			state->config.load_from_file(resolve_config_path());
+			state->apply_from_config();
 			ShortcutManager::init(state->config);
 			setup_main_window(app, *state, state->config);
 		}),

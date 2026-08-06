@@ -105,12 +105,21 @@ static gboolean on_legacy_event(
 
 		if (button == GDK_BUTTON_PRIMARY) {
 			state->lmb.is_dragging = false;
+
 			check_and_process(state);
 			gtk_widget_queue_draw(widget);
 			return GDK_EVENT_STOP;
 		}
 		else if (button == GDK_BUTTON_SECONDARY) {
 			state->rmb.is_dragging = false;
+
+			if (state->lmb.is_dragging && state->active_measurement) {
+				auto& m = *state->active_measurement;
+				state->lmb.click_pos = state->cursor.pos;
+				state->lmb.initial_p1 = m.start;
+				state->lmb.initial_p2 = m.end;
+			}
+
 			check_and_process(state);
 			gtk_widget_queue_draw(widget);
 			return GDK_EVENT_STOP;
@@ -138,7 +147,7 @@ static void on_draw(
 	const ColorScheme* highlight_theme =
 		(it != state->config.color_schemes.end())
 			? &it->second
-			: state->config.current_color_scheme
+			: state->color_scheme
 	;
 	if (state->show_guides) {
 		for (const auto& g : state->guides) {
@@ -148,8 +157,8 @@ static void on_draw(
 				width,
 				height,
 				state->active_guide == g.get()
-					? state->config.current_color_scheme->highlight
-					: state->config.current_color_scheme->guide
+					? state->color_scheme->highlight
+					: state->color_scheme->guide
 			);
 		}
 	}
@@ -159,13 +168,13 @@ static void on_draw(
 			*m,
 			state->active_measurement == m.get()
 				? *highlight_theme
-				: *state->config.current_color_scheme
+				: *state->color_scheme
 		);
 	}
 	if (state->draft_measurement) {
-		draw_measurement(cr, *state->draft_measurement, *state->config.current_color_scheme);
+		draw_measurement(cr, *state->draft_measurement, *state->color_scheme);
 	}
-	draw_cursor(cr, state->cursor, width, height, state->config.current_color_scheme->basic);
+	draw_cursor(cr, state->cursor, width, height, state->color_scheme->basic);
 }
 
 static gboolean on_key_pressed(

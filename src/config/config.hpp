@@ -10,18 +10,17 @@ using SelectionGuides = std::unordered_map<uint32_t, SelectionGuideRule>;
 using ColorSchemes = std::unordered_map<std::string, ColorScheme>;
 using ThemeNames = std::unordered_map<uint32_t, std::string>;
 
+struct ScreenshotConfig {
+	std::string target{"both"};
+	std::string format{"png"};
+	std::string file_pattern{"~/screenshot_%Y_%m_%d_%H_%M_%S.png"};
+};
+
 std::string resolve_config_path();
 
 class Config {
 public:
-	std::string selection_mode{"inner"};
 	int snap_distance{10};
-
-	struct ScreenshotConfig {
-		std::string target{"both"};
-		std::string format{"png"};
-		std::string file_pattern{"~/screenshot_%Y_%m_%d_%H_%M_%S.png"};
-	} screenshot;
 
 	Keybindings keys;
 	AspectRatios ratios;
@@ -29,7 +28,7 @@ public:
 	ColorSchemes color_schemes;
 	ThemeNames theme_names;
 
-	ColorScheme* current_color_scheme = nullptr;
+	ScreenshotConfig screenshot;
 
 	bool load_from_file(const std::string& filepath);
 };

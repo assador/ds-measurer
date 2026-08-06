@@ -68,9 +68,6 @@ bool Config::load_from_file(const std::string& filepath) {
 	try {
 		YAML::Node doc = YAML::LoadFile(filepath);
 
-		if (doc["common"]["selection mode"]) {
-			selection_mode = doc["common"]["selection mode"].as<std::string>();
-		}
 		if (doc["guides"]["snap distance"]) {
 			snap_distance = doc["guides"]["snap distance"].as<int>();
 		}
@@ -131,11 +128,6 @@ bool Config::load_from_file(const std::string& filepath) {
 				parse_theme(node.second, scheme);
 				color_schemes[key] = scheme;
 			}
-		}
-		if (auto it = color_schemes.find("default"); it != color_schemes.end()) {
-			current_color_scheme = &it->second;
-		} else if (!color_schemes.empty()) {
-			current_color_scheme = &color_schemes.begin()->second;
 		}
 
 		return true;

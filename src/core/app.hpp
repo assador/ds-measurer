@@ -9,8 +9,6 @@
 #include "core/measurement.hpp"
 #include "core/types.hpp"
 
-enum class Mode : std::uint8_t { Measurements, Guides, Count };
-
 struct MouseState {
 	bool is_dragging{false};
 	Point click_pos;
@@ -38,12 +36,23 @@ struct AppState {
 	Guide* active_guide = nullptr;
 	Measurement* active_measurement = nullptr;
 
+	ColorScheme* color_scheme = nullptr;
+
 	explicit AppState(Config& cfg) : config(cfg) {}
 
 	std::function<void()> request_draw;
 	void queue_draw() const {
 		if (request_draw) request_draw();
 	}
+
+	void apply_from_config() {
+		if (auto it = config.color_schemes.find("default"); it != config.color_schemes.end()) {
+			color_scheme = &it->second;
+		} else if (!config.color_schemes.empty()) {
+			color_scheme = &config.color_schemes.begin()->second;
+		}
+	};
+
 	void request_quit();
 };
 

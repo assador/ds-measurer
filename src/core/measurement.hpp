@@ -19,23 +19,34 @@ public:
 
 	Measurement(Point p1, Point p2, const SelectionGuides& guides = SelectionGuides{});
 
-	int width() const { return std::abs(end.x - start.x) + 1; }
-	int height() const { return std::abs(end.y - start.y) + 1; }
-	double length() const { return start.distance_to(end); }
+	int width(bool greedy = false) const {
+		return std::abs(end.x - start.x) + (greedy ? 1 : 0);
+	}
 
-	double angle() const {
-		return std::atan2(height(), width());
+	int height(bool greedy = false) const {
+		return std::abs(end.y - start.y) + (greedy ? 1 : 0);
 	}
-	double angle_deg() const {
-		return angle() * 180.0 / M_PI;
+
+	double length(bool greedy = false) const {
+		return std::hypot(width(greedy), height(greedy));
 	}
-	std::pair<int, int> aspect_ratio() const {
-		int w = width();
-		int h = height();
+
+	double angle(bool greedy = false) const {
+		return std::atan2(height(greedy), width(greedy));
+	}
+
+	double angle_deg(bool greedy = false) const {
+		return angle(greedy) * 180.0 / M_PI;
+	}
+
+	std::pair<int, int> aspect_ratio(bool greedy = false) const {
+		int w = width(greedy);
+		int h = height(greedy);
 		if (w == 0 || h == 0) return {w, h};
 		int g = std::gcd(w, h);
 		return {w / g, h / g};
 	}
+
 	void move_by(int dx, int dy) {
 		start.x += dx;
 		start.y += dy;

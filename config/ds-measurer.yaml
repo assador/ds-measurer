@@ -1,5 +1,3 @@
-common:
-   selection mode: inner
 guides:
    snap distance: 10
 screenshot:
@@ -7,25 +5,25 @@ screenshot:
    format: png
    file:   ~/screenshot_%Y_%m_%d_%H_%M_%S.png
 shortcuts:
-   clear all:          j
-   clear last:         BackSpace
-   clear:              Delete
-   copy values:        space
-   fixed ratio:        Shift_L
-   freeze:             f
-   from center:        Control_L
-   guide horizontal:   bracketleft
-   guide vertical:     bracketright
-   only mask:          question
-   quit:               Escape
-   relax:              grave
-   reset ratio:        backslash
-   screenshot:         s
-   segment line:       z
-   select:             Tab
-   show guides:        g
-   snap to guides:     p
-   toggle mode:        m
+   clear all:             j
+   clear last:            BackSpace
+   clear:                 Delete
+   copy values:           space
+   fixed ratio:           Shift_L
+   freeze:                f
+   from center:           Control_L
+   guide horizontal:      bracketleft
+   guide vertical:        bracketright
+   only mask:             question
+   quit:                  Escape
+   relax:                 grave
+   reset ratio:           backslash
+   screenshot:            s
+   segment line:          z
+   select:                Tab
+   show guides:           g
+   snap to guides:        p
+   toggle mode:           m
 aspect ratio shortcuts:
    q: "1"
    w: "4 / 3"

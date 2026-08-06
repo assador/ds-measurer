@@ -37,8 +37,8 @@ void draw_measurement(
 	const ColorScheme& colors
 );
 
-inline double coord_to_pixel(int coord) {
-	return static_cast<double>(coord) + 0.5;
+inline double coord_to_pixel(double coord) {
+	return coord + 0.5;
 }
 
 inline void set_cairo_color(cairo_t* cr, const Color& color) {

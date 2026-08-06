@@ -9,6 +9,8 @@ enum class Orientation : std::uint8_t { Horizontal, Vertical };
 enum class TextAlignH : std::uint8_t { Left, Center, Right };
 enum class TextAlignV : std::uint8_t { Top, Baseline, Middle, Bottom };
 
+enum class Mode : std::uint8_t { Measurements, Guides, Count };
+
 struct Color {
 	double r{0.0};
 	double g{0.0};

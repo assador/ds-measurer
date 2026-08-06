@@ -188,7 +188,7 @@ void ShortcutManager::init(const Config& config) {
 				auto it = state.config.color_schemes.find(theme_name);
 				it != state.config.color_schemes.end()
 			) {
-				state.config.current_color_scheme = &it->second;
+				state.color_scheme = &it->second;
 				state.queue_draw();
 			}
 		});

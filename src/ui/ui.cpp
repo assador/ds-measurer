@@ -57,14 +57,14 @@ void draw_grid(
 	set_cairo_color(cr, color);
 
 	for (double rx : g.rule.x) {
-		int px = static_cast<int>(std::round(x + w * rx));
-		cairo_move_to(cr, coord_to_pixel(px), y);
-		cairo_line_to(cr, coord_to_pixel(px), y + h);
+		double px = coord_to_pixel(std::round(x + w * rx));
+		cairo_move_to(cr, px, coord_to_pixel(y));
+		cairo_line_to(cr, px, coord_to_pixel(y + h));
 	}
 	for (double ry : g.rule.y) {
-		int py = static_cast<int>(std::round(y + h * ry));
-		cairo_move_to(cr, x, coord_to_pixel(py));
-		cairo_line_to(cr, x + w, coord_to_pixel(py));
+		double py = coord_to_pixel(std::round(y + h * ry));
+		cairo_move_to(cr, coord_to_pixel(x), py);
+		cairo_line_to(cr, coord_to_pixel(x + w), py);
 	}
 	cairo_stroke(cr);
 }
@@ -114,22 +114,6 @@ void draw_measurement(
 	if (dx < 0 && dy < 0) phi += 2 * M_PI;
 	double base = (dx >= 0) ? 0.0 : M_PI;
 
-	// SEC Hypot and arc
-
-	if (m.show_hypot) {
-		// hypot
-		set_cairo_color(cr, colors.main);
-		cairo_move_to(cr, coord_to_pixel(m.start.x), coord_to_pixel(m.start.y));
-		cairo_line_to(cr, coord_to_pixel(m.end.x), coord_to_pixel(m.end.y));
-		cairo_stroke(cr);
-		// arc
-		if (m.width() > 20) {
-			set_cairo_color(cr, colors.basic);
-			cairo_arc(cr, m.start.x, m.start.y, 20, std::min(base, phi), std::max(base, phi));
-			cairo_stroke(cr);
-		}
-	}
-
 	// SEC Bounding box
 
 	set_cairo_color(cr, colors.basic);
@@ -141,6 +125,22 @@ void draw_measurement(
 		y_max - y_min
 	);
 	cairo_stroke(cr);
+
+	// SEC Hypot and arc
+
+	if (m.show_hypot) {
+		// hypot
+		set_cairo_color(cr, colors.main);
+		cairo_move_to(cr, coord_to_pixel(m.start.x), coord_to_pixel(m.start.y));
+		cairo_line_to(cr, coord_to_pixel(m.end.x), coord_to_pixel(m.end.y));
+		cairo_stroke(cr);
+		// arc
+		if (m.width(true) > 20) {
+			set_cairo_color(cr, colors.basic);
+			cairo_arc(cr, m.start.x, m.start.y, 20, std::min(base, phi), std::max(base, phi));
+			cairo_stroke(cr);
+		}
+	}
 
 	// SEC Labels
 
@@ -167,23 +167,29 @@ void draw_measurement(
 
 	if (m.show_hypot) {
 		// hypot length
-		std::string hypot_str = std::to_string(static_cast<int>(m.length()));
+		std::string hypot_str = std::to_string(static_cast<int>(m.length(true)));
 		set_cairo_color(cr, colors.text_main);
 		draw_label(cr, hypot_str, cx + offset.h, cy - offset.v, align.h, align.v);
 		// angle
-		std::string angle_str = std::format("{:.6g} °", m.angle_deg());
+		std::string angle_str = std::format("{:.6g} °", m.angle_deg(true));
 		set_cairo_color(cr, colors.text_basic);
 		draw_label(cr, angle_str, m.start.x + offset.h, m.start.y - offset.v, align.h, align.v);
 	}
 
 	// width / height
 	set_cairo_color(cr, colors.text_basic);
-	draw_label(cr, std::to_string(m.width()), cx, m.end.y + offset.v, TextAlignH::Center, align.vr);
-	draw_label(cr, std::to_string(m.height()), m.end.x + offset.h, cy, align.h, TextAlignV::Middle);
+	draw_label(cr, std::to_string(m.width(true)), cx, m.end.y + offset.v, TextAlignH::Center, align.vr);
+	draw_label(cr, std::to_string(m.height(true)), m.end.x + offset.h, cy, align.h, TextAlignV::Middle);
 
 	// coords of start / end points
-	std::string coords_start_str = std::to_string(m.start.x) + ", " + std::to_string(m.start.y);
-	std::string coords_end_str = std::to_string(m.end.x) + ", " + std::to_string(m.end.y);
+	std::string coords_start_str =
+		std::to_string(m.start.x + (dx < 0 ? 1 : 0)) + ", " +
+		std::to_string(m.start.y + (dy < 0 ? 1 : 0))
+	;
+	std::string coords_end_str =
+		std::to_string(m.end.x + (dx >= 0 ? 1 : 0)) + ", " +
+		std::to_string(m.end.y + (dy >= 0 ? 1 : 0))
+	;
 
 	set_cairo_color(cr, colors.text_faded);
 	draw_label(cr, coords_start_str, m.start.x - offset.h, m.start.y - offset.v, align.hr, align.v);
