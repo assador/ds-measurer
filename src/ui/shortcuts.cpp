@@ -37,28 +37,29 @@ void ShortcutManager::init(const Config& config) {
 		}
 	};
 
-	add("quit", [](AppState& state) { state.request_quit(); });
+	add("clear", [](AppState& state) { state.clear_active(); });
+	add("clear_all", [](AppState& state) { state.clear_all(); });
+	add("clear_last", [](AppState& state) { state.clear_last(); });
+	add("fixed_ratio", [](AppState& state, bool is_pressed) { state.set_fixed_ratio(is_pressed); });
 	add("freeze", [](AppState& state) { state.freeze_draft(); });
+	add("from_center", [](AppState& state, bool is_pressed) { state.set_from_center(is_pressed); });
 	add("guide_horizontal", [](AppState& state) { state.add_guide(Orientation::Horizontal); });
 	add("guide_vertical", [](AppState& state) { state.add_guide(Orientation::Vertical); });
-	add("toggle_mode", [](AppState& state) { ++state.mode; });
-	add("select", [](AppState& state) { state.cycle_active(1); });
-	add("clear", [](AppState& state) { state.clear_active(); });
-	add("clear_last", [](AppState& state) { state.clear_last(); });
-	add("clear_all", [](AppState& state) { state.clear_all(); });
+	add("quit", [](AppState& state) { state.request_quit(); });
 	add("relax", [](AppState& state) { state.relax(); });
 	add("segment_line", [](AppState& state) { state.toggle_hypot_of_active(); });
-	add("fixed_ratio", [](AppState& state, bool is_pressed) { state.set_fixed_ratio(is_pressed); });
-	add("from_center", [](AppState& state, bool is_pressed) { state.set_from_center(is_pressed); });
+	add("select", [](AppState& state) { state.cycle_active(1); });
+	add("snap_to_guides", [](AppState& state) { state.snap_to_guides = !state.snap_to_guides; });
+	add("toggle_mode", [](AppState& state) { ++state.mode; });
 
-	for (const auto& [kc, ratio] : config.ratios) {
-		add_binding(kc, [ratio](AppState& state) {
-			state.set_ratio(ratio);
-		});
-	}
 	for (const auto& [kc, theme_name] : config.theme_names) {
 		add_binding(kc, [theme_name](AppState& state) {
 			state.set_color_scheme(theme_name);
+		});
+	}
+	for (const auto& [kc, ratio] : config.ratios) {
+		add_binding(kc, [ratio](AppState& state) {
+			state.set_ratio(ratio);
 		});
 	}
 	for (const auto& [kc, rule] : config.guides) {

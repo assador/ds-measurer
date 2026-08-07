@@ -47,6 +47,12 @@ public:
 		return {w / g, h / g};
 	}
 
+	void toggle_grid(uint32_t kc) {
+		auto it = grids.find(kc);
+		if (it == grids.end()) return;
+		it->second.rule.show = !it->second.rule.show;
+	}
+
 	void move_by(int dx, int dy) {
 		start.x += dx;
 		start.y += dy;
@@ -58,12 +64,6 @@ public:
 	void move_from(const Point& p1, const Point& p2, int dx, int dy) {
 		start = Point{p1.x + dx, p1.y + dy};
 		end = Point{p2.x + dx, p2.y + dy};
-	}
-
-	void toggle_grid(uint32_t kc) {
-		auto it = grids.find(kc);
-		if (it == grids.end()) return;
-		it->second.rule.show = !it->second.rule.show;
 	}
 
 	void apply_modifiers(

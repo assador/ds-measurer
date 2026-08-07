@@ -42,10 +42,14 @@ static void on_motion(
 			int dx = static_cast<int>(x) - state->rmb.click_pos.x;
 			int dy = static_cast<int>(y) - state->rmb.click_pos.y;
 			m.move_from(state->rmb.initial_p1, state->rmb.initial_p2, dx, dy);
+			state->snap_active_translation();
 		} else if (state->lmb.is_dragging) {
+			Point target_pos = state->get_snapped_pos(
+				Point{static_cast<int>(x), static_cast<int>(y)}
+			);
 			m.apply_modifiers(
 				state->lmb.initial_p1,
-				Point{x, y},
+				target_pos,
 				state->is_from_center,
 				state->is_fixed_ratio,
 				state->ratio
@@ -81,9 +85,12 @@ static gboolean on_legacy_event(
 			state->lmb.click_pos = Point{static_cast<int>(x), static_cast<int>(y)};
 
 			if (!state->active_measurement) {
+				Point target_pos = state->get_snapped_pos(
+					Point{static_cast<int>(x), static_cast<int>(y)}
+				);
 				state->draft_measurement = std::make_unique<Measurement>(
-					Point{x, y},
-					Point{x, y},
+					target_pos,
+					target_pos,
 					state->config.guides
 				);
 				state->active_measurement = state->draft_measurement.get();

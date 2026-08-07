@@ -29,6 +29,7 @@ struct AppState {
 	bool is_from_center{false};
 
 	bool show_guides{true};
+	bool snap_to_guides{true};
 	
 	std::vector<std::unique_ptr<Guide>> guides;
 	std::vector<std::unique_ptr<Measurement>> measurements;
@@ -157,6 +158,41 @@ struct AppState {
 		if (!active_measurement) return;
 		active_measurement->toggle_grid(kc);
 		queue_draw();
+	}
+
+	[[nodiscard]] Point get_snapped_pos(Point initial) const {
+		if (!snap_to_guides || guides.empty()) return initial;
+
+		int dist = config.snap_distance;
+		if (dist <= 0) return initial;
+		Point snapped = initial;
+
+		for (const auto& g : guides) {
+			if (g->orientation == Orientation::Horizontal) {
+				if (std::abs(initial.y - g->position) <= dist) snapped.y = g->position;
+			} else if (g->orientation == Orientation::Vertical) {
+				if (std::abs(initial.x - g->position) <= dist) snapped.x = g->position;
+			}
+		}
+		return snapped;
+	}
+
+	void snap_active_translation() {
+		if (!snap_to_guides || guides.empty() || !active_measurement) return;
+
+		auto& m = *active_measurement;
+		int snap_dx = 0;
+		int snap_dy = 0;
+
+		Point snapped_start = get_snapped_pos(m.start);
+		if (snapped_start.x != m.start.x) snap_dx = snapped_start.x - m.start.x;
+		if (snapped_start.y != m.start.y) snap_dy = snapped_start.y - m.start.y;
+
+		Point snapped_end = get_snapped_pos(m.end);
+		if (snap_dx == 0 && snapped_end.x != m.end.x) snap_dx = snapped_end.x - m.end.x;
+		if (snap_dy == 0 && snapped_end.y != m.end.y) snap_dy = snapped_end.y - m.end.y;
+
+		if (snap_dx != 0 || snap_dy != 0)  m.move_by(snap_dx, snap_dy);
 	}
 
 	std::function<void()> request_draw;
