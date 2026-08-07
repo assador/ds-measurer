@@ -1,5 +1,6 @@
 #include "ui/window.hpp"
 #include <gtk4-layer-shell.h>
+#include "core/app.hpp"
 #include "core/types.hpp"
 #include "ui/shortcuts.hpp"
 #include "ui/ui.hpp"
@@ -52,6 +53,13 @@ static void on_motion(
 		}
 	}
 	gtk_widget_queue_draw(widget);
+}
+
+static gboolean on_scroll(GtkEventControllerScroll*, double /*dx*/, double dy, gpointer user_data) {
+	auto* state = static_cast<AppState*>(user_data);
+	state->cycle_active((dy > 0) ? 1 : -1);
+	state->queue_draw();
+	return GDK_EVENT_STOP;
 }
 
 static gboolean on_legacy_event(
@@ -238,6 +246,10 @@ void setup_main_window(
 	GtkEventController* motion_controller = gtk_event_controller_motion_new();
 	g_signal_connect(motion_controller, "motion", G_CALLBACK(on_motion), &state);
 	gtk_widget_add_controller(drawing_area, motion_controller);
+
+	GtkEventController* scroll_controller = gtk_event_controller_scroll_new(GTK_EVENT_CONTROLLER_SCROLL_VERTICAL);
+	g_signal_connect(scroll_controller, "scroll", G_CALLBACK(on_scroll), &state);
+	gtk_widget_add_controller(drawing_area, scroll_controller);
 
 	GtkEventController* legacy_controller = gtk_event_controller_legacy_new();
 	g_signal_connect(legacy_controller, "event", G_CALLBACK(on_legacy_event), &state);
