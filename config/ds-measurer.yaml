@@ -1,11 +1,12 @@
 common:
    show diagonal: yes
+   copy format: "⤢ {w} × {h} / {l} | ⦟ {a}° | ⇱ [{x1}, {y1}] | ⇲ [{x2}, {y2}]"
 guides:
    snap distance: 10
 screenshot:
    target: both
    format: png
-   file:   ~/screenshot_%Y_%m_%d_%H_%M_%S.png
+   file:   "~/screenshot_%Y_%m_%d_%H_%M_%S.png"
 shortcuts:
    clear all:        j
    clear last:       BackSpace

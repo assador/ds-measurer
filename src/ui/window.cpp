@@ -61,7 +61,7 @@ static void on_motion(
 static gboolean on_scroll(GtkEventControllerScroll*, double /*dx*/, double dy, gpointer user_data) {
 	auto* state = static_cast<AppState*>(user_data);
 	state->cycle_active((dy > 0) ? 1 : -1);
-	state->queue_draw();
+	state->redraw();
 	return GDK_EVENT_STOP;
 }
 
@@ -240,8 +240,14 @@ void setup_main_window(
 
 	GdkDisplay* display = gdk_display_get_default();
 	GtkWidget* drawing_area = gtk_drawing_area_new();
+	GdkClipboard* clipboard = gdk_display_get_clipboard(display);
 
-	state.request_draw = [drawing_area]() { gtk_widget_queue_draw(drawing_area); };
+	state.request_redraw = [drawing_area]() {
+		gtk_widget_queue_draw(drawing_area);
+	};
+	state.request_text_to_clipboard = [clipboard](const std::string& text) {
+		gdk_clipboard_set_text(clipboard, text.c_str());
+	};
 
 	gtk_window_set_child(GTK_WINDOW(window), drawing_area);
 	gtk_drawing_area_set_draw_func(GTK_DRAWING_AREA(drawing_area), on_draw, &state, nullptr);

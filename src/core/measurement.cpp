@@ -1,4 +1,5 @@
 #include "core/measurement.hpp"
+#include <format>
 
 Measurement::Measurement(
 	Point p1,
@@ -65,4 +66,33 @@ void Measurement::apply_modifiers(
 	} else {
 		start = i_start;
 	}
+}
+
+std::string Measurement::values_string(std::string_view fmt) const {
+	std::string result(fmt);
+
+	auto replace = [&result](std::string_view tag, const auto& val) {
+		std::string tag_str(tag);
+		size_t pos = 0;
+		std::string val_str;
+		if constexpr (std::is_floating_point_v<std::decay_t<decltype(val)>>) {
+			val_str = std::format("{:.6g}", val);
+		} else {
+			val_str = std::to_string(val);
+		}
+		while ((pos = result.find(tag_str, pos)) != std::string::npos) {
+			result.replace(pos, tag_str.length(), val_str);
+			pos += val_str.length();
+		}
+	};
+	replace("{w}", width(true));
+	replace("{h}", height(true));
+	replace("{l}", length(true));
+	replace("{a}", angle_deg(true));
+	replace("{x1}", start.x + (end.x < start.x ? 1 : 0));
+	replace("{y1}", start.y + (end.y < start.y ? 1 : 0));
+	replace("{x2}", end.x + (end.x < start.x ? 0 : 1));
+	replace("{y2}", end.y + (end.y < start.y ? 0 : 1));
+
+	return result;
 }

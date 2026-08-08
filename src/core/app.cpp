@@ -22,7 +22,7 @@ void AppState::set_color_scheme(const std::string& name) {
 		it != config.color_schemes.end()
 	) {
 		color_scheme = &it->second;
-		queue_draw();
+		redraw();
 	}
 }
 
@@ -31,7 +31,7 @@ void AppState::add_guide(Orientation orient) {
 		orient == Orientation::Vertical ? cursor.pos.x : cursor.pos.y,
 		orient
 	));
-	queue_draw();
+	redraw();
 }
 
 void AppState::clear_active() {
@@ -40,7 +40,7 @@ void AppState::clear_active() {
 	} else {
 		clear_container_active(measurements, active_measurement);
 	}
-	queue_draw();
+	redraw();
 }
 
 void AppState::clear_all() {
@@ -52,7 +52,7 @@ void AppState::clear_all() {
 		active_measurement = nullptr;
 		draft_measurement.reset();
 	}
-	queue_draw();
+	redraw();
 }
 
 void AppState::clear_last() {
@@ -61,7 +61,12 @@ void AppState::clear_last() {
 	} else {
 		clear_container_last(measurements, active_measurement);
 	}
-	queue_draw();
+	redraw();
+}
+
+void AppState::copy_values(Measurement* m) {
+	if (!m) return;
+	text_to_clipboard(m->values_string(config.copy_format));
 }
 
 void AppState::cycle_active(int step) {
@@ -70,13 +75,13 @@ void AppState::cycle_active(int step) {
 	} else {
 		cycle_container_active(measurements, active_measurement, step);
 	}
-	queue_draw();
+	redraw();
 }
 
 void AppState::freeze_draft() {
 	if (draft_measurement) {
 		measurements.push_back(std::make_unique<Measurement>(*draft_measurement));
-		queue_draw();
+		redraw();
 	}
 }
 
@@ -87,7 +92,7 @@ void AppState::relax() {
 		active_measurement = nullptr;
 		draft_measurement.reset();
 	}
-	queue_draw();
+	redraw();
 }
 
 // SEC Actions on active objects and modifiers
@@ -117,7 +122,7 @@ void AppState::redraw_measurement_with_modifiers(Measurement& m) {
 		is_fixed_ratio,
 		ratio
 	);
-	queue_draw();
+	redraw();
 }
 
 void AppState::set_fixed_ratio(bool is_pressed) {
@@ -161,13 +166,13 @@ void AppState::snap_active_translation() {
 void AppState::toggle_grids_of_active(uint32_t kc) {
 	if (!active_measurement) return;
 	active_measurement->toggle_grid(kc);
-	queue_draw();
+	redraw();
 }
 
 void AppState::toggle_diagonal_of_active() {
 	if (!active_measurement) return;
 	active_measurement->show_diagonal = !active_measurement->show_diagonal;
-	queue_draw();
+	redraw();
 }
 
 int run_application(int argc, char** argv, AppState& state, Config& config) {

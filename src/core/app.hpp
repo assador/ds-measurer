@@ -41,10 +41,15 @@ struct AppState {
 
 	explicit AppState(Config& cfg) : config(cfg) {}
 
-	std::function<void()> request_draw;
-	void queue_draw() const {
-		if (request_draw) request_draw();
+	std::function<void()> request_redraw;
+	void redraw() const {
+		if (request_redraw) request_redraw();
 	}
+	std::function<void(const std::string&)> request_text_to_clipboard;
+	void text_to_clipboard(const std::string& text) const {
+		if (request_text_to_clipboard) request_text_to_clipboard(text);
+	}
+
 	void request_quit();
 
 	void apply_from_config();
@@ -54,6 +59,7 @@ struct AppState {
 	void clear_active();
 	void clear_all();
 	void clear_last();
+	void copy_values(Measurement* m);
 	void cycle_active(int step = 1);
 	void freeze_draft();
 	void relax();

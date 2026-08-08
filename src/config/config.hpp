@@ -22,6 +22,7 @@ class Config {
 public:
 	bool show_diagonal{true};
 	int snap_distance{10};
+	std::string copy_format{"{w} × {h}"};
 
 	Keybindings keys;
 	AspectRatios ratios;

@@ -71,6 +71,9 @@ bool Config::load_from_file(const std::string& filepath) {
 		if (doc["common"]["show diagonal"]) {
 			show_diagonal = doc["common"]["show diagonal"].as<bool>();
 		}
+		if (doc["common"]["copy format"]) {
+			copy_format = doc["common"]["copy format"].as<std::string>();
+		}
 		if (doc["guides"]["snap distance"]) {
 			snap_distance = doc["guides"]["snap distance"].as<int>();
 		}

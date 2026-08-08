@@ -67,4 +67,5 @@ public:
 		bool fixed_ratio,
 		double ratio
 	);
+	std::string values_string(std::string_view fmt = "{w} × {h}") const;
 };
