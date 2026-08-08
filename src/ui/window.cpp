@@ -1,6 +1,5 @@
 #include "ui/window.hpp"
 #include <gtk4-layer-shell.h>
-#include "core/app.hpp"
 #include "core/types.hpp"
 #include "ui/shortcuts.hpp"
 #include "ui/ui.hpp"
@@ -91,6 +90,7 @@ static gboolean on_legacy_event(
 				state->draft_measurement = std::make_unique<Measurement>(
 					target_pos,
 					target_pos,
+					MeasurementOptions{ .show_diagonal = state->config.show_diagonal },
 					state->config.guides
 				);
 				state->active_measurement = state->draft_measurement.get();
@@ -252,6 +252,7 @@ void setup_main_window(
 
 	GtkEventController* motion_controller = gtk_event_controller_motion_new();
 	g_signal_connect(motion_controller, "motion", G_CALLBACK(on_motion), &state);
+	g_signal_connect(motion_controller, "enter", G_CALLBACK(on_motion), &state);
 	gtk_widget_add_controller(drawing_area, motion_controller);
 
 	GtkEventController* scroll_controller = gtk_event_controller_scroll_new(GTK_EVENT_CONTROLLER_SCROLL_VERTICAL);

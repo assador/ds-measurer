@@ -20,6 +20,7 @@ std::string resolve_config_path();
 
 class Config {
 public:
+	bool show_diagonal{true};
 	int snap_distance{10};
 
 	Keybindings keys;

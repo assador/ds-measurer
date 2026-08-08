@@ -128,8 +128,8 @@ void draw_measurement(
 
 	// SEC Hypot and arc
 
-	if (m.show_hypot) {
-		// hypot
+	if (m.show_diagonal) {
+		// diagonal
 		set_cairo_color(cr, colors.main);
 		cairo_move_to(cr, coord_to_pixel(m.start.x), coord_to_pixel(m.start.y));
 		cairo_line_to(cr, coord_to_pixel(m.end.x), coord_to_pixel(m.end.y));
@@ -165,11 +165,11 @@ void draw_measurement(
 		offset.v = -5.0;
 	}
 
-	if (m.show_hypot) {
-		// hypot length
-		std::string hypot_str = std::to_string(static_cast<int>(m.length(true)));
+	if (m.show_diagonal) {
+		// diagonal length
+		std::string diagonal_str = std::to_string(static_cast<int>(m.length(true)));
 		set_cairo_color(cr, colors.text_main);
-		draw_label(cr, hypot_str, cx + offset.h, cy - offset.v, align.h, align.v);
+		draw_label(cr, diagonal_str, cx + offset.h, cy - offset.v, align.h, align.v);
 		// angle
 		std::string angle_str = std::format("{:.6g} °", m.angle_deg(true));
 		set_cairo_color(cr, colors.text_basic);

@@ -68,6 +68,9 @@ bool Config::load_from_file(const std::string& filepath) {
 	try {
 		YAML::Node doc = YAML::LoadFile(filepath);
 
+		if (doc["common"]["show diagonal"]) {
+			show_diagonal = doc["common"]["show diagonal"].as<bool>();
+		}
 		if (doc["guides"]["snap distance"]) {
 			snap_distance = doc["guides"]["snap distance"].as<int>();
 		}

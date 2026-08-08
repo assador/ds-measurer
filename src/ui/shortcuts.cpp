@@ -1,8 +1,6 @@
 #include "ui/shortcuts.hpp"
 #include <cstdint>
 #include <vector>
-#include "config/config.hpp"
-#include "core/app.hpp"
 #include "core/utils.hpp"
 #include "core/types.hpp"
 
@@ -47,7 +45,7 @@ void ShortcutManager::init(const Config& config) {
 	add("guide_vertical", [](AppState& state) { state.add_guide(Orientation::Vertical); });
 	add("quit", [](AppState& state) { state.request_quit(); });
 	add("relax", [](AppState& state) { state.relax(); });
-	add("segment_line", [](AppState& state) { state.toggle_hypot_of_active(); });
+	add("toggle_diagonal", [](AppState& state) { state.toggle_diagonal_of_active(); });
 	add("select", [](AppState& state) { state.cycle_active(1); });
 	add("snap_to_guides", [](AppState& state) { state.snap_to_guides = !state.snap_to_guides; });
 	add("toggle_mode", [](AppState& state) { ++state.mode; });
