@@ -49,6 +49,10 @@ struct AppState {
 	void text_to_clipboard(const std::string& text) const {
 		if (request_text_to_clipboard) request_text_to_clipboard(text);
 	}
+	std::function<void(int x, int y, int w, int h)> request_screenshot_to_clipboard;
+	void screenshot_to_clipboard(int x, int y, int w, int h) const {
+		if (request_screenshot_to_clipboard) request_screenshot_to_clipboard(x, y, w, h);
+	}
 
 	void request_quit();
 
@@ -63,6 +67,7 @@ struct AppState {
 	void cycle_active(int step = 1);
 	void freeze_draft();
 	void relax();
+	void screenshot(Measurement* m);
 
 	[[nodiscard]] Point get_snapped_pos(Point initial) const;
 	void redraw_measurement_with_modifiers(Measurement& m);

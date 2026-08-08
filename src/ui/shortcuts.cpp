@@ -47,6 +47,7 @@ void ShortcutManager::init(const Config& config) {
 	add("quit", [](AppState& state) { state.request_quit(); });
 	add("relax", [](AppState& state) { state.relax(); });
 	add("toggle_diagonal", [](AppState& state) { state.toggle_diagonal_of_active(); });
+	add("screenshot", [](AppState& state) { state.screenshot(state.active_measurement); });
 	add("select", [](AppState& state) { state.cycle_active(1); });
 	add("snap_to_guides", [](AppState& state) { state.snap_to_guides = !state.snap_to_guides; });
 	add("toggle_mode", [](AppState& state) { ++state.mode; });

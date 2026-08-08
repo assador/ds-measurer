@@ -1,6 +1,6 @@
 common:
    show diagonal: yes
-   copy format: "⤢ {w} × {h} / {l} | ⦟ {a}° | ⇱ [{x1}, {y1}] | ⇲ [{x2}, {y2}]"
+   copy format: "{w} × {h} / {l}\n{a}°\n[{x1}, {y1}]\n[{x2}, {y2}]"
 guides:
    snap distance: 10
 screenshot:

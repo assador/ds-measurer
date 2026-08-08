@@ -41,6 +41,13 @@ struct Point {
 	}
 };
 
+struct Rect {
+	int x{0};
+	int y{0};
+	int w{0};
+	int h{0};
+};
+
 struct SelectionGuideRule {
 	std::vector<double> x;
 	std::vector<double> y;

@@ -1,6 +1,7 @@
 #include "ui/window.hpp"
 #include <gtk4-layer-shell.h>
 #include "core/types.hpp"
+#include "platform/screenshot.hpp"
 #include "ui/shortcuts.hpp"
 #include "ui/ui.hpp"
 
@@ -247,6 +248,9 @@ void setup_main_window(
 	};
 	state.request_text_to_clipboard = [clipboard](const std::string& text) {
 		gdk_clipboard_set_text(clipboard, text.c_str());
+	};
+	state.request_screenshot_to_clipboard = [window](int x, int y, int w, int h) {
+		platform::region_to_clipboard(GTK_WINDOW(window), x, y, w, h);
 	};
 
 	gtk_window_set_child(GTK_WINDOW(window), drawing_area);

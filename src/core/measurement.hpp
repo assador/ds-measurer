@@ -48,6 +48,20 @@ public:
 		return angle(greedy) * 180.0 / M_PI;
 	}
 
+	Rect normalized_rect(bool greedy = false) const {
+		int min_x = std::min(start.x, end.x);
+		int max_x = std::max(start.x, end.x);
+		int min_y = std::min(start.y, end.y);
+		int max_y = std::max(start.y, end.y);
+		int offset = greedy ? 1 : 0;
+		return Rect{
+			.x = min_x,
+			.y = min_y,
+			.w = (max_x - min_x) + offset,
+			.h = (max_y - min_y) + offset,
+		};
+	}
+
 	std::pair<int, int> aspect_ratio(bool greedy = false) const {
 		int w = width(greedy);
 		int h = height(greedy);

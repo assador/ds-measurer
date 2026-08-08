@@ -95,6 +95,12 @@ void AppState::relax() {
 	redraw();
 }
 
+void AppState::screenshot(Measurement* m) {
+	if (!m) return;
+	auto r = m->normalized_rect(true);
+	screenshot_to_clipboard(r.x, r.y, r.w, r.h);
+}
+
 // SEC Actions on active objects and modifiers
 
 [[nodiscard]] Point AppState::get_snapped_pos(Point initial) const {
