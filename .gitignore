@@ -1,6 +1,7 @@
 # Build directory & artifacts
 build/
 build_opt/
+build_wlr/
 bin/
 out/
 
