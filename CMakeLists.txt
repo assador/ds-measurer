@@ -5,8 +5,8 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-option(ENABLE_WLR_SCREENCOPY "Enable wlr-screencopy protocol support (wlroots)" OFF)
-option(ENABLE_KDE_SCREENSHOT "Enable org.kde.KWin.ScreenShot2 support (KDE Plasma)" ON)
+option(ENABLE_WLR_SCREENCOPY "Enable wlr-screencopy protocol support (wlroots)" ON)
+option(ENABLE_KDE_SCREENSHOT "Enable org.kde.KWin.ScreenShot2 support (KDE Plasma)" OFF)
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(GTK4 REQUIRED gtk4)

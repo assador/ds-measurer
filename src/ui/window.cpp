@@ -222,12 +222,16 @@ void setup_main_window(
 	GtkCssProvider* provider = gtk_css_provider_new();
 	gtk_css_provider_load_from_string(
 		provider,
-		"window, contents { background-color: transparent; }"
+		"window, window.background, contents, drawingarea {\n"
+		"  background-color: transparent;\n"
+		"  background-image: none;\n"
+		"  box-shadow: none;\n"
+		"}"
 	);
 	gtk_style_context_add_provider_for_display(
 		gdk_display_get_default(),
 		GTK_STYLE_PROVIDER(provider),
-		GTK_STYLE_PROVIDER_PRIORITY_APPLICATION
+		GTK_STYLE_PROVIDER_PRIORITY_USER + 100
 	);
 	g_object_unref(provider);
 
@@ -239,6 +243,8 @@ void setup_main_window(
 	gtk_layer_set_anchor(GTK_WINDOW(window), GTK_LAYER_SHELL_EDGE_LEFT, TRUE);
 	gtk_layer_set_anchor(GTK_WINDOW(window), GTK_LAYER_SHELL_EDGE_RIGHT, TRUE);
 
+	gtk_layer_set_exclusive_zone(GTK_WINDOW(window), -1);
+	
 	GdkDisplay* display = gdk_display_get_default();
 	GtkWidget* drawing_area = gtk_drawing_area_new();
 	GdkClipboard* clipboard = gdk_display_get_clipboard(display);
