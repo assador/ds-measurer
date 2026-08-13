@@ -1,21 +1,7 @@
 #include "ui/ui.hpp"
+#include "core/types.hpp"
 #include <format>
 #include <string>
-
-void set_label(
-	cairo_t* cr,
-	const TextStyle& style
-) {
-	set_cairo_color(cr, style.color);
-
-	cairo_select_font_face(
-		cr,
-		style.font_family.c_str(),
-		CAIRO_FONT_SLANT_NORMAL,
-		CAIRO_FONT_WEIGHT_NORMAL
-	);
-	cairo_set_font_size(cr, style.font_size);
-}
 
 // SEC Cursor
 
@@ -98,7 +84,8 @@ void draw_guide(
 void draw_measurement(
 	cairo_t* cr,
 	const Measurement& m,
-	const ColorScheme& colors
+	const ColorScheme& colors,
+	const TextStyle& text_style
 ) {
 	cairo_set_line_width(cr, 1.0);
 
@@ -164,6 +151,7 @@ void draw_measurement(
 		align.v = TextAlignV::Top; align.vr = TextAlignV::Bottom;
 		offset.v = -5.0;
 	}
+	set_label(cr, text_style);
 
 	if (m.show_diagonal) {
 		// diagonal length

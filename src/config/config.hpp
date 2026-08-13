@@ -20,9 +20,10 @@ std::string resolve_config_path();
 
 class Config {
 public:
+	std::string copy_format{"{w} × {h}"};
 	bool show_diagonal{true};
 	int snap_distance{10};
-	std::string copy_format{"{w} × {h}"};
+	TextStyle text_style = {.font_family = "Sans", .font_size = 10.0};
 
 	Keybindings keys;
 	AspectRatios ratios;

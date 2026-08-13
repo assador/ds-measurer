@@ -185,10 +185,16 @@ static void on_draw(
 			state->active_measurement == m.get()
 				? *highlight_theme
 				: *state->color_scheme
+			,
+			state->config.text_style
 		);
 	}
 	if (state->draft_measurement) {
-		draw_measurement(cr, *state->draft_measurement, *state->color_scheme);
+		draw_measurement(
+			cr, *state->draft_measurement,
+			*state->color_scheme,
+			state->config.text_style
+		);
 	}
 	draw_cursor(cr, state->cursor, width, height, state->color_scheme->basic);
 }

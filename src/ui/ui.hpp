@@ -7,8 +7,6 @@
 #include "core/measurement.hpp"
 #include "core/types.hpp"
 
-void set_label(cairo_t* cr, const TextStyle& style);
-
 void draw_cursor(
 	cairo_t* cr,
 	const Cursor& c,
@@ -34,7 +32,8 @@ void draw_guide(
 void draw_measurement(
 	cairo_t* cr,
 	const Measurement& m,
-	const ColorScheme& colors
+	const ColorScheme& colors,
+	const TextStyle& text_style
 );
 
 inline double coord_to_pixel(double coord) {
@@ -43,6 +42,26 @@ inline double coord_to_pixel(double coord) {
 
 inline void set_cairo_color(cairo_t* cr, const Color& color) {
 	cairo_set_source_rgba(cr, color.r, color.g, color.b, color.a);
+}
+
+inline void set_label(
+	cairo_t* cr,
+	const TextStyle& style
+) {
+	cairo_font_options_t* font_opts = cairo_font_options_create();
+	cairo_get_font_options(cr, font_opts);
+	cairo_font_options_set_antialias(font_opts, CAIRO_ANTIALIAS_GRAY);
+	cairo_font_options_set_subpixel_order(font_opts, CAIRO_SUBPIXEL_ORDER_DEFAULT);
+	cairo_set_font_options(cr, font_opts);
+	cairo_font_options_destroy(font_opts);
+
+	cairo_select_font_face(
+		cr,
+		style.font_family.c_str(),
+		CAIRO_FONT_SLANT_NORMAL,
+		CAIRO_FONT_WEIGHT_NORMAL
+	);
+	cairo_set_font_size(cr, style.font_size);
 }
 
 inline void draw_label(

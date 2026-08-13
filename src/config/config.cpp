@@ -68,11 +68,17 @@ bool Config::load_from_file(const std::string& filepath) {
 	try {
 		YAML::Node doc = YAML::LoadFile(filepath);
 
-		if (doc["common"]["show diagonal"]) {
-			show_diagonal = doc["common"]["show diagonal"].as<bool>();
-		}
 		if (doc["common"]["copy format"]) {
 			copy_format = doc["common"]["copy format"].as<std::string>();
+		}
+		if (doc["common"]["font family"]) {
+			text_style.font_family = doc["common"]["font family"].as<std::string>();
+		}
+		if (doc["common"]["font size"]) {
+			text_style.font_size = doc["common"]["font size"].as<double>();
+		}
+		if (doc["common"]["show diagonal"]) {
+			show_diagonal = doc["common"]["show diagonal"].as<bool>();
 		}
 		if (doc["guides"]["snap distance"]) {
 			snap_distance = doc["guides"]["snap distance"].as<int>();
