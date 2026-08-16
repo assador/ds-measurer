@@ -18,6 +18,14 @@ namespace platform::wayland {
 
 namespace {
 
+struct ScreencopyFrame {
+	std::vector<uint8_t> pixels;
+	int width{0};
+	int height{0};
+	uint32_t stride{0};
+	uint32_t format{0};
+};
+
 struct ScreencopyData {
 	bool done{false};
 	bool failed{false};
@@ -47,11 +55,7 @@ static const struct zwlr_screencopy_frame_v1_listener frame_listener = {
 		}
 	,
 	.flags =
-		[](
-			void*,
-			struct zwlr_screencopy_frame_v1*,
-			uint32_t
-		) {}
+		[](void*, struct zwlr_screencopy_frame_v1*, uint32_t) {}
 	,
 	.ready =
 		[](
@@ -94,46 +98,47 @@ static const struct zwlr_screencopy_frame_v1_listener frame_listener = {
 		) {}
 	,
 	.buffer_done =
-		[](
-			void*,
-			struct zwlr_screencopy_frame_v1*
-		) {}
+		[](void*, struct zwlr_screencopy_frame_v1*) {}
 	,
 };
 
-} // namespace
+wl_output* get_wl_output_from_window(
+	GdkDisplay* display,
+	GtkWindow* window
+) {
+	GdkSurface* surface = gtk_native_get_surface(GTK_NATIVE(window));
+	GdkMonitor* gdk_mon =
+		surface ? gdk_display_get_monitor_at_surface(display, surface) : nullptr
+	;
+	if (!gdk_mon) {
+		GListModel* monitors = gdk_display_get_monitors(display);
+		if (!monitors || g_list_model_get_n_items(monitors) == 0) return nullptr;
+		gdk_mon = GDK_MONITOR(g_list_model_get_item(monitors, 0));
+	} else {
+		g_object_ref(gdk_mon);
+	}
+	wl_output* output = gdk_wayland_monitor_get_wl_output(gdk_mon);
+	g_object_unref(gdk_mon);
+	return output;
+}
 
-bool region_to_clipboard(
+std::optional<ScreencopyFrame> capture_region_raw(
 	GtkWindow* window,
 	int x,
 	int y,
 	int width,
 	int height
 ) {
-	if (width <= 0 || height <= 0) return false;
+	if (width <= 0 || height <= 0) return std::nullopt;
 
 	GdkDisplay* display = gdk_display_get_default();
-	if (!display) return false;
+	if (!display) return std::nullopt;
 
 	wl_display* wl_disp = gdk_wayland_display_get_wl_display(display);
-	if (!wl_disp) return false;
+	if (!wl_disp) return std::nullopt;
 
-	GdkSurface* surface = gtk_native_get_surface(GTK_NATIVE(window));
-	GdkMonitor* gdk_mon = nullptr;
-
-	if (surface) gdk_mon = gdk_display_get_monitor_at_surface(display, surface);
-	if (!gdk_mon) {
-		GListModel* monitors = gdk_display_get_monitors(display);
-		if (!monitors || g_list_model_get_n_items(monitors) == 0) return false;
-		gdk_mon = GDK_MONITOR(g_list_model_get_item(monitors, 0));
-	} else {
-		g_object_ref(gdk_mon);
-	}
-
-	wl_output* output = gdk_wayland_monitor_get_wl_output(gdk_mon);
-	g_object_unref(gdk_mon);
-
-	if (!output) return false;
+	wl_output* output = get_wl_output_from_window(display, window);
+	if (!output) return std::nullopt;
 
 	static zwlr_screencopy_manager_v1* screencopy_mgr = nullptr;
 	static wl_shm* wayland_shm = nullptr;
@@ -168,23 +173,19 @@ bool region_to_clipboard(
 					}
 				}
 			,
-			.global_remove = [](void*, wl_registry*, uint32_t) {}
+			.global_remove =
+				[](
+					void*,
+					wl_registry*,
+					uint32_t
+				) {}
+			,
 		};
 		wl_registry_add_listener(registry, &registry_listener, nullptr);
 		wl_display_roundtrip(wl_disp);
 		wl_registry_destroy(registry);
 	}
-	if (!screencopy_mgr || !wayland_shm) {
-		g_warning("wlr-screencopy protocol or wl_shm is not supported!");
-		return false;
-	}
-
-	gtk_widget_set_visible(GTK_WIDGET(window), FALSE);
-	while (g_main_context_pending(nullptr)) {
-		g_main_context_iteration(nullptr, FALSE);
-	}
-
-	wl_display_roundtrip(wl_disp);
+	if (!screencopy_mgr || !wayland_shm) return std::nullopt;
 
 	zwlr_screencopy_frame_v1* frame =
 		zwlr_screencopy_manager_v1_capture_output_region(
@@ -199,40 +200,37 @@ bool region_to_clipboard(
 	while (!data.stride && !data.failed) {
 		g_main_context_iteration(nullptr, TRUE);
 	}
-
 	if (data.failed || data.stride == 0) {
 		zwlr_screencopy_frame_v1_destroy(frame);
-		gtk_widget_set_visible(GTK_WIDGET(window), TRUE);
-		return false;
+		return std::nullopt;
 	}
 
 	data.size = data.stride * static_cast<size_t>(data.height);
 	int fd = utils::create_shm_file(data.size);
 	if (fd < 0) {
 		zwlr_screencopy_frame_v1_destroy(frame);
-		gtk_widget_set_visible(GTK_WIDGET(window), TRUE);
-		return false;
+		return std::nullopt;
 	}
-
 	data.pixels = mmap(nullptr, data.size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
 	if (data.pixels == MAP_FAILED) {
-		data.pixels = nullptr;
 		close(fd);
 		zwlr_screencopy_frame_v1_destroy(frame);
-		gtk_widget_set_visible(GTK_WIDGET(window), TRUE);
-		return false;
+		return std::nullopt;
 	}
 
-	wl_shm_pool* pool =
-		wl_shm_create_pool(
-			wayland_shm, fd, static_cast<int32_t>(data.size)
-		)
-	;
-	wl_buffer* buffer =
-		wl_shm_pool_create_buffer(
-			pool, 0, data.width, data.height, static_cast<int32_t>(data.stride), data.format
-		)
-	;
+	wl_shm_pool* pool = wl_shm_create_pool(
+		wayland_shm,
+		fd,
+		static_cast<int32_t>(data.size)
+	);
+	wl_buffer* buffer = wl_shm_pool_create_buffer(
+		pool,
+		0,
+		data.width,
+		data.height,
+		static_cast<int32_t>(data.stride),
+		data.format
+	);
 	wl_shm_pool_destroy(pool);
 	close(fd);
 
@@ -243,58 +241,92 @@ bool region_to_clipboard(
 		g_main_context_iteration(nullptr, TRUE);
 	}
 
-	if (data.done) {
-		g_printerr("[WLR] Screencopy successful! Size: %dx%d\n", data.width, data.height);
-	} else if (data.failed) {
-		g_printerr("[WLR] Screencopy failed event received!\n");
-	}
-
-	gtk_widget_set_visible(GTK_WIDGET(window), TRUE);
-
-	bool success = false;
+	std::optional<ScreencopyFrame> result;
 	if (data.done && data.pixels) {
-		std::vector<uint8_t> pixel_data(data.size);
-		std::memcpy(pixel_data.data(), data.pixels, data.size);
-
-		munmap(data.pixels, data.size);
-		data.pixels = nullptr;
-
-		size_t bytes_per_pixel = data.stride / static_cast<size_t>(data.width);
-
-		GdkMemoryFormat mem_fmt = GDK_MEMORY_DEFAULT;
-
-		if (bytes_per_pixel == 3) {
-			if (data.format == 0) {
-				mem_fmt = GDK_MEMORY_R8G8B8;
-			} else {
-				mem_fmt = GDK_MEMORY_B8G8R8;
-			}
-		} else {
-			if (data.format == 0x34325241 || data.format == 0x34325258) {
-				mem_fmt = GDK_MEMORY_R8G8B8A8_PREMULTIPLIED;
-			} else if (data.format == 1 || data.format == 0) {
-				mem_fmt = GDK_MEMORY_B8G8R8A8_PREMULTIPLIED;
-			}
-		}
-
-		GBytes* bytes = g_bytes_new(pixel_data.data(), pixel_data.size());
-
-		GdkTexture* texture = GDK_TEXTURE(gdk_memory_texture_new(
-			data.width, data.height, mem_fmt, bytes, static_cast<gsize>(data.stride)
-		));
-
-		if (texture) {
-			GdkClipboard* clipboard = gdk_display_get_clipboard(display);
-			gdk_clipboard_set_texture(clipboard, texture);
-			g_object_unref(texture);
-			success = true;
-		}
-		g_bytes_unref(bytes);
+		ScreencopyFrame captured;
+		captured.width = data.width;
+		captured.height = data.height;
+		captured.stride = data.stride;
+		captured.format = data.format;
+		captured.pixels.resize(data.size);
+		std::memcpy(captured.pixels.data(), data.pixels, data.size);
+		result = std::move(captured);
 	}
 
+	munmap(data.pixels, data.size);
 	wl_buffer_destroy(buffer);
 	zwlr_screencopy_frame_v1_destroy(frame);
+
+	return result;
+}
+
+} // namespace
+
+bool region_to_clipboard(GtkWindow* window, int x, int y, int width, int height) {
+	auto frame = capture_region_raw(window, x, y, width, height);
+	if (!frame) return false;
+
+	size_t bytes_per_pixel = frame->stride / static_cast<size_t>(frame->width);
+	GdkMemoryFormat mem_fmt = GDK_MEMORY_DEFAULT;
+
+	if (bytes_per_pixel == 3) {
+		mem_fmt = (frame->format == WL_SHM_FORMAT_RGB888) ? GDK_MEMORY_R8G8B8 : GDK_MEMORY_B8G8R8;
+	} else {
+		if (frame->format == 0x34325241 || frame->format == 0x34325258) {
+			mem_fmt = GDK_MEMORY_R8G8B8A8_PREMULTIPLIED;
+		}
+		else if (frame->format == WL_SHM_FORMAT_ARGB8888 || frame->format == WL_SHM_FORMAT_XRGB8888) {
+			mem_fmt = GDK_MEMORY_B8G8R8A8_PREMULTIPLIED;
+		}
+	}
+
+	GBytes* bytes = g_bytes_new(frame->pixels.data(), frame->pixels.size());
+	GdkTexture* texture = GDK_TEXTURE(gdk_memory_texture_new(
+		frame->width,
+		frame->height,
+		mem_fmt,
+		bytes,
+		static_cast<gsize>(frame->stride)
+	));
+
+	bool success = false;
+	if (texture) {
+		GdkDisplay* display = gdk_display_get_default();
+		GdkClipboard* clipboard = gdk_display_get_clipboard(display);
+		gdk_clipboard_set_texture(clipboard, texture);
+		g_object_unref(texture);
+		success = true;
+	}
+	g_bytes_unref(bytes);
+
 	return success;
+}
+
+std::optional<Color> get_pixel_color(GtkWindow* window, int x, int y) {
+	auto frame = capture_region_raw(window, x, y, 1, 1);
+	if (!frame || frame->pixels.empty()) return std::nullopt;
+
+	const auto* p = frame->pixels.data();
+	Color color;
+
+	if (frame->format == WL_SHM_FORMAT_ARGB8888 || frame->format == WL_SHM_FORMAT_XRGB8888) {
+		color.b = p[0] / 255.0;
+		color.g = p[1] / 255.0;
+		color.r = p[2] / 255.0;
+		color.a = (frame->format == WL_SHM_FORMAT_XRGB8888) ? 1.0 : (p[3] / 255.0);
+	} else if (frame->format == 0x34325241 || frame->format == 0x34325258) {
+		color.r = p[0] / 255.0;
+		color.g = p[1] / 255.0;
+		color.b = p[2] / 255.0;
+		color.a = (frame->format == 0x34325258) ? 1.0 : (p[3] / 255.0);
+	} else {
+		color.b = p[0] / 255.0;
+		color.g = p[1] / 255.0;
+		color.r = p[2] / 255.0;
+		color.a = 1.0;
+	}
+
+	return color;
 }
 
 } // namespace platform::wayland

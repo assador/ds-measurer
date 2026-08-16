@@ -13,6 +13,7 @@ shortcuts:
    clear all:        j
    clear last:       BackSpace
    clear:            Delete
+   colorshot:        d
    copy values:      space
    fixed ratio:      Shift_L
    freeze:           f

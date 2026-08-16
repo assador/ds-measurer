@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <cmath>
 #include <cstdint>
 #include <string>
@@ -18,21 +19,60 @@ struct Color {
 	double a{1.0};
 };
 
+struct ColorHSLA {
+	double h{0.0};
+	double s{0.0};
+	double l{0.0};
+	double a{1.0};
+};
+
+inline ColorHSLA rgb_to_hsl(double r, double g, double b, double a = 1.0) {
+	double max_c = std::max({r, g, b});
+	double min_c = std::min({r, g, b});
+	double delta = max_c - min_c;
+
+	double l = (max_c + min_c) / 2.0;
+	double s = 0.0;
+	double h = 0.0;
+
+	if (delta > 0.00001) {
+		s = (l <= 0.5) ? (delta / (max_c + min_c)) : (delta / (2.0 - max_c - min_c));
+
+		if (max_c == r) {
+			h = (g - b) / delta + (g < b ? 6.0 : 0.0);
+		} else if (max_c == g) {
+			h = (b - r) / delta + 2.0;
+		} else {
+			h = (r - g) / delta + 4.0;
+		}
+		h /= 6.0;
+	}
+
+	return ColorHSLA{.h = h * 360.0, .s = s, .l = l, .a = a};
+}
+
+inline ColorHSLA rgb_to_hsl(const Color& color) {
+	return rgb_to_hsl(color.r, color.g, color.b, color.a);
+}
+
 struct ColorScheme {
-	Color main{.r=0.0, .g=0.5, .b=1.0, .a=0.5};
-	Color basic{.r=0.0, .g=0.0, .b=0.0, .a=0.25};
-	Color guide{.r=0.0, .g=0.0, .b=0.0, .a=0.15};
-	Color highlight{.r=0.0, .g=0.5, .b=1.0, .a=1};
-	Color text_main{.r=0.0, .g=0.5, .b=1.0, .a=0.6};
-	Color text_basic{.r=0.0, .g=0.0, .b=0.0, .a=0.75};
-	Color text_faded{.r=0.0, .g=0.0, .b=0.0, .a=0.4};
+	Color main{.r  = 0.0, .g = 0.5, .b = 1.0, .a = 0.5};
+	Color basic{.r = 0.0, .g = 0.0, .b = 0.0, .a = 0.25};
+	Color guide{.r = 0.0, .g = 0.0, .b = 0.0, .a = 0.15};
+	Color highlight{.r = 0.0, .g = 0.5, .b = 1.0, .a = 1};
+	Color text_main{.r = 0.0, .g = 0.5, .b = 1.0, .a = 0.6};
+	Color text_basic{.r = 0.0, .g = 0.0, .b = 0.0, .a = 0.75};
+	Color text_faded{.r = 0.0, .g = 0.0, .b = 0.0, .a = 0.4};
 };
 
 struct Point {
 	int x{0};
 	int y{0};
 
-	Point(double dx, double dy) : x(static_cast<int>(dx)), y(static_cast<int>(dy)) {}
+	Point(double dx, double dy)
+		: x(static_cast<int>(std::round(dx)))
+		, y(static_cast<int>(std::round(dy)))
+	{}
 	Point(int ix, int iy) : x(ix), y(iy) {}
 	Point() = default;
 

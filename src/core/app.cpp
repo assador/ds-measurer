@@ -1,6 +1,7 @@
 #include "core/app.hpp"
 #include <gtk/gtk.h>
 #include "core/shobzaebis.hpp"
+#include "core/types.hpp"
 #include "ui/shortcuts.hpp"
 #include "ui/window.hpp"
 
@@ -99,6 +100,10 @@ void AppState::screenshot(Measurement* m) {
 	if (!m) return;
 	auto r = m->normalized_rect(true);
 	screenshot_to_clipboard(r.x, r.y, r.w, r.h);
+}
+
+void AppState::colorshot(Cursor& c) {
+	if (auto color = get_pixel_color(c.pos.x, c.pos.y)) color_to_clipboard(*color);
 }
 
 // SEC Actions on active objects and modifiers

@@ -1,5 +1,6 @@
 #include "ui/window.hpp"
 #include <gtk4-layer-shell.h>
+#include "core/color.hpp"
 #include "core/types.hpp"
 #include "platform/screenshot.hpp"
 #include "ui/shortcuts.hpp"
@@ -199,6 +200,45 @@ static void on_draw(
 	draw_cursor(cr, state->cursor, width, height, state->color_scheme->basic);
 }
 
+class ScopedOverlayHider {
+public:
+	explicit ScopedOverlayHider(GtkWindow* window, AppState* state) : window_(window), state_(state) {
+		GtkWidget* child = gtk_window_get_child(window_);
+		const bool is_drawing_area = child && GTK_IS_DRAWING_AREA(child);
+		if (is_drawing_area) {
+			drawing_area_ = GTK_DRAWING_AREA(child);
+			gtk_drawing_area_set_draw_func(
+				drawing_area_,
+				[](GtkDrawingArea*, cairo_t* cr, int, int, gpointer) {
+					cairo_save(cr);
+					cairo_set_source_rgba(cr, 0.0, 0.0, 0.0, 0.0);
+					cairo_set_operator(cr, CAIRO_OPERATOR_CLEAR);
+					cairo_paint(cr);
+					cairo_restore(cr);
+				},
+				nullptr, nullptr
+			);
+			gtk_widget_queue_draw(GTK_WIDGET(drawing_area_));
+		}
+		while (g_main_context_pending(nullptr)) {
+			g_main_context_iteration(nullptr, FALSE);
+		}
+		GdkDisplay* display = gdk_display_get_default();
+		if (display) gdk_display_flush(display);
+		g_usleep(20'000);
+	}
+	~ScopedOverlayHider() {
+		if (drawing_area_) {
+			gtk_drawing_area_set_draw_func(drawing_area_, on_draw, state_, nullptr);
+			gtk_widget_queue_draw(GTK_WIDGET(drawing_area_));
+		}
+	}
+private:
+	GtkWindow* window_;
+	AppState* state_;
+	GtkDrawingArea* drawing_area_{nullptr};
+};
+
 static gboolean on_key_pressed(
 	GtkEventControllerKey*,
 	guint,
@@ -261,8 +301,18 @@ void setup_main_window(
 	state.request_text_to_clipboard = [clipboard](const std::string& text) {
 		gdk_clipboard_set_text(clipboard, text.c_str());
 	};
-	state.request_screenshot_to_clipboard = [window](int x, int y, int w, int h) {
+	state.request_screenshot_to_clipboard = [window, &state](int x, int y, int w, int h) {
+		ScopedOverlayHider hider(GTK_WINDOW(window), &state);
 		platform::region_to_clipboard(GTK_WINDOW(window), x, y, w, h);
+	};
+	state.request_get_pixel_color = [window, &state](int x, int y) {
+		ScopedOverlayHider hider(GTK_WINDOW(window), &state);
+		return platform::get_pixel_color(GTK_WINDOW(window), x, y);
+	};
+	state.request_color_to_clipboard = [window, &state](Color& color) {
+		GdkDisplay* display = gdk_display_get_default();
+		GdkClipboard* clipboard = gdk_display_get_clipboard(display);
+		gdk_clipboard_set_text(clipboard, utils::color_to_formats_str(color).c_str());
 	};
 
 	gtk_window_set_child(GTK_WINDOW(window), drawing_area);

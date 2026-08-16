@@ -2,6 +2,7 @@
 
 #include <functional>
 #include <memory>
+#include <optional>
 #include <vector>
 #include "config/config.hpp"
 #include "core/cursor.hpp"
@@ -53,6 +54,15 @@ struct AppState {
 	void screenshot_to_clipboard(int x, int y, int w, int h) const {
 		if (request_screenshot_to_clipboard) request_screenshot_to_clipboard(x, y, w, h);
 	}
+	std::function<std::optional<Color>(int x, int y)> request_get_pixel_color;
+	[[nodiscard]] std::optional<Color> get_pixel_color(int x, int y) const {
+		if (request_get_pixel_color) return request_get_pixel_color(x, y);
+		return std::nullopt;
+	}
+	std::function<void(Color& color)> request_color_to_clipboard;
+	void color_to_clipboard(Color& color) const {
+		if (request_color_to_clipboard) request_color_to_clipboard(color);
+	}
 
 	void request_quit();
 
@@ -68,6 +78,7 @@ struct AppState {
 	void freeze_draft();
 	void relax();
 	void screenshot(Measurement* m);
+	void colorshot(Cursor& c);
 
 	[[nodiscard]] Point get_snapped_pos(Point initial) const;
 	void redraw_measurement_with_modifiers(Measurement& m);
