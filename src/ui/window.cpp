@@ -166,6 +166,19 @@ static void on_draw(
 			? &it->second
 			: state->color_scheme
 	;
+	if (state->show_color_picks) {
+		for (const auto& p : state->color_picks) {
+			draw_color_pick(
+				cr,
+				*p,
+				state->active_color_pick == p.get()
+					? *highlight_theme
+					: *state->color_scheme
+				,
+				state->config.text_style
+			);
+		}
+	}
 	if (state->show_guides) {
 		for (const auto& g : state->guides) {
 			draw_guide(
@@ -312,7 +325,7 @@ void setup_main_window(
 	state.request_color_to_clipboard = [window, &state](Color& color) {
 		GdkDisplay* display = gdk_display_get_default();
 		GdkClipboard* clipboard = gdk_display_get_clipboard(display);
-		gdk_clipboard_set_text(clipboard, utils::color_to_formats_str(color).c_str());
+		gdk_clipboard_set_text(clipboard, utils::color_to_fmt_str(color).c_str());
 	};
 
 	gtk_window_set_child(GTK_WINDOW(window), drawing_area);

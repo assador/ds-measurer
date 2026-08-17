@@ -7,6 +7,7 @@
 #include "config/config.hpp"
 #include "core/cursor.hpp"
 #include "core/guide.hpp"
+#include "core/color_pick.hpp"
 #include "core/measurement.hpp"
 #include "core/types.hpp"
 
@@ -29,12 +30,15 @@ struct AppState {
 	bool is_fixed_ratio{false};
 	bool is_from_center{false};
 
+	bool show_color_picks{true};
 	bool show_guides{true};
 	bool snap_to_guides{true};
 	
+	std::vector<std::unique_ptr<ColorPick>> color_picks;
 	std::vector<std::unique_ptr<Guide>> guides;
 	std::vector<std::unique_ptr<Measurement>> measurements;
 	std::unique_ptr<Measurement> draft_measurement;
+	ColorPick* active_color_pick = nullptr;
 	Guide* active_guide = nullptr;
 	Measurement* active_measurement = nullptr;
 
@@ -73,12 +77,13 @@ struct AppState {
 	void clear_active();
 	void clear_all();
 	void clear_last();
-	void copy_values(Measurement* m);
 	void cycle_active(int step = 1);
-	void freeze_draft();
 	void relax();
+	void copy_values(Measurement* m);
+	void copy_active_color();
+	void freeze_draft();
 	void screenshot(Measurement* m);
-	void colorshot(Cursor& c);
+	void pick_color(Cursor& c);
 
 	[[nodiscard]] Point get_snapped_pos(Point initial) const;
 	void redraw_measurement_with_modifiers(Measurement& m);

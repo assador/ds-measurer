@@ -80,6 +80,26 @@ bool Config::load_from_file(const std::string& filepath) {
 		if (doc["common"]["show diagonal"]) {
 			show_diagonal = doc["common"]["show diagonal"].as<bool>();
 		}
+		if (doc["pick color"]["target"]) {
+			const auto t = doc["pick color"]["target"].as<std::string>();
+			if (t == "clipboard") {
+				color_pick.target = ColorPickTarget::Clipboard;
+			} else if (t == "stack") {
+				color_pick.target = ColorPickTarget::Stack;
+			} else if (t == "both") {
+				color_pick.target = ColorPickTarget::Both;
+			}
+		}
+		if (doc["screenshot"]["target"]) {
+			const auto t = doc["screenshot"]["target"].as<std::string>();
+			if (t == "clipboard") {
+				screenshot.target = ScreenshotTarget::Clipboard;
+			} else if (t == "file") {
+				screenshot.target = ScreenshotTarget::File;
+			} else if (t == "both") {
+				screenshot.target = ScreenshotTarget::Both;
+			}
+		}
 		if (doc["guides"]["snap distance"]) {
 			snap_distance = doc["guides"]["snap distance"].as<int>();
 		}

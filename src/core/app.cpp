@@ -1,5 +1,6 @@
 #include "core/app.hpp"
 #include <gtk/gtk.h>
+#include "config/config.hpp"
 #include "core/shobzaebis.hpp"
 #include "core/types.hpp"
 #include "ui/shortcuts.hpp"
@@ -36,7 +37,9 @@ void AppState::add_guide(Orientation orient) {
 }
 
 void AppState::clear_active() {
-	if (mode == Mode::Guides) {
+	if (mode == Mode::ColorPicks) {
+		clear_container_active(color_picks, active_color_pick);
+	} else if (mode == Mode::Guides) {
 		clear_container_active(guides, active_guide);
 	} else {
 		clear_container_active(measurements, active_measurement);
@@ -45,7 +48,10 @@ void AppState::clear_active() {
 }
 
 void AppState::clear_all() {
-	if (mode == Mode::Guides) {
+	if (mode == Mode::ColorPicks) {
+		color_picks.clear();
+		active_color_pick = nullptr;
+	} else if (mode == Mode::Guides) {
 		guides.clear();
 		active_guide = nullptr;
 	} else {
@@ -57,10 +63,35 @@ void AppState::clear_all() {
 }
 
 void AppState::clear_last() {
-	if (mode == Mode::Guides) {
+	if (mode == Mode::ColorPicks) {
+		clear_container_last(color_picks, active_color_pick);
+	} else if (mode == Mode::Guides) {
 		clear_container_last(guides, active_guide);
 	} else {
 		clear_container_last(measurements, active_measurement);
+	}
+	redraw();
+}
+
+void AppState::cycle_active(int step) {
+	if (mode == Mode::ColorPicks) {
+		cycle_container_active(color_picks, active_color_pick, step);
+	} else if (mode == Mode::Guides) {
+		cycle_container_active(guides, active_guide, step);
+	} else {
+		cycle_container_active(measurements, active_measurement, step);
+	}
+	redraw();
+}
+
+void AppState::relax() {
+	if (mode == Mode::ColorPicks) {
+		active_color_pick = nullptr;
+	} else if (mode == Mode::Guides) {
+		active_guide = nullptr;
+	} else {
+		active_measurement = nullptr;
+		draft_measurement.reset();
 	}
 	redraw();
 }
@@ -70,13 +101,8 @@ void AppState::copy_values(Measurement* m) {
 	text_to_clipboard(m->values_string(config.copy_format));
 }
 
-void AppState::cycle_active(int step) {
-	if (mode == Mode::Guides) {
-		cycle_container_active(guides, active_guide, step);
-	} else {
-		cycle_container_active(measurements, active_measurement, step);
-	}
-	redraw();
+void AppState::copy_active_color() {
+	if (active_color_pick) text_to_clipboard(active_color_pick->fmt_str);
 }
 
 void AppState::freeze_draft() {
@@ -86,24 +112,27 @@ void AppState::freeze_draft() {
 	}
 }
 
-void AppState::relax() {
-	if (mode == Mode::Guides) {
-		active_guide = nullptr;
-	} else {
-		active_measurement = nullptr;
-		draft_measurement.reset();
-	}
-	redraw();
-}
-
 void AppState::screenshot(Measurement* m) {
 	if (!m) return;
 	auto r = m->normalized_rect(true);
-	screenshot_to_clipboard(r.x, r.y, r.w, r.h);
+	if (config.screenshot.target != ScreenshotTarget::Clipboard) {
+		// TODO Песать прямо на диськ!
+	}
+	if (config.screenshot.target != ScreenshotTarget::File) {
+		screenshot_to_clipboard(r.x, r.y, r.w, r.h);
+	}
 }
 
-void AppState::colorshot(Cursor& c) {
-	if (auto color = get_pixel_color(c.pos.x, c.pos.y)) color_to_clipboard(*color);
+void AppState::pick_color(Cursor& c) {
+	if (auto color = get_pixel_color(c.pos.x, c.pos.y)) {
+		if (config.color_pick.target != ColorPickTarget::Clipboard) {
+			color_picks.push_back(std::make_unique<ColorPick>(c.pos, *color));
+			redraw();
+		}
+		if (config.color_pick.target != ColorPickTarget::Stack) {
+			color_to_clipboard(*color);
+		}
+	}
 }
 
 // SEC Actions on active objects and modifiers

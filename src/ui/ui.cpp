@@ -3,6 +3,46 @@
 #include <format>
 #include <string>
 
+// SEC Color pick
+
+void draw_color_pick(
+	cairo_t* cr,
+	const ColorPick& p,
+	const ColorScheme& colors,
+	const TextStyle& text_style
+) {
+	cairo_set_line_width(cr, 1.0);
+
+	// SEC Cross
+
+	const double cross_size = 20;
+	const double px = coord_to_pixel(p.pos.x);
+	const double py = coord_to_pixel(p.pos.y);
+
+	set_cairo_color(cr, colors.guide);
+	cairo_move_to(cr, p.pos.x - cross_size / 2, py);
+	cairo_line_to(cr, p.pos.x + cross_size / 2, py);
+	cairo_stroke(cr);
+	cairo_move_to(cr, px, p.pos.y - cross_size / 2);
+	cairo_line_to(cr, px, p.pos.y + cross_size / 2);
+	cairo_stroke(cr);
+
+	// SEC Label
+
+	TextOffset offset;
+
+	set_label(cr, text_style);
+	set_cairo_color(cr, colors.text_faded);
+	draw_multiline_label(
+		cr,
+		p.fmt_str,
+		p.pos.x + offset.h,
+		p.pos.y + offset.v,
+		TextAlignH::Left,
+		TextAlignV::Top
+	);
+}
+
 // SEC Cursor
 
 void draw_cursor(
@@ -17,8 +57,8 @@ void draw_cursor(
 	cairo_set_line_width(cr, 1.0);
 	set_cairo_color(cr, color);
 
-	double px = coord_to_pixel(c.pos.x);
-	double py = coord_to_pixel(c.pos.y);
+	const double px = coord_to_pixel(c.pos.x);
+	const double py = coord_to_pixel(c.pos.y);
 
 	cairo_move_to(cr, 0, py);
 	cairo_line_to(cr, screen_w, py);
@@ -67,7 +107,7 @@ void draw_guide(
 	cairo_set_line_width(cr, 1.0);
 	set_cairo_color(cr, color);
 
-	double px = coord_to_pixel(g.position);
+	const double px = coord_to_pixel(g.position);
 
 	if (g.orientation == Orientation::Horizontal) {
 		cairo_move_to(cr, 0, px);
@@ -89,10 +129,10 @@ void draw_measurement(
 ) {
 	cairo_set_line_width(cr, 1.0);
 
-	int x_min = std::min(m.start.x, m.end.x);
-	int x_max = std::max(m.start.x, m.end.x);
-	int y_min = std::min(m.start.y, m.end.y);
-	int y_max = std::max(m.start.y, m.end.y);
+	const int x_min = std::min(m.start.x, m.end.x);
+	const int x_max = std::max(m.start.x, m.end.x);
+	const int y_min = std::min(m.start.y, m.end.y);
+	const int y_max = std::max(m.start.y, m.end.y);
 
 	int dx = m.end.x - m.start.x;
 	int dy = m.end.y - m.start.y;
@@ -131,8 +171,8 @@ void draw_measurement(
 
 	// SEC Labels
 
-	double cx = (m.start.x + m.end.x) / 2.0;
-	double cy = (m.start.y + m.end.y) / 2.0;
+	const double cx = (m.start.x + m.end.x) / 2.0;
+	const double cy = (m.start.y + m.end.y) / 2.0;
 
 	TextAlign align;
 	TextOffset offset;

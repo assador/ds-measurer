@@ -10,9 +10,17 @@ using SelectionGuides = std::unordered_map<uint32_t, SelectionGuideRule>;
 using ColorSchemes = std::unordered_map<std::string, ColorScheme>;
 using ThemeNames = std::unordered_map<uint32_t, std::string>;
 
+enum class ColorPickTarget : std::uint8_t { Both, Clipboard, Stack };
+enum class ScreenshotTarget : std::uint8_t { Both, Clipboard, File };
+enum class ScreenshotFormat : std::uint8_t { Png };
+
+struct ColorPickConfig {
+	ColorPickTarget target{ColorPickTarget::Both};
+};
+
 struct ScreenshotConfig {
-	std::string target{"both"};
-	std::string format{"png"};
+	ScreenshotTarget target{ScreenshotTarget::Both};
+	ScreenshotFormat format{ScreenshotFormat::Png};
 	std::string file_pattern{"~/screenshot_%Y_%m_%d_%H_%M_%S.png"};
 };
 
@@ -31,6 +39,7 @@ public:
 	ColorSchemes color_schemes;
 	ThemeNames theme_names;
 
+	ColorPickConfig color_pick;
 	ScreenshotConfig screenshot;
 
 	bool load_from_file(const std::string& filepath);

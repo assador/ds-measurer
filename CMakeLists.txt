@@ -16,6 +16,7 @@ find_package(yaml-cpp REQUIRED)
 set(SOURCES
 	src/config/config.cpp
 	src/core/app.cpp
+	src/core/color_pick.cpp
 	src/core/measurement.cpp
 	src/main.cpp
 	src/platform/screenshot.cpp

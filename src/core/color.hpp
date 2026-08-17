@@ -9,7 +9,7 @@
 
 namespace utils {
 
-inline std::string color_to_formats_str(const Color& color) {
+inline std::string color_to_fmt_str(const Color& color) {
 	ColorHSLA hsl = rgb_to_hsl(color.r, color.g, color.b);
 
 	auto to_byte = [](double v) {

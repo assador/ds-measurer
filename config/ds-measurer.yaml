@@ -5,15 +5,17 @@ common:
    show diagonal: yes
 guides:
    snap distance: 10
+pick color:
+   target: clipboard  # both | clipboard | stack
 screenshot:
-   target: both
+   target: clipboard  # both | clipboard | file
    format: png
    file:   "~/screenshot_%Y_%m_%d_%H_%M_%S.png"
 shortcuts:
    clear all:        j
    clear last:       BackSpace
    clear:            Delete
-   colorshot:        d
+   pick color:       d
    copy values:      space
    fixed ratio:      Shift_L
    freeze:           f
