@@ -100,6 +100,9 @@ bool Config::load_from_file(const std::string& filepath) {
 				screenshot.target = ScreenshotTarget::Both;
 			}
 		}
+		if (doc["screenshot"]["file"]) {
+			screenshot.file_pattern = doc["screenshot"]["file"].as<std::string>();
+		}
 		if (doc["guides"]["snap distance"]) {
 			snap_distance = doc["guides"]["snap distance"].as<int>();
 		}

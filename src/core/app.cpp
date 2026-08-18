@@ -112,17 +112,6 @@ void AppState::freeze_draft() {
 	}
 }
 
-void AppState::screenshot(Measurement* m) {
-	if (!m) return;
-	auto r = m->normalized_rect(true);
-	if (config.screenshot.target != ScreenshotTarget::Clipboard) {
-		// TODO Песать прямо на диськ!
-	}
-	if (config.screenshot.target != ScreenshotTarget::File) {
-		screenshot_to_clipboard(r.x, r.y, r.w, r.h);
-	}
-}
-
 void AppState::pick_color(Cursor& c) {
 	if (auto color = get_pixel_color(c.pos.x, c.pos.y)) {
 		if (config.color_pick.target != ColorPickTarget::Clipboard) {

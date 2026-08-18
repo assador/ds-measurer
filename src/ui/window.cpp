@@ -1,7 +1,9 @@
 #include "ui/window.hpp"
+#include <filesystem>
 #include <gtk4-layer-shell.h>
 #include "core/color.hpp"
 #include "core/types.hpp"
+#include "core/utils.hpp"
 #include "platform/screenshot.hpp"
 #include "ui/shortcuts.hpp"
 #include "ui/ui.hpp"
@@ -14,6 +16,34 @@ static void check_and_process(AppState* state) {
 		}
 		state->draft_measurement.reset();
 	}
+}
+
+bool texture_to_clipboard(GdkTexture* texture) {
+	if (!texture) return false;
+	GdkDisplay* display = gdk_display_get_default();
+	GdkClipboard* clipboard = gdk_display_get_clipboard(display);
+	gdk_clipboard_set_texture(clipboard, texture);
+	return true;
+}
+
+bool texture_to_file(GdkTexture* texture, const std::string& pattern) {
+	if (!texture || pattern.empty()) return false;
+
+	namespace fs = std::filesystem;
+	fs::path full_path = utils::expand_path_pattern(pattern);
+
+	std::error_code ec;
+	if (full_path.has_parent_path()) fs::create_directories(full_path.parent_path(), ec);
+
+	GError* error = nullptr;
+	if (!gdk_texture_save_to_png(texture, full_path.string().c_str())) {
+		if (error) {
+			g_warning("Failed to save screenshot: %s", error->message);
+			g_error_free(error);
+		}
+		return false;
+	}
+	return true;
 }
 
 static GdkCursor* create_invisible_cursor(GdkDisplay* display) {
@@ -271,14 +301,6 @@ static gboolean on_key_released(
 	return ShortcutManager::handle_key(keycode, false, *static_cast<AppState*>(user_data));
 }
 
-bool texture_to_clipboard(GdkTexture* texture) {
-	if (!texture) return false;
-	GdkDisplay* display = gdk_display_get_default();
-	GdkClipboard* clipboard = gdk_display_get_clipboard(display);
-	gdk_clipboard_set_texture(clipboard, texture);
-	return true;
-}
-
 void setup_main_window(
 	GtkApplication* app,
 	AppState& state,
@@ -322,10 +344,16 @@ void setup_main_window(
 	state.request_text_to_clipboard = [clipboard](const std::string& text) {
 		gdk_clipboard_set_text(clipboard, text.c_str());
 	};
-	state.request_screenshot_to_clipboard = [window, &state](int x, int y, int w, int h) {
+	state.request_screenshot = [window, &state](int x, int y, int w, int h) {
 		ScopedOverlayHider hider(GTK_WINDOW(window), &state);
 		if (auto texture = platform::get_region_texture(GTK_WINDOW(window), x, y, w, h)) {
-			texture_to_clipboard(texture);
+			const auto target = state.config.screenshot.target;
+			if (target != ScreenshotTarget::Clipboard) {
+				texture_to_file(texture, state.config.screenshot.file_pattern);
+			}
+			if (target != ScreenshotTarget::File) {
+				texture_to_clipboard(texture);
+			}
 			g_object_unref(texture);
 		}
 	};

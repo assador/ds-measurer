@@ -18,6 +18,7 @@ set(SOURCES
 	src/core/app.cpp
 	src/core/color_pick.cpp
 	src/core/measurement.cpp
+	src/core/utils.cpp
 	src/main.cpp
 	src/platform/screenshot.cpp
 	src/ui/shortcuts.cpp

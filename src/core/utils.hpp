@@ -43,6 +43,8 @@ inline int create_shm_file(size_t size) {
 	return fd;
 }
 
+std::string expand_path_pattern(const std::string& pattern);
+
 } // namespace utils
 
 template <utils::CountableEnum E>

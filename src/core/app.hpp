@@ -54,9 +54,11 @@ struct AppState {
 	void text_to_clipboard(const std::string& text) const {
 		if (request_text_to_clipboard) request_text_to_clipboard(text);
 	}
-	std::function<void(int x, int y, int w, int h)> request_screenshot_to_clipboard;
-	void screenshot_to_clipboard(int x, int y, int w, int h) const {
-		if (request_screenshot_to_clipboard) request_screenshot_to_clipboard(x, y, w, h);
+	std::function<void(int x, int y, int w, int h)> request_screenshot;
+	void screenshot(Measurement* m) const {
+		if (!m) return;
+		auto r = m->normalized_rect(true);
+		if (request_screenshot) request_screenshot(r.x, r.y, r.w, r.h);
 	}
 	std::function<std::optional<Color>(int x, int y)> request_get_pixel_color;
 	[[nodiscard]] std::optional<Color> get_pixel_color(int x, int y) const {
@@ -82,7 +84,6 @@ struct AppState {
 	void copy_values(Measurement* m);
 	void copy_active_color();
 	void freeze_draft();
-	void screenshot(Measurement* m);
 	void pick_color(Cursor& c);
 
 	[[nodiscard]] Point get_snapped_pos(Point initial) const;
