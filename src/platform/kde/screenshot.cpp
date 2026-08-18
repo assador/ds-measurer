@@ -38,20 +38,27 @@ std::optional<KWinFrame> capture_region_raw(int x, int y, int width, int height)
 		return std::nullopt;
 	}
 
-	GError* error = nullptr;
-	GDBusConnection* conn = g_bus_get_sync(G_BUS_TYPE_SESSION, nullptr, &error);
+	static GDBusConnection* conn = nullptr;
 	if (!conn) {
-		if (error) g_error_free(error);
-		close(mem_fd);
-		return std::nullopt;
+		GError* conn_error = nullptr;
+		conn = g_bus_get_sync(G_BUS_TYPE_SESSION, nullptr, &conn_error);
+		if (!conn) {
+			if (conn_error) {
+				g_warning("Failed to connect to session bus: %s", conn_error->message);
+				g_error_free(conn_error);
+			}
+			close(mem_fd);
+			return std::nullopt;
+		}
 	}
+
+	GError* error = nullptr;
 
 	GUnixFDList* fd_list = g_unix_fd_list_new();
 	int fd_index = g_unix_fd_list_append(fd_list, mem_fd, &error);
 	if (fd_index < 0) {
 		if (error) g_error_free(error);
 		g_object_unref(fd_list);
-		g_object_unref(conn);
 		close(mem_fd);
 		return std::nullopt;
 	}
@@ -92,13 +99,11 @@ std::optional<KWinFrame> capture_region_raw(int x, int y, int width, int height)
 			g_warning("KWin ScreenShot2 D-Bus error: %s", error->message);
 			g_error_free(error);
 		}
-		g_object_unref(conn);
 		close(mem_fd);
 		return std::nullopt;
 	}
 
 	g_variant_unref(result);
-	g_object_unref(conn);
 
 	std::optional<KWinFrame> frame;
 	void* ptr = mmap(nullptr, buffer_size, PROT_READ, MAP_SHARED, mem_fd, 0);
@@ -119,11 +124,18 @@ std::optional<KWinFrame> capture_region_raw(int x, int y, int width, int height)
 
 } // namespace
 
-bool region_to_clipboard(GtkWindow* /*window*/, int x, int y, int width, int height) {
+GdkTexture* get_region_texture(GtkWindow* /*window*/, int x, int y, int width, int height) {
 	auto frame = capture_region_raw(x, y, width, height);
-	if (!frame) return false;
+	if (!frame) return nullptr;
 
-	GBytes* bytes = g_bytes_new(frame->pixels.data(), frame->pixels.size());
+	auto data_ptr = new std::vector<uint8_t>(std::move(frame->pixels));
+
+	GBytes* bytes = g_bytes_new_with_free_func(
+		data_ptr->data(),
+		data_ptr->size(),
+		[](gpointer user_data) { delete static_cast<std::vector<uint8_t>*>(user_data); },
+		data_ptr
+	);
 	GdkTexture* texture = GDK_TEXTURE(gdk_memory_texture_new(
 		static_cast<int>(frame->width),
 		static_cast<int>(frame->height),
@@ -131,18 +143,9 @@ bool region_to_clipboard(GtkWindow* /*window*/, int x, int y, int width, int hei
 		bytes,
 		static_cast<gsize>(frame->stride)
 	));
-
-	bool success = false;
-	if (texture) {
-		GdkDisplay* display = gdk_display_get_default();
-		GdkClipboard* clipboard = gdk_display_get_clipboard(display);
-		gdk_clipboard_set_texture(clipboard, texture);
-		g_object_unref(texture);
-		success = true;
-	}
-
 	g_bytes_unref(bytes);
-	return success;
+
+	return texture;
 }
 
 std::optional<Color> get_pixel_color(GtkWindow* /*window*/, int x, int y) {
@@ -166,8 +169,8 @@ std::optional<Color> get_pixel_color(GtkWindow* /*window*/, int x, int y) {
 
 namespace platform::kde {
 
-bool region_to_clipboard(GtkWindow*, int, int, int, int) { return false; }
 std::optional<Color> get_pixel_color(GtkWindow*, int, int) { return std::nullopt; }
+GdkTexture* get_region_texture(GtkWindow*, int, int, int, int) { return nullptr; }
 
 } // namespace platform::kde
 

@@ -271,6 +271,14 @@ static gboolean on_key_released(
 	return ShortcutManager::handle_key(keycode, false, *static_cast<AppState*>(user_data));
 }
 
+bool texture_to_clipboard(GdkTexture* texture) {
+	if (!texture) return false;
+	GdkDisplay* display = gdk_display_get_default();
+	GdkClipboard* clipboard = gdk_display_get_clipboard(display);
+	gdk_clipboard_set_texture(clipboard, texture);
+	return true;
+}
+
 void setup_main_window(
 	GtkApplication* app,
 	AppState& state,
@@ -316,7 +324,10 @@ void setup_main_window(
 	};
 	state.request_screenshot_to_clipboard = [window, &state](int x, int y, int w, int h) {
 		ScopedOverlayHider hider(GTK_WINDOW(window), &state);
-		platform::region_to_clipboard(GTK_WINDOW(window), x, y, w, h);
+		if (auto texture = platform::get_region_texture(GTK_WINDOW(window), x, y, w, h)) {
+			texture_to_clipboard(texture);
+			g_object_unref(texture);
+		}
 	};
 	state.request_get_pixel_color = [window, &state](int x, int y) {
 		ScopedOverlayHider hider(GTK_WINDOW(window), &state);

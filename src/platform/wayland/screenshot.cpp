@@ -262,9 +262,9 @@ std::optional<ScreencopyFrame> capture_region_raw(
 
 } // namespace
 
-bool region_to_clipboard(GtkWindow* window, int x, int y, int width, int height) {
+GdkTexture* get_region_texture(GtkWindow* window, int x, int y, int width, int height) {
 	auto frame = capture_region_raw(window, x, y, width, height);
-	if (!frame) return false;
+	if (!frame) return nullptr;
 
 	size_t bytes_per_pixel = frame->stride / static_cast<size_t>(frame->width);
 	GdkMemoryFormat mem_fmt = GDK_MEMORY_DEFAULT;
@@ -279,8 +279,14 @@ bool region_to_clipboard(GtkWindow* window, int x, int y, int width, int height)
 			mem_fmt = GDK_MEMORY_B8G8R8A8_PREMULTIPLIED;
 		}
 	}
+	auto data_ptr = new std::vector<uint8_t>(std::move(frame->pixels));
 
-	GBytes* bytes = g_bytes_new(frame->pixels.data(), frame->pixels.size());
+	GBytes* bytes = g_bytes_new_with_free_func(
+		data_ptr->data(),
+		data_ptr->size(),
+		[](gpointer user_data) { delete static_cast<std::vector<uint8_t>*>(user_data); },
+		data_ptr
+	);
 	GdkTexture* texture = GDK_TEXTURE(gdk_memory_texture_new(
 		frame->width,
 		frame->height,
@@ -288,18 +294,9 @@ bool region_to_clipboard(GtkWindow* window, int x, int y, int width, int height)
 		bytes,
 		static_cast<gsize>(frame->stride)
 	));
-
-	bool success = false;
-	if (texture) {
-		GdkDisplay* display = gdk_display_get_default();
-		GdkClipboard* clipboard = gdk_display_get_clipboard(display);
-		gdk_clipboard_set_texture(clipboard, texture);
-		g_object_unref(texture);
-		success = true;
-	}
 	g_bytes_unref(bytes);
 
-	return success;
+	return texture;
 }
 
 std::optional<Color> get_pixel_color(GtkWindow* window, int x, int y) {
