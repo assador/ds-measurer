@@ -18,7 +18,7 @@ static void check_and_process(AppState* state) {
 	}
 }
 
-bool texture_to_clipboard(GdkTexture* texture) {
+static bool texture_to_clipboard(GdkTexture* texture) {
 	if (!texture) return false;
 	GdkDisplay* display = gdk_display_get_default();
 	GdkClipboard* clipboard = gdk_display_get_clipboard(display);
@@ -26,7 +26,7 @@ bool texture_to_clipboard(GdkTexture* texture) {
 	return true;
 }
 
-bool texture_to_file(GdkTexture* texture, const std::string& pattern) {
+static bool texture_to_file(GdkTexture* texture, const std::string& pattern) {
 	if (!texture || pattern.empty()) return false;
 
 	namespace fs = std::filesystem;
