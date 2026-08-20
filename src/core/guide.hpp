@@ -4,8 +4,8 @@
 
 class Guide {
 public:
-	int position{0};
+	int coord{0};
 	Orientation orientation{Orientation::Horizontal};
 
-	Guide(int pos, Orientation orient) : position(pos), orientation(orient) {}
+	Guide(int c, Orientation o) : coord(c), orientation(o) {}
 };

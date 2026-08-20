@@ -67,7 +67,12 @@ static void on_motion(
 
 	state->cursor.update(static_cast<int>(x), static_cast<int>(y));
 
-	if (state->active_measurement) {
+	if (
+		state->active_measurement && (
+			state->mode == Mode::Measurements ||
+			state->active_measurement == state->draft_measurement.get()
+		)
+	) {
 		auto& m = *state->active_measurement;
 		if (state->rmb.is_dragging) {
 			int dx = static_cast<int>(x) - state->rmb.click_pos.x;
@@ -85,6 +90,23 @@ static void on_motion(
 				state->is_fixed_ratio,
 				state->ratio
 			);
+		}
+	}
+	if (state->rmb.is_dragging) {
+		if (state->active_guide && state->mode == Mode::Guides) {
+			auto& g = *state->active_guide;
+			if (g.orientation == Orientation::Horizontal) {
+				g.coord = state->rmb.initial_p0.y + static_cast<int>(y) - state->rmb.click_pos.y;
+			} else if (g.orientation == Orientation::Vertical) {
+				g.coord = state->rmb.initial_p0.x + static_cast<int>(x) - state->rmb.click_pos.x;
+			}
+		}
+		if (state->active_color_pick && state->mode == Mode::ColorPicks) {
+			auto& p = *state->active_color_pick;
+			int dx = static_cast<int>(x) - state->rmb.click_pos.x;
+			int dy = static_cast<int>(y) - state->rmb.click_pos.y;
+			p.move_from(state->rmb.initial_p0, dx, dy);
+			state->snap_active_translation();
 		}
 	}
 	gtk_widget_queue_draw(widget);
@@ -137,10 +159,28 @@ static gboolean on_legacy_event(
 			state->rmb.is_dragging = true;
 			state->rmb.click_pos = Point{static_cast<int>(x), static_cast<int>(y)};
 
-			if (state->active_measurement) {
+			if (
+				state->active_measurement && (
+					state->mode == Mode::Measurements ||
+					state->active_measurement == state->draft_measurement.get()
+				)
+			) {
 				auto& m = *state->active_measurement;
 				state->rmb.initial_p1 = m.start;
 				state->rmb.initial_p2 = m.end;
+			}
+			if (state->active_guide && state->mode == Mode::Guides) {
+				auto& g = *state->active_guide;
+				state->rmb.initial_p0 =
+					g.orientation == Orientation::Horizontal ? Point{static_cast<int>(x), g.coord} :
+					g.orientation == Orientation::Vertical ? Point{g.coord, static_cast<int>(y)} :
+					Point{static_cast<int>(x), static_cast<int>(y)}
+				;
+			}
+			if (state->active_color_pick && state->mode == Mode::ColorPicks) {
+				auto& p = *state->active_color_pick;
+				state->rmb.initial_p0 = p.pos;
+				p.set_color(std::nullopt);
 			}
 
 			gtk_widget_queue_draw(widget);
@@ -165,6 +205,10 @@ static gboolean on_legacy_event(
 				state->lmb.click_pos = state->cursor.pos;
 				state->lmb.initial_p1 = m.start;
 				state->lmb.initial_p2 = m.end;
+			}
+			if (state->active_color_pick && state->mode == Mode::ColorPicks) {
+				auto& p = *state->active_color_pick;
+				p.set_color(state->get_pixel_color(p.pos.x, p.pos.y));
 			}
 
 			check_and_process(state);

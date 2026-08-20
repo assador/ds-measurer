@@ -14,6 +14,7 @@
 struct MouseState {
 	bool is_dragging{false};
 	Point click_pos;
+	Point initial_p0;
 	Point initial_p1;
 	Point initial_p2;
 };

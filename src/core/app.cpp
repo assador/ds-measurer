@@ -115,7 +115,7 @@ void AppState::freeze_draft() {
 void AppState::pick_color(Cursor& c) {
 	if (auto color = get_pixel_color(c.pos.x, c.pos.y)) {
 		if (config.color_pick.target != ColorPickTarget::Clipboard) {
-			color_picks.push_back(std::make_unique<ColorPick>(c.pos, *color));
+			color_picks.push_back(std::make_unique<ColorPick>(c.pos, color));
 			redraw();
 		}
 		if (config.color_pick.target != ColorPickTarget::Stack) {
@@ -135,9 +135,9 @@ void AppState::pick_color(Cursor& c) {
 
 	for (const auto& g : guides) {
 		if (g->orientation == Orientation::Horizontal) {
-			if (std::abs(initial.y - g->position) <= dist) snapped.y = g->position;
+			if (std::abs(initial.y - g->coord) <= dist) snapped.y = g->coord;
 		} else if (g->orientation == Orientation::Vertical) {
-			if (std::abs(initial.x - g->position) <= dist) snapped.x = g->position;
+			if (std::abs(initial.x - g->coord) <= dist) snapped.x = g->coord;
 		}
 	}
 	return snapped;
@@ -175,21 +175,31 @@ void AppState::set_ratio(double r) {
 }
 
 void AppState::snap_active_translation() {
-	if (!snap_to_guides || guides.empty() || !active_measurement) return;
+	auto& m = active_measurement;
+	auto& p = active_color_pick;
+	if (!snap_to_guides || guides.empty() || !m && !p) return;
 
-	auto& m = *active_measurement;
 	int snap_dx = 0;
 	int snap_dy = 0;
 
-	Point snapped_start = get_snapped_pos(m.start);
-	if (snapped_start.x != m.start.x) snap_dx = snapped_start.x - m.start.x;
-	if (snapped_start.y != m.start.y) snap_dy = snapped_start.y - m.start.y;
+	if (m && (mode == Mode::Measurements || m == draft_measurement.get())) {
+		Point snapped_start = get_snapped_pos(m->start);
+		if (snapped_start.x != m->start.x) snap_dx = snapped_start.x - m->start.x;
+		if (snapped_start.y != m->start.y) snap_dy = snapped_start.y - m->start.y;
 
-	Point snapped_end = get_snapped_pos(m.end);
-	if (snap_dx == 0 && snapped_end.x != m.end.x) snap_dx = snapped_end.x - m.end.x;
-	if (snap_dy == 0 && snapped_end.y != m.end.y) snap_dy = snapped_end.y - m.end.y;
+		Point snapped_end = get_snapped_pos(m->end);
+		if (snap_dx == 0 && snapped_end.x != m->end.x) snap_dx = snapped_end.x - m->end.x;
+		if (snap_dy == 0 && snapped_end.y != m->end.y) snap_dy = snapped_end.y - m->end.y;
 
-	if (snap_dx != 0 || snap_dy != 0)  m.move_by(snap_dx, snap_dy);
+		if (snap_dx != 0 || snap_dy != 0)  m->move_by(snap_dx, snap_dy);
+	}
+	else if (p && mode == Mode::ColorPicks) {
+		Point snapped = get_snapped_pos(p->pos);
+		if (snapped.x != p->pos.x) snap_dx = snapped.x - p->pos.x;
+		if (snapped.y != p->pos.y) snap_dy = snapped.y - p->pos.y;
+
+		if (snap_dx != 0 || snap_dy != 0)  p->move_by(snap_dx, snap_dy);
+	}
 }
 
 void AppState::toggle_grids_of_active(uint32_t kc) {

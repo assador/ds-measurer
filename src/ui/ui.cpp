@@ -107,7 +107,7 @@ void draw_guide(
 	cairo_set_line_width(cr, 1.0);
 	set_cairo_color(cr, color);
 
-	const double px = coord_to_pixel(g.position);
+	const double px = coord_to_pixel(g.coord);
 
 	if (g.orientation == Orientation::Horizontal) {
 		cairo_move_to(cr, 0, px);
