@@ -11,26 +11,28 @@ screenshot:
    target: clipboard  # both | clipboard | file
    file:   "~/screenshot_%Y_%m_%d_%H_%M_%S.png"
 shortcuts:
-   clear all:        j
-   clear last:       BackSpace
-   clear:            Delete
-   pick color:       d
-   copy values:      space
-   fixed ratio:      Shift_L
-   freeze:           f
-   from center:      Control_L
-   guide horizontal: bracketleft
-   guide vertical:   bracketright
-   only mask:        question
-   quit:             Escape
-   relax:            grave
-   reset ratio:      backslash
-   screenshot:       s
-   select:           Tab
-   show guides:      g
-   snap to guides:   p
-   toggle diagonal:  z
-   toggle mode:      m
+   clear all:              j
+   clear last:             BackSpace
+   clear:                  Delete
+   pick color:             d
+   copy values:            space
+   fixed ratio:            Shift_L
+   freeze:                 f
+   from center:            Control_L
+   guide horizontal:       bracketleft
+   guide vertical:         bracketright
+   only mask:              question
+   quit:                   Escape
+   relax:                  grave
+   reset ratio:            backslash
+   screenshot:             s
+   select:                 Tab
+   show guides:            g
+   snap to guides:         p
+   switch to colorpicks:   h
+   switch to guides:       g
+   switch to measurements: m
+   toggle diagonal:        z
 aspect ratio shortcuts:
    q: "1"
    w: "4 / 3"

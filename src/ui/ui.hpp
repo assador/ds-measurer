@@ -34,7 +34,7 @@ void draw_guide(
 	const Guide& g,
 	int screen_w,
 	int screen_h,
-	const Color& color
+	const ColorScheme& colors
 );
 
 void draw_measurement(

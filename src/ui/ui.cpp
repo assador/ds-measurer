@@ -112,10 +112,10 @@ void draw_guide(
 	const Guide& g,
 	int screen_w,
 	int screen_h,
-	const Color& color
+	const ColorScheme& colors
 ) {
 	cairo_set_line_width(cr, 1.0);
-	set_cairo_color(cr, color);
+	set_cairo_color(cr, colors.guide);
 
 	const double px = coord_to_pixel(g.coord);
 

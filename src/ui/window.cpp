@@ -261,8 +261,8 @@ static void on_draw(
 				width,
 				height,
 				state->active_guide == g.get()
-					? state->color_scheme->highlight
-					: state->color_scheme->guide
+					? *highlight_theme
+					: *state->color_scheme
 			);
 		}
 	}
@@ -377,7 +377,7 @@ void setup_main_window(
 	gtk_layer_set_anchor(GTK_WINDOW(window), GTK_LAYER_SHELL_EDGE_RIGHT, TRUE);
 
 	gtk_layer_set_exclusive_zone(GTK_WINDOW(window), -1);
-	
+
 	GdkDisplay* display = gdk_display_get_default();
 	GtkWidget* drawing_area = gtk_drawing_area_new();
 	GdkClipboard* clipboard = gdk_display_get_clipboard(display);

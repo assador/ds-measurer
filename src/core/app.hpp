@@ -34,7 +34,7 @@ struct AppState {
 	bool show_color_picks{true};
 	bool show_guides{true};
 	bool snap_to_guides{true};
-	
+
 	std::vector<std::unique_ptr<ColorPick>> color_picks;
 	std::vector<std::unique_ptr<Guide>> guides;
 	std::vector<std::unique_ptr<Measurement>> measurements;

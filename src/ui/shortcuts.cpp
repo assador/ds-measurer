@@ -1,7 +1,6 @@
 #include "ui/shortcuts.hpp"
 #include <cstdint>
 #include <vector>
-#include "core/utils.hpp"
 #include "core/types.hpp"
 
 struct ActionBinding {
@@ -50,8 +49,10 @@ void ShortcutManager::init(const Config& config) {
 	add("screenshot", [](AppState& state) { state.screenshot(state.active_measurement); });
 	add("select", [](AppState& state) { state.cycle_active(1); });
 	add("snap_to_guides", [](AppState& state) { state.snap_to_guides = !state.snap_to_guides; });
+	add("switch_to_colorpicks", [](AppState& state) { state.mode = Mode::ColorPicks; });
+	add("switch_to_guides", [](AppState& state) { state.mode = Mode::Guides; });
+	add("switch_to_measurements", [](AppState& state) { state.mode = Mode::Measurements; });
 	add("toggle_diagonal", [](AppState& state) { state.toggle_diagonal_of_active(); });
-	add("toggle_mode", [](AppState& state) { ++state.mode; });
 
 	for (const auto& [kc, theme_name] : config.theme_names) {
 		add_binding(kc, [theme_name](AppState& state) {
