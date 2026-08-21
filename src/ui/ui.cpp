@@ -30,9 +30,19 @@ void draw_color_pick(
 	// SEC Label
 
 	TextOffset offset;
+	std::string coords_str = std::to_string(p.pos.x) + ", " + std::to_string(p.pos.y);
 
 	set_label(cr, text_style);
 	set_cairo_color(cr, colors.text_faded);
+
+	draw_label(
+		cr,
+		coords_str,
+		p.pos.x + offset.h,
+		p.pos.y - offset.v,
+		TextAlignH::Left,
+		TextAlignV::Bottom
+	);
 	draw_multiline_label(
 		cr,
 		p.fmt_str,
