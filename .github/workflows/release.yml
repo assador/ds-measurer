@@ -81,28 +81,31 @@ jobs:
           export DEPLOY_GTK_VERSION=4
           export DISABLE_GSTREAMER=1
 
-          mkdir -p AppDir/usr/lib
-          cp -d /usr/local/lib/x86_64-linux-gnu/libgtk4-layer-shell.so* AppDir/usr/lib/ 2>/dev/null || cp -d /usr/local/lib/libgtk4-layer-shell.so* AppDir/usr/lib/
+          LAYER_SHELL_LIB=$(find /usr/local/lib -name "libgtk4-layer-shell.so*" | head -n 1)
 
           ./linuxdeploy-x86_64.AppImage \
             --appdir AppDir \
             --desktop-file assets/ds-measurer.desktop \
             --icon-file assets/ds-measurer.svg \
+            --library "$LAYER_SHELL_LIB" \
             --plugin gtk \
             --exclude-library=libwayland-client.so.0 \
             --exclude-library=libwayland-server.so.0 \
             --exclude-library=libwayland-egl.so.1 \
-            --exclude-library=libwayland-cursor.so.0
+            --exclude-library=libwayland-cursor.so.0 \
+            --exclude-library=libX11.so.6 \
+            --exclude-library=libX11-xcb.so.1
 
           rm -rf AppDir/usr/lib/gtk-4.0/4.0.0/media
 
-          rm -f AppDir/AppRun
+          rm -f AppDir/AppRun AppDir/AppRun.wrapped
           cat << 'EOF' > AppDir/AppRun
           #!/bin/sh
           HERE="$(dirname "$(readlink -f "${0}")")"
           export LD_LIBRARY_PATH="${HERE}/usr/lib:${LD_LIBRARY_PATH}"
           export GDK_BACKEND=wayland
           export XDG_SESSION_TYPE=wayland
+          unset DISPLAY
           exec "${HERE}/usr/bin/ds-measurer" "$@"
           EOF
           chmod +x AppDir/AppRun
