@@ -96,3 +96,5 @@ add_custom_command(
 	COMMENT "Copying updated ds-measurer.yaml to build directory"
 )
 target_sources(${PROJECT_NAME} PRIVATE ${CONFIG_DST})
+
+install(TARGETS ${PROJECT_NAME} DESTINATION bin)

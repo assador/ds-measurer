@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="512"
+   height="512"
+   viewBox="0 0 512 512"
+   id="svg-icon"
+   version="1.1"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1" />
+  <g
+     id="g1">
+    <path
+       style="fill:#ffffff;stroke:none"
+       d="m 90.8,20 h 330.4 c 39.2232,0 70.8,31.5768 70.8,70.8 l 0,222.4 c 0,39.2232 -31.5768,70.8 -70.8,70.8 H 90.8 C 51.5768,384 20,352.4232 20,313.2 L 20,90.8 C 20,51.5768 51.5768,20 90.8,20 Z"
+       id="m" />
+    <path
+       style="stroke:#000000;stroke-width:20;stroke-opacity:0.5"
+       d="M 20,202 H 492"
+       id="d" />
+    <path
+       style="stroke:#000000;stroke-width:20;stroke-opacity:0.5"
+       d="M 256,20 V 384"
+       id="v" />
+    <path
+       style="stroke:#0080ff;stroke-width:20;stroke-opacity:1"
+       d="M 40,364 472,40"
+       id="h" />
+    <path
+       style="fill:#808080;stroke:none"
+       d="M 80,0 C 36.025945,0 0,36.025945 0,80 v 352 c 0,43.97406 36.025945,80 80,80 h 352 c 43.97406,0 80,-36.02594 80,-80 V 80 C 512,36.025945 475.97406,0 432,0 Z m 0,40 h 352 c 22.50594,0 40,17.494055 40,40 v 244 c 0,22.50594 -17.49406,40 -40,40 H 80 C 57.494055,364 40,346.50594 40,324 V 80 C 40,57.494055 57.494055,40 80,40 Z"
+       id="s" />
+    <circle
+       style="fill:#ffffff;stroke:none"
+       cx="412"
+       cy="440"
+       r="40"
+       id="b" />
+  </g>
+</svg>

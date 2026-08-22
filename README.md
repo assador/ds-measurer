@@ -82,7 +82,11 @@ When building from source manually, this is controlled by the `ENABLE_KDE_S
 
 Once again, if either build tries to take a screenshot or sample color outside its native environment, it simply grumbles into the console and ignores the request, while everything else works properly. So if you don’t need screenshots and the color picker, it doesn’t matter which one you download.
 
+---
+
 So there you go. Welcome, feel free to use, criticize, scold, and praise. You can even [donate](https://boosty.to/assador/donate) for some sausage.
+
+---
 
 ## Third-Party Libraries
 
