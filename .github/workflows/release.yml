@@ -46,7 +46,7 @@ jobs:
         run: |
           git clone https://github.com/wmww/gtk4-layer-shell.git
           cd gtk4-layer-shell
-          meson setup build
+          meson setup build -Dintrospection=false -Ddocs=false
           ninja -C build
           sudo ninja -C build install
           sudo ldconfig
