@@ -352,16 +352,6 @@ void setup_main_window(
 ) {
 	GtkWidget* window = gtk_application_window_new(app);
 
-	if (!gtk_layer_is_supported()) {
-		g_printerr("CRITICAL: gtk_layer_is_supported() returned FALSE!\n");
-		GdkDisplay* display = gdk_display_get_default();
-		if (display) {
-			g_printerr("Current GDK Display type: %s\n", G_OBJECT_TYPE_NAME(display));
-		}
-	} else {
-		g_print("INFO: Layer shell IS supported on this display!\n");
-	}
-
 	GtkCssProvider* provider = gtk_css_provider_new();
 	gtk_css_provider_load_from_string(
 		provider,

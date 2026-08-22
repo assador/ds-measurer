@@ -215,6 +215,7 @@ void AppState::toggle_diagonal_of_active() {
 }
 
 int run_application(int argc, char** argv, AppState& state, Config& config) {
+	setenv("GDK_BACKEND", "wayland", 1);
 	GtkApplication* app = gtk_application_new(
 		"org.assador.ds.Measurer",
 		G_APPLICATION_DEFAULT_FLAGS
