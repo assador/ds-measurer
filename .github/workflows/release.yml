@@ -85,10 +85,26 @@ jobs:
             --appdir AppDir \
             --desktop-file assets/ds-measurer.desktop \
             --icon-file assets/ds-measurer.svg \
-            --plugin gtk \
-            --env GDK_BACKEND=wayland \
+            --plugin gtk
+
+          echo 'export GDK_BACKEND=wayland' >> AppDir/AppRun.env
+
+          ./linuxdeploy-x86_64.AppImage \
+            --appdir AppDir \
             --output appimage
 
+          mv ds-measurer-x86_64.AppImage "ds-measurer-${VERSION}-${{ matrix.name }}-x86_64.AppImage"
+
+      - name: Create AppImage
+        run: |
+          VERSION=${GITHUB_REF_NAME#v}
+          export DEPLOY_GTK_VERSION=4
+          ./linuxdeploy-x86_64.AppImage \
+            --appdir AppDir \
+            --desktop-file assets/ds-measurer.desktop \
+            --icon-file assets/ds-measurer.svg \
+            --plugin gtk \
+            --output appimage
           mv ds-measurer-x86_64.AppImage "ds-measurer-${VERSION}-${{ matrix.name }}-x86_64.AppImage"
 
       - name: Upload Release Assets
