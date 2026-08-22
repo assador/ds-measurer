@@ -81,13 +81,20 @@ jobs:
           export DEPLOY_GTK_VERSION=4
           export DISABLE_GSTREAMER=1
 
+          LAYER_SHELL_LIB=$(find /usr/local/lib -name "libgtk4-layer-shell.so*" | head -n 1)
+
           ./linuxdeploy-x86_64.AppImage \
             --appdir AppDir \
             --desktop-file assets/ds-measurer.desktop \
             --icon-file assets/ds-measurer.svg \
+            --library "$LAYER_SHELL_LIB" \
             --plugin gtk \
             --exclude-library=libwayland-client.so.0 \
-            --exclude-library=libwayland-server.so.0
+            --exclude-library=libwayland-server.so.0 \
+            --exclude-library=libwayland-egl.so.1 \
+            --exclude-library=libwayland-cursor.so.0
+
+          rm -rf AppDir/usr/lib/gtk-4.0/4.0.0/media
 
           echo 'export GDK_BACKEND=wayland' >> AppDir/AppRun.env
           echo 'export XDG_SESSION_TYPE=wayland' >> AppDir/AppRun.env
