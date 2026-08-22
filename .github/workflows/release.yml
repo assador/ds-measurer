@@ -34,8 +34,9 @@ jobs:
             cmake \
             build-essential \
             libgtk-4-dev \
-            libgtk-4-layer-shell-dev \
-            libadwaita-1-dev \
+            libgtk4-layer-shell-dev \
+            libwayland-dev \
+            wayland-protocols \
             libcairo2-dev \
             libglib2.0-dev \
             libyaml-cpp-dev
