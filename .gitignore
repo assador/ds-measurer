@@ -1,6 +1,6 @@
 # Build directory & artifacts
 build/
-build_opt/
+build_kde/
 build_wlr/
 bin/
 out/

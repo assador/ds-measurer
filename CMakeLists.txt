@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 option(ENABLE_WLR_SCREENCOPY "Enable wlr-screencopy protocol support (wlroots)" ON)
-option(ENABLE_KDE_SCREENSHOT "Enable org.kde.KWin.ScreenShot2 support (KDE Plasma)" OFF)
+option(ENABLE_KDE_SCREENSHOT "Enable org.kde.KWin.ScreenShot2 support (KDE Plasma)" ON)
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(GTK4 REQUIRED gtk4)
@@ -65,6 +65,8 @@ if (ENABLE_KDE_SCREENSHOT)
 	add_compile_definitions(HAS_KDE_SCREENSHOT=1)
 endif()
 
+include(GNUInstallDirs)
+
 add_executable(${PROJECT_NAME} ${SOURCES})
 
 target_include_directories(${PROJECT_NAME} PRIVATE
@@ -96,3 +98,8 @@ add_custom_command(
 	COMMENT "Copying updated ds-measurer.yaml to build directory"
 )
 target_sources(${PROJECT_NAME} PRIVATE ${CONFIG_DST})
+
+install(TARGETS ${PROJECT_NAME} DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(FILES ${CONFIG_SRC} DESTINATION ${CMAKE_INSTALL_SYSCONFDIR}/ds-measurer)
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/assets/ds-measurer.desktop DESTINATION ${CMAKE_INSTALL_DATADIR}/applications)
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/assets/ds-measurer.svg DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor/scalable/apps)

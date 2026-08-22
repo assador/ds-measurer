@@ -1,0 +1,127 @@
+name: Build AppImages
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+
+    strategy:
+      matrix:
+        include:
+          - name: kde
+            kde_flag: "ON"
+            wlr_flag: "OFF"
+          - name: wlr
+            kde_flag: "OFF"
+            wlr_flag: "ON"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            cmake \
+            meson \
+            ninja-build \
+            build-essential \
+            libgtk-4-dev \
+            libwayland-dev \
+            wayland-protocols \
+            libcairo2-dev \
+            libglib2.0-dev \
+            libyaml-cpp-dev
+
+      - name: Build and install gtk4-layer-shell from source
+        run: |
+          git clone https://github.com/wmww/gtk4-layer-shell.git
+          cd gtk4-layer-shell
+          meson setup build \
+            -Dintrospection=false \
+            -Dexamples=false \
+            -Dvapi=false \
+            -Ddocs=false
+          ninja -C build
+          sudo ninja -C build install
+          sudo ldconfig
+
+      - name: Download linuxdeploy and plugins
+        run: |
+          wget https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
+          wget https://raw.githubusercontent.com/linuxdeploy/linuxdeploy-plugin-gtk/master/linuxdeploy-plugin-gtk.sh
+          chmod +x linuxdeploy-x86_64.AppImage linuxdeploy-plugin-gtk.sh
+          sudo cp linuxdeploy-plugin-gtk.sh /usr/local/bin/linuxdeploy-plugin-gtk
+
+      - name: Build project
+        run: |
+          mkdir build && cd build
+          cmake -DCMAKE_BUILD_TYPE=MinSizeRel \
+                -DCMAKE_INSTALL_PREFIX=/usr \
+                -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=ON \
+                -DCMAKE_CXX_FLAGS="-Os -ffunction-sections -fdata-sections" \
+                -DCMAKE_EXE_LINKER_FLAGS="-Wl,--gc-sections" \
+                -DENABLE_KDE_SCREENSHOT=${{ matrix.kde_flag }} \
+                -DENABLE_WLR_SCREENCOPY=${{ matrix.wlr_flag }} ..
+          make -j$(nproc)
+          DESTDIR=../AppDir make install
+
+      - name: Create AppImage
+        run: |
+          export DEPLOY_GTK_VERSION=4
+          export DISABLE_GSTREAMER=1
+
+          cp config/ds-measurer.yaml AppDir/usr/bin/ds-measurer.yaml
+
+          LAYER_SHELL_LIB=$(find /usr/local/lib -name "libgtk4-layer-shell.so*" | head -n 1)
+
+          ./linuxdeploy-x86_64.AppImage \
+            --appdir AppDir \
+            --desktop-file assets/ds-measurer.desktop \
+            --icon-file assets/ds-measurer.svg \
+            --library "$LAYER_SHELL_LIB" \
+            --plugin gtk \
+            --exclude-library=libwayland-client.so.0 \
+            --exclude-library=libwayland-server.so.0 \
+            --exclude-library=libwayland-egl.so.1 \
+            --exclude-library=libwayland-cursor.so.0 \
+            --exclude-library=libX11.so.6 \
+            --exclude-library=libX11-xcb.so.1
+
+          rm -rf AppDir/usr/lib/gtk-4.0/4.0.0/media
+
+          rm -f AppDir/AppRun AppDir/AppRun.wrapped
+          cat << 'EOF' > AppDir/AppRun
+          #!/bin/sh
+          HERE="$(dirname "$(readlink -f "${0}")")"
+          export LD_LIBRARY_PATH="${HERE}/usr/lib:${LD_LIBRARY_PATH}"
+          export GDK_BACKEND=wayland
+          export XDG_SESSION_TYPE=wayland
+          unset DISPLAY
+          exec "${HERE}/usr/bin/ds-measurer" "$@"
+          EOF
+          chmod +x AppDir/AppRun
+
+          ./linuxdeploy-x86_64.AppImage \
+            --appdir AppDir \
+            --output appimage
+
+          mv ds-measurer-x86_64.AppImage "ds-measurer-${{ matrix.name }}-x86_64.AppImage"
+
+      - name: Upload Rolling Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: "Latest Build"
+          files: ds-measurer-${{ matrix.name }}-x86_64.AppImage

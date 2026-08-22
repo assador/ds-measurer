@@ -31,7 +31,9 @@ void ShortcutManager::init(const Config& config) {
 	auto add = [&](const std::string& name, auto&& action) {
 		if (auto it = config.keys.find(name); it != config.keys.end()) {
 			add_binding(it->second, std::forward<decltype(action)>(action));
+			return true;
 		}
+		return false;
 	};
 
 	add("clear", [](AppState& state) { state.clear_active(); });
@@ -44,7 +46,6 @@ void ShortcutManager::init(const Config& config) {
 	add("guide_horizontal", [](AppState& state) { state.add_guide(Orientation::Horizontal); });
 	add("guide_vertical", [](AppState& state) { state.add_guide(Orientation::Vertical); });
 	add("pick_color", [](AppState& state) { state.pick_color(state.cursor); });
-	add("quit", [](AppState& state) { state.request_quit(); });
 	add("relax", [](AppState& state) { state.relax(); });
 	add("screenshot", [](AppState& state) { state.screenshot(state.active_measurement); });
 	add("select", [](AppState& state) { state.cycle_active(1); });
@@ -68,6 +69,10 @@ void ShortcutManager::init(const Config& config) {
 		add_binding(kc, [kc](AppState& state) {
 			state.toggle_grids_of_active(kc);
 		});
+	}
+	if (!add("quit", [](AppState& state) { state.request_quit(); })) {
+		constexpr uint32_t ESC_KEYCODE = 9;
+		add_binding(ESC_KEYCODE, [](AppState& state) { state.request_quit(); });
 	}
 }
 

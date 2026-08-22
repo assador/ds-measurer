@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=ds-measurer
+Exec=ds-measurer
+Icon=ds-measurer
+Terminal=false
+Categories=Utility;Graphics;
+Comment=On-screen measurer/screenshooter/colorpicker for Wayland
+X-KDE-DBUS-Restricted-Interfaces=org.kde.KWin.ScreenShot2

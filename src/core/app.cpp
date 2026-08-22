@@ -11,10 +11,13 @@ void AppState::request_quit() {
 }
 
 void AppState::apply_from_config() {
+	static ColorScheme fallback_scheme{};
 	if (auto it = config.color_schemes.find("default"); it != config.color_schemes.end()) {
 		color_scheme = &it->second;
 	} else if (!config.color_schemes.empty()) {
 		color_scheme = &config.color_schemes.begin()->second;
+	} else {
+		color_scheme = &fallback_scheme;
 	}
 }
 
@@ -215,6 +218,7 @@ void AppState::toggle_diagonal_of_active() {
 }
 
 int run_application(int argc, char** argv, AppState& state, Config& config) {
+	setenv("GDK_BACKEND", "wayland", 1);
 	GtkApplication* app = gtk_application_new(
 		"org.assador.ds.Measurer",
 		G_APPLICATION_DEFAULT_FLAGS
