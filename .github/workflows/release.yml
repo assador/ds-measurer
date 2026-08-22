@@ -79,12 +79,16 @@ jobs:
         run: |
           VERSION=${GITHUB_REF_NAME#v}
           export DEPLOY_GTK_VERSION=4
+          export DISABLE_GSTREAMER=1
+
           ./linuxdeploy-x86_64.AppImage \
             --appdir AppDir \
             --desktop-file assets/ds-measurer.desktop \
             --icon-file assets/ds-measurer.svg \
             --plugin gtk \
+            --env GDK_BACKEND=wayland \
             --output appimage
+
           mv ds-measurer-x86_64.AppImage "ds-measurer-${VERSION}-${{ matrix.name }}-x86_64.AppImage"
 
       - name: Upload Release Assets

@@ -98,3 +98,4 @@ add_custom_command(
 target_sources(${PROJECT_NAME} PRIVATE ${CONFIG_DST})
 
 install(TARGETS ${PROJECT_NAME} DESTINATION bin)
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/config/ds-measurer.yaml DESTINATION bin)
