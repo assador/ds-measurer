@@ -96,11 +96,16 @@ jobs:
 
           rm -rf AppDir/usr/lib/gtk-4.0/4.0.0/media
 
-          cat << 'EOF' >> AppDir/AppRun.env
+          rm -f AppDir/AppRun
+          cat << 'EOF' > AppDir/AppRun
+          #!/bin/sh
+          HERE="$(dirname "$(readlink -f "${0}")")"
+          export LD_LIBRARY_PATH="${HERE}/usr/lib:${LD_LIBRARY_PATH}"
           export GDK_BACKEND=wayland
           export XDG_SESSION_TYPE=wayland
-          unset DISPLAY
+          exec "${HERE}/usr/bin/ds-measurer" "$@"
           EOF
+          chmod +x AppDir/AppRun
 
           ./linuxdeploy-x86_64.AppImage \
             --appdir AppDir \
