@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
 
     strategy:
       matrix:
@@ -34,7 +34,7 @@ jobs:
             cmake \
             build-essential \
             libgtk-4-dev \
-            libgtk4-layer-shell-dev \
+            libgtk-4-layer-shell-dev \
             libadwaita-1-dev \
             libcairo2-dev \
             libglib2.0-dev \
