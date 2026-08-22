@@ -85,9 +85,12 @@ jobs:
             --appdir AppDir \
             --desktop-file assets/ds-measurer.desktop \
             --icon-file assets/ds-measurer.svg \
-            --plugin gtk
+            --plugin gtk \
+            --exclude-library=libwayland-client.so.0 \
+            --exclude-library=libwayland-server.so.0
 
           echo 'export GDK_BACKEND=wayland' >> AppDir/AppRun.env
+          echo 'export XDG_SESSION_TYPE=wayland' >> AppDir/AppRun.env
 
           ./linuxdeploy-x86_64.AppImage \
             --appdir AppDir \
