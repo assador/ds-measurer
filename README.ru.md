@@ -74,8 +74,8 @@
 
 Обе сборки отличаются только в части скриншутера и пипетки. Обе работают и в KDE, и чёрт знает, где ещё, но с wlroots, однако:
 
-- Первая — [`ds-measurer-2.0.0-kde-x86_64.AppImage`](https://github.com/assador/ds-measurer/releases/download/v2.0.0/ds-measurer-2.0.0-kde-x86_64.AppImage) — скриншотит и понимает цвета под курсором только в кедах с их `org.kde.KWin.ScreenShot2`.
-- Вторая — [`ds-measurer-2.0.0-wlr-x86_64.AppImage`](https://github.com/assador/ds-measurer/releases/download/v2.0.0/ds-measurer-2.0.0-wlr-x86_64.AppImage) — скриншотит и понимает цвета под курсором только c `wlroots` с их `wlr-screencopy`.
+- Первая — [`ds-measurer-kde-x86_64.AppImage`](https://github.com/assador/ds-measurer/releases/download/latest/ds-measurer-kde-x86_64.AppImage) — скриншотит и понимает цвета под курсором только в кедах с их `org.kde.KWin.ScreenShot2`.
+- Вторая — [`ds-measurer-wlr-x86_64.AppImage`](https://github.com/assador/ds-measurer/releases/download/latest/ds-measurer-wlr-x86_64.AppImage) — скриншотит и понимает цвета под курсором только c `wlroots` с их `wlr-screencopy`.
 
 При самостоятельной сборке из исходников это определяется флагами `ENABLE_KDE_SCREENSHOT` и `ENABLE_WLR_SCREENCOPY` в `CMakeLists.txt`.
 

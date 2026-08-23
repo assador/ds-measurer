@@ -74,8 +74,8 @@ Here are two AppImage builds, both for x86_64. Linux/Wayland, naturally…
 
 Both builds differ only in the screenshooter and color picker parts. Both work in KDE and God knows where else, provided `wlroots` is present:
 
-- The first one — [`ds-measurer-2.0.0-kde-x86_64.AppImage`](https://github.com/assador/ds-measurer/releases/download/v2.0.0/ds-measurer-2.0.0-kde-x86_64.AppImage) — takes screenshots and samples colors under the cursor only in KDE via their `org.kde.KWin.ScreenShot2`.
-- The second one — `ds-measurer-3.0.0-wlr-x86_64.AppImage` — takes screenshots and samples colors under the cursor only on `wlroots` via their `wlr-screencopy`.
+- The first one — [`ds-measurer-kde-x86_64.AppImage`](https://github.com/assador/ds-measurer/releases/download/latest/ds-measurer-kde-x86_64.AppImage) — takes screenshots and samples colors under the cursor only in KDE via their `org.kde.KWin.ScreenShot2`.
+- The second one — [`ds-measurer-wlr-x86_64.AppImage`](https://github.com/assador/ds-measurer/releases/download/latest/ds-measurer-wlr-x86_64.AppImage) — takes screenshots and samples colors under the cursor only on `wlroots` via their `wlr-screencopy`.
 
 When building from source manually, this is controlled by the `ENABLE_KDE_SCREENSHOT` and `ENABLE_WLR_SCREENCOPY` flags in `CMakeLists.txt`.
 

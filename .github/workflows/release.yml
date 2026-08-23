@@ -2,6 +2,8 @@ name: Build AppImages
 
 on:
   push:
+    branches:
+      - main
     tags:
       - 'v*'
   workflow_dispatch:
@@ -77,7 +79,6 @@ jobs:
 
       - name: Create AppImage
         run: |
-          VERSION=${GITHUB_REF_NAME#v}
           export DEPLOY_GTK_VERSION=4
           export DISABLE_GSTREAMER=1
 
@@ -114,10 +115,11 @@ jobs:
             --appdir AppDir \
             --output appimage
 
-          mv ds-measurer-x86_64.AppImage "ds-measurer-${VERSION}-${{ matrix.name }}-x86_64.AppImage"
+          mv ds-measurer-x86_64.AppImage "ds-measurer-${{ matrix.name }}-x86_64.AppImage"
 
-      - name: Upload Release Assets
-        uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
+      - name: Upload Rolling Release
+        uses: softprops/action-gh-release@v2
         with:
-          files: ds-measurer-*-${{ matrix.name }}-x86_64.AppImage
+          tag_name: latest
+          name: "Latest Build"
+          files: ds-measurer-${{ matrix.name }}-x86_64.AppImage
