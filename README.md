@@ -70,17 +70,37 @@ There were no doubts here before, and none appeared now. Why reinvent the wh
 
 ## Code and Builds
 
-Here are two AppImage builds, both for x86_64. Linux/Wayland, in case you were wondering…
+Here are two AppImage builds, both for x86_64. Linux/Wayland, naturally…
 
 Both builds differ only in the screenshooter and color picker parts. Both work in KDE and God knows where else, provided `wlroots` is present:
 
-The first one — `ds-measurer-3.0.0-kde-x86_64.AppImage` — takes screenshots and samples colors under the cursor only in KDE via their `org.kde.KWin.ScreenShot2`.
-
-The second one — `ds-measurer-3.0.0-wlr-x86_64.AppImage` — takes screenshots and samples colors under the cursor only on `wlroots` via their `wlr-screencopy`.
+- The first one — [`ds-measurer-2.0.0-kde-x86_64.AppImage`](https://github.com/assador/ds-measurer/releases/download/v2.0.0/ds-measurer-2.0.0-kde-x86_64.AppImage) — takes screenshots and samples colors under the cursor only in KDE via their `org.kde.KWin.ScreenShot2`.
+- The second one — `ds-measurer-3.0.0-wlr-x86_64.AppImage` — takes screenshots and samples colors under the cursor only on `wlroots` via their `wlr-screencopy`.
 
 When building from source manually, this is controlled by the `ENABLE_KDE_SCREENSHOT` and `ENABLE_WLR_SCREENCOPY` flags in `CMakeLists.txt`.
 
 Once again, if either build tries to take a screenshot or sample color outside its native environment, it simply grumbles into the console and ignores the request, while everything else works properly. So if you don’t need screenshots and the color picker, it doesn’t matter which one you download.
+
+Say what you will, but we had to bundle a fair bit of GTK into these, seeing as the app relies on it to get off the couch. As a result, our neat, sub-100KB standalone binary inflates to a couple of dozen megabytes inside the AppImage wrapper. Here’s what’s in their little bellies:
+
+1. **The `ds-measurer` binary itself**, naturally
+2. **GTK4 & the core GUI stack:**
+    - `libgtk-4.so`
+    - `libglib-2.0.so`, `libgobject-2.0.so`, `libgio-2.0.so` (GLib essentials)
+    - `libcairo.so` and `libpango-1.0.so` (graphics and text rendering)
+    - `libgdk_pixbuf-2.0.so` (for screenshots and color picking)
+    - `libharfbuzz`, `libfreetype`, `libfontconfig` (text layout and fonts)
+3. **Layer Shell:** a standalone build of `libgtk4-layer-shell.so` (for screen overlay functionality)
+4. **Configuration parser:** `libyaml-cpp.so` (for reading config files)
+5. **Assets:** `ds-measurer.desktop` and `ds-measurer.svg` (desktop entry and icon :o))
+
+What has been excised from the bundle and is left to the host system instead:
+
+- **Wayland & EGL stack:** `libwayland-client`, `libwayland-server`, `libwayland-egl`, `libwayland-cursor` (on the safe assumption that a Wayland utility will be running under Wayland)
+- **X11 stack:** `libX11`, `libX11-xcb` (for the very same reason)
+- **GStreamer:** GTK4’s media module has been completely gutted (maybe one day Measurer will sing the blues or play questionable videos in the corner while working… but not today)
+
+So overall, the AppImage is fairly self-contained, packing **GTK4**, **Cairo** and <nobr>**gtk4-layer-shell**</nobr>. The only system requirement is an active **Wayland compositor** with <nobr>**wlr-layer-shell**</nobr> support (Sway, Hyprland, KDE Plasma, River, etc.).
 
 ---
 

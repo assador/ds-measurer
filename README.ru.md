@@ -74,13 +74,33 @@
 
 Обе сборки отличаются только в части скриншутера и пипетки. Обе работают и в KDE, и чёрт знает, где ещё, но с wlroots, однако:
 
-Первая — `ds-measurer-3.0.0-kde-x86_64.AppImage` — скриншотит и понимает цвета под курсором только в кедах с их `org.kde.KWin.ScreenShot2`.
-
-Вторая — `ds-measurer-3.0.0-wlr-x86_64.AppImage` — скриншотит и понимает цвета под курсором только c `wlroots` с их `wlr-screencopy`.
+- Первая — [`ds-measurer-2.0.0-kde-x86_64.AppImage`](https://github.com/assador/ds-measurer/releases/download/v2.0.0/ds-measurer-2.0.0-kde-x86_64.AppImage) — скриншотит и понимает цвета под курсором только в кедах с их `org.kde.KWin.ScreenShot2`.
+- Вторая — [`ds-measurer-2.0.0-wlr-x86_64.AppImage`](https://github.com/assador/ds-measurer/releases/download/v2.0.0/ds-measurer-2.0.0-wlr-x86_64.AppImage) — скриншотит и понимает цвета под курсором только c `wlroots` с их `wlr-screencopy`.
 
 При самостоятельной сборке из исходников это определяется флагами `ENABLE_KDE_SCREENSHOT` и `ENABLE_WLR_SCREENCOPY` в `CMakeLists.txt`.
 
 Обе, ещё раз, при попытке сделать скриншот или снять цвет не в родной среде просто ворчат в консольку и забивают на это, но всё остальное делают исправно. Так что, если не нужны скриншоты и пипетка, пофиг, какую качать.
+
+Как ни крути, а куски GTK в них, разумеется, засунуть пришлось, коль скоро всё это встаёт с дивана с его помощью. Так что чистый ручной бинарник Замерщика на сотню с небольшим килобайт распухает в опакеченных AppImage на пару десятков мегабайт. Вот, что у них в животиках:
+
+1. **Сам бинарник** `ds-measurer`, собственно
+2. **GTK4 и базовый GUI-стэк:**
+    - `libgtk-4.so`
+    - `libglib-2.0.so`, `libgobject-2.0.so`, `libgio-2.0.so` (GLib-овские штучки)
+    - `libcairo.so` и `libpango-1.0.so` (графика и текст)
+    - `libgdk_pixbuf-2.0.so` (для скриншутера и пипетки)
+    - `libharfbuzz`, `libfreetype`, `libfontconfig` (вёрстка/шрифты)
+3. **Layer Shell:** собранная отдельно `libgtk4-layer-shell.so` (для оверлея)
+4. **Конфигурационный парсер** `libyaml-cpp.so` (для чтения конфига)
+5. **Ассеты** `ds-measurer.desktop` и `ds-measurer.svg` (ярлык и иконка :o))
+
+Выпилено же из наших картинок и берётся с хост-системы:
+
+- **Wayland и EGL:** `libwayland-client`, `libwayland-server`, `libwayland-egl`, `libwayland-cursor` (преполагается какбэ, что утилитку для Wayland запускают под Wayland)
+- **X11:** `libX11`, `libX11-xcb` (по той же причине)
+- **GStreamer:** медиа-модуль GTK4 вырезан полностью (когда-нибудь Замерщик во время работы может и будет петь блюзы и показывать в углу непристойные видюшки… но не сейчас)
+
+Так что, AppImage более-менее самодостаточен, включает в себя **GTK4**, **Cairo** и <nobr>**gtk4-layer-shell**</nobr>, а от системы требует только запущенный **Wayland-композитор** с поддержкой <nobr>**wlr-layer-shell**</nobr> (Sway, Hyprland, KDE Plasma, River и т.д.).
 
 ---
 
