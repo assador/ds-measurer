@@ -3,6 +3,8 @@
 
 `ds-measurer` is an on-screen measurement tool that comes bundled with region screenshotting and a color picker. The program is very useful, mostly as a helper for poor frontend developers and markup layout engineers, but not limited to them. Free software, AGPLv3. AppImage builds are available (x86_64/Linux/Wayland, [description below](#code-and-builds)).
 
+![](https://raw.githubusercontent.com/assador/ds-measurer/refs/heads/main/docs/screenshots/screenshot_0.png)
+
 Here is the gist. A transparent layer is created on top of the screen without windows or borders — meaning, without anything at all — along with a full-screen crosshair cursor (everything underneath the layer keeps living its own life: the screen is interactive, no initial static screenshots in the buffer, etc.).
 
 The user can measure whatever is actually on their screen — coordinates, width and height, distance between points, angles, and so on. Each measurement (which can be “frozen” and saved to a stack) also has its own stack of displayed/hidden grids governed by rules defined in the [YAML config](https://raw.githubusercontent.com/assador/ds-measurer/refs/heads/main/config/ds-measurer.yaml) (e.g., center, golden ratio, thirds, fifths, etc.). You can also add guides for these measurements to snap to. The measurements themselves — both the active one and frozen ones — can be modified and dragged around.
@@ -23,6 +25,8 @@ Features include color scheme support with hotkey switching, selection from the�
     
     The guides themselves are placed at the cursor location via hotkeys (`[` for horizontal, `]` for vertical). Working with this stack and its guides is completely identical to working with the measurements stack, including cycling through them, dragging them (RMB), deleting current/last/all, etc.
 
+![](https://raw.githubusercontent.com/assador/ds-measurer/refs/heads/main/docs/screenshots/screenshot_1.png)
+
 4. **<span id="colorpicker">Color picker</span> and color sampling**. Just by moving the mouse around the screen, or in the middle of anything else, you can press the `d` key (by default), and you will get the color values for the point under the mouse cursor. The values themselves are represented as a multi-line text block, one line per format, for example:
     
     ```
@@ -39,6 +43,8 @@ Features include color scheme support with hotkey switching, selection from the�
     Where it goes also depends on the `target` key in the corresponding config section: `target: clipboard  # both | clipboard | file`. **both** is self-explanatory: both places. **clipboard** is also clear: straight to the clipboard. And **file** writes directly to disk in PNG format. Where exactly on disk is specified by a pattern on the line below in the same config — `file: "~/screenshot_%Y_%m_%d_%H_%M_%S.png"`. Everything here seems self-evident too. Path, filename, timestamps supported.
     
     You can take a screenshot right while measuring with LMB held down, or while dragging a measurement with RMB held down. You can screenshot both a newly created measurement and a selected saved one.    
+
+![](https://raw.githubusercontent.com/assador/ds-measurer/refs/heads/main/docs/screenshots/screenshot_2.png)
 
 ## Tech Stack
 
@@ -67,6 +73,8 @@ And on top of all this — `gtk4-layer-shell`, so that all of our stuff lay
 ### And Cairo
 
 There were no doubts here before, and none appeared now. Why reinvent the wheel? A wonderful library for rendering all this stuff in 2D vector graphics.
+
+![](https://raw.githubusercontent.com/assador/ds-measurer/refs/heads/main/docs/screenshots/screenshot_3.png)
 
 ## Code and Builds
 
