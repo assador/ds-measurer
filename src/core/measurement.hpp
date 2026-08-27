@@ -11,7 +11,8 @@
 using Grids = std::unordered_map<uint32_t, Grid>;
 
 struct MeasurementOptions {
-	bool show_diagonal{true};
+	bool show_diagonal = true;
+	LabelState labels_state = { .show = true, .show_back = true };
 };
 
 class Measurement {
@@ -19,7 +20,7 @@ public:
 	Point start;
 	Point end;
 	Grids grids;
-	bool show_diagonal{true};
+	MeasurementOptions opts;
 
 	Measurement(
 		Point p1,
@@ -82,4 +83,11 @@ public:
 		double ratio
 	);
 	std::string values_string(std::string_view fmt = "{w} × {h}") const;
+
+	void hide_labels();
+	void show_labels();
+	void toggle_labels();
+	void hide_labels_back();
+	void show_labels_back();
+	void toggle_labels_back();
 };

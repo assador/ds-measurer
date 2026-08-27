@@ -9,7 +9,7 @@ Measurement::Measurement(
 ) :
 	start(p1),
 	end(p2),
-	show_diagonal(opts.show_diagonal)
+	opts(opts)
 {
 	grids.reserve(guides.size());
 	for (const auto& [key, rule] : guides) {
@@ -96,3 +96,10 @@ std::string Measurement::values_string(std::string_view fmt) const {
 
 	return result;
 }
+
+void Measurement::hide_labels() { opts.labels_state.show = false; };
+void Measurement::show_labels() { opts.labels_state.show = true; };
+void Measurement::toggle_labels() { opts.labels_state.show = !opts.labels_state.show; };
+void Measurement::hide_labels_back() { opts.labels_state.show_back = false; };
+void Measurement::show_labels_back() { opts.labels_state.show_back = true; };
+void Measurement::toggle_labels_back() { opts.labels_state.show_back = !opts.labels_state.show_back; };

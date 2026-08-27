@@ -31,6 +31,27 @@ void AppState::set_color_scheme(const std::string& name) {
 	}
 }
 
+void AppState::apply_labels_action(bool LabelState::* field, SwitchAction action) {
+	if (action == SwitchAction::Toggle) labels.*field = !(labels.*field);
+	else labels.*field = (action == SwitchAction::On);
+
+	const bool value = labels.*field;
+	const auto onoff = value ? SwitchAction::On : SwitchAction::Off;
+
+	if (draft_measurement) draft_measurement->opts.labels_state.*field = value;
+	switch_container_labels_state(measurements, field, onoff);
+	switch_container_labels_state(color_picks, field, onoff);
+	redraw();
+}
+
+void AppState::toggle_labels() {
+	apply_labels_action(&LabelState::show, SwitchAction::Toggle);
+}
+
+void AppState::toggle_labels_back() {
+	apply_labels_action(&LabelState::show_back, SwitchAction::Toggle);
+}
+
 void AppState::add_guide(Orientation orient) {
 	guides.push_back(std::make_unique<Guide>(
 		orient == Orientation::Vertical ? cursor.pos.x : cursor.pos.y,
@@ -118,7 +139,11 @@ void AppState::freeze_draft() {
 void AppState::pick_color(Cursor& c) {
 	if (auto color = get_pixel_color(c.pos.x, c.pos.y)) {
 		if (config.color_pick.target != ColorPickTarget::Clipboard) {
-			color_picks.push_back(std::make_unique<ColorPick>(c.pos, color));
+			color_picks.push_back(std::make_unique<ColorPick>(
+				c.pos,
+				color,
+				ColorPickOptions{ .labels_state = labels }
+			));
 			redraw();
 		}
 		if (config.color_pick.target != ColorPickTarget::Stack) {
@@ -213,7 +238,7 @@ void AppState::toggle_grids_of_active(uint32_t kc) {
 
 void AppState::toggle_diagonal_of_active() {
 	if (!active_measurement) return;
-	active_measurement->show_diagonal = !active_measurement->show_diagonal;
+	active_measurement->opts.show_diagonal = !active_measurement->opts.show_diagonal;
 	redraw();
 }
 

@@ -141,10 +141,10 @@ bool Config::load_from_file(const std::string& filepath) {
 		}
 		auto parse_color = [](const YAML::Node& node) -> Color {
 			return Color{
-				.r=node["r"].as<double>(),
-				.g=node["g"].as<double>(),
-				.b=node["b"].as<double>(),
-				.a=node["a"].as<double>()
+				.r = node["r"].as<double>(),
+				.g = node["g"].as<double>(),
+				.b = node["b"].as<double>(),
+				.a = node["a"].as<double>(),
 			};
 		};
 		auto parse_theme = [&](const YAML::Node& node, ColorScheme& theme) {
@@ -152,6 +152,7 @@ bool Config::load_from_file(const std::string& filepath) {
 			if (node["main"]) theme.main = parse_color(node["main"]);
 			if (node["basic"]) theme.basic = parse_color(node["basic"]);
 			if (node["guide"]) theme.guide = parse_color(node["guide"]);
+			if (node["text back"]) theme.text_back = parse_color(node["text back"]);
 			if (node["text main"]) theme.text_main = parse_color(node["text main"]);
 			if (node["text basic"]) theme.text_basic = parse_color(node["text basic"]);
 			if (node["text faded"]) theme.text_faded = parse_color(node["text faded"]);

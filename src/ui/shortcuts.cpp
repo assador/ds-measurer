@@ -4,7 +4,7 @@
 #include "core/types.hpp"
 
 struct ActionBinding {
-	uint32_t keycode{0};
+	uint32_t keycode = 0;
 	std::function<void(AppState&, bool)> action;
 };
 
@@ -54,6 +54,8 @@ void ShortcutManager::init(const Config& config) {
 	add("switch_to_guides", [](AppState& state) { state.mode = Mode::Guides; });
 	add("switch_to_measurements", [](AppState& state) { state.mode = Mode::Measurements; });
 	add("toggle_diagonal", [](AppState& state) { state.toggle_diagonal_of_active(); });
+	add("toggle_labels", [](AppState& state) { state.toggle_labels(); });
+	add("toggle_labels_back", [](AppState& state) { state.toggle_labels_back(); });
 
 	for (const auto& [kc, theme_name] : config.theme_names) {
 		add_binding(kc, [theme_name](AppState& state) {

@@ -1,5 +1,5 @@
 # ds-measurer
-**v2.0.0** | [Русская версия](README.ru.md) | [Mail](mailto:assador@gmail.com) | [Donate](https://boosty.to/assador/donate)
+**v2.0.1** | [Русская версия](README.ru.md) | [Mail](mailto:assador@gmail.com) | [Donate](https://boosty.to/assador/donate)
 
 `ds-measurer` is an on-screen measurement tool that comes bundled with region screenshotting and a color picker. The program is very useful, mostly as a helper for poor frontend developers and markup layout engineers, but not limited to them. Free software, AGPLv3. AppImage builds are available (x86_64/Linux/Wayland, [description below](#code-and-builds)).
 

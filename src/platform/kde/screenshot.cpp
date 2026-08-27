@@ -17,9 +17,9 @@ namespace {
 
 struct KWinFrame {
 	std::vector<uint8_t> pixels;
-	uint32_t width{0};
-	uint32_t height{0};
-	uint32_t stride{0};
+	uint32_t width = 0;
+	uint32_t height = 0;
+	uint32_t stride = 0;
 };
 
 std::optional<KWinFrame> capture_region_raw(int x, int y, int width, int height) {

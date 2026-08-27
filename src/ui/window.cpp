@@ -144,7 +144,10 @@ static gboolean on_legacy_event(
 				state->draft_measurement = std::make_unique<Measurement>(
 					target_pos,
 					target_pos,
-					MeasurementOptions{ .show_diagonal = state->config.show_diagonal },
+					MeasurementOptions{
+						.show_diagonal = state->config.show_diagonal,
+						.labels_state = state->labels,
+					},
 					state->config.guides
 				);
 				state->active_measurement = state->draft_measurement.get();
@@ -323,7 +326,7 @@ public:
 private:
 	GtkWindow* window_;
 	AppState* state_;
-	GtkDrawingArea* drawing_area_{nullptr};
+	GtkDrawingArea* drawing_area_ = nullptr;
 };
 
 static gboolean on_key_pressed(

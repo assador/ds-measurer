@@ -77,42 +77,59 @@ inline void draw_label(
 	const std::string& text,
 	double x,
 	double y,
-	TextAlignH halign = TextAlignH::Left,
-	TextAlignV valign = TextAlignV::Baseline
+	LabelOpts opts
 ) {
 	if (text.empty()) return;
 
-	cairo_text_extents_t extents;
-	cairo_text_extents(cr, text.c_str(), &extents);
+	cairo_text_extents_t te;
+	cairo_text_extents(cr, text.c_str(), &te);
+	cairo_font_extents_t fe;
+	cairo_font_extents(cr, &fe);
 
-	double rx = x;
-	double ry = y;
+	const double font_h = fe.ascent + fe.descent;
 
-	switch (halign) {
+	const double rect_w = te.width + opts.padding.l + opts.padding.r;
+	const double rect_h = font_h + opts.padding.t + opts.padding.b;
+
+	double rect_x = x;
+	double rect_y = y;
+
+	switch (opts.halign) {
+		case TextAlignH::Left:
+			rect_x = x;
+			break;
 		case TextAlignH::Center:
-			rx -= (extents.width / 2.0 + extents.x_bearing);
+			rect_x = x - rect_w / 2.0;
 			break;
 		case TextAlignH::Right:
-			rx -= (extents.width + extents.x_bearing);
-			break;
-		case TextAlignH::Left:
-			rx -= extents.x_bearing;
+			rect_x = x - rect_w;
 			break;
 	}
-	switch (valign) {
+	switch (opts.valign) {
+		case TextAlignV::Top:
+			rect_y = y;
+			break;
 		case TextAlignV::Middle:
-			ry -= (extents.height / 2.0 + extents.y_bearing);
+			rect_y = y - rect_h / 2.0;
 			break;
 		case TextAlignV::Bottom:
-			ry -= (extents.height + extents.y_bearing);
-			break;
-		case TextAlignV::Top:
-			ry -= extents.y_bearing;
+			rect_y = y - rect_h;
 			break;
 		case TextAlignV::Baseline:
+			rect_y = y - fe.ascent - opts.padding.t;
 			break;
 	}
 
+	if (opts.show_back) {
+		set_cairo_color(cr, opts.color_back);
+		cairo_rectangle(cr, rect_x, rect_y, rect_w, rect_h);
+		cairo_fill(cr);
+	}
+
+	const double rx = rect_x + opts.padding.l - te.x_bearing;
+	const double ry = rect_y + opts.padding.t + fe.ascent;
+
+	set_cairo_color(cr, opts.color);
 	cairo_move_to(cr, rx, ry);
 	cairo_show_text(cr, text.c_str());
 }
@@ -122,13 +139,12 @@ inline void draw_multiline_label(
 	const std::string& text,
 	double x,
 	double y,
-	TextAlignH halign = TextAlignH::Left,
-	TextAlignV valign = TextAlignV::Baseline
+	LabelOpts opts
 ) {
 	if (text.empty()) return;
 
 	if (text.find('\n') == std::string::npos) {
-		draw_label(cr, text, x, y, halign, valign);
+		draw_label(cr, text, x, y, opts);
 		return;
 	}
 
@@ -141,25 +157,72 @@ inline void draw_multiline_label(
 
 	cairo_font_extents_t fe;
 	cairo_font_extents(cr, &fe);
-	const double line_height = fe.height;
-	const double total_height = line_height * static_cast<double>(lines.size());
+	const double font_h = fe.ascent + fe.descent;
+	const double line_h = fe.height;
 
-	double start_y = y;
-	switch (valign) {
-		case TextAlignV::Middle:
-			start_y -= (total_height / 2.0 - fe.ascent);
+	double text_w = 0.0;
+	for (const auto& l : lines) {
+		cairo_text_extents_t te;
+		cairo_text_extents(cr, l.c_str(), &te);
+		if (te.width > text_w) text_w = te.width;
+	}
+
+	const double text_h = line_h * static_cast<double>(lines.size());
+	const double rect_w = text_w + opts.padding.l + opts.padding.r;
+	const double rect_h = text_h + opts.padding.t + opts.padding.b;
+
+	double rect_x = x;
+	double rect_y = y;
+
+	switch (opts.halign) {
+		case TextAlignH::Left:
+			rect_x = x;
 			break;
-		case TextAlignV::Bottom:
-			start_y -= (total_height - fe.ascent);
+		case TextAlignH::Center:
+			rect_x = x - rect_w / 2.0;
 			break;
-		case TextAlignV::Top:
-			start_y += fe.ascent;
-			break;
-		case TextAlignV::Baseline:
+		case TextAlignH::Right:
+			rect_x = x - rect_w;
 			break;
 	}
+	switch (opts.valign) {
+		case TextAlignV::Top:
+			rect_y = y;
+			break;
+		case TextAlignV::Middle:
+			rect_y = y - rect_h / 2.0;
+			break;
+		case TextAlignV::Bottom:
+			rect_y = y - rect_h;
+			break;
+		case TextAlignV::Baseline:
+			rect_y = y - fe.ascent - opts.padding.t;
+			break;
+	}
+
+	if (opts.show_back) {
+		set_cairo_color(cr, opts.color_back);
+		cairo_rectangle(cr, rect_x, rect_y, rect_w, rect_h);
+		cairo_fill(cr);
+	}
+
+	auto line_opts = opts;
+	line_opts.show_back = false;
+	line_opts.valign = TextAlignV::Top;
+	line_opts.padding = { .t = 0, .r = 0, .b = 0, .l = 0 };
+
+	const double content_y = rect_y + opts.padding.t;
+
 	for (size_t i = 0; i < lines.size(); ++i) {
-		const double current_y = start_y + static_cast<double>(i) * line_height;
-		draw_label(cr, lines[i], x, current_y, halign, TextAlignV::Baseline);
+		const double line_y = content_y + static_cast<double>(i) * line_h;
+
+		double line_x = rect_x + opts.padding.l;
+		if (opts.halign == TextAlignH::Center) {
+			line_x = rect_x + rect_w / 2.0;
+		} else if (opts.halign == TextAlignH::Right) {
+			line_x = rect_x + rect_w - opts.padding.r;
+		}
+
+		draw_label(cr, lines[i], line_x, line_y, line_opts);
 	}
 }

@@ -20,21 +20,21 @@ namespace {
 
 struct ScreencopyFrame {
 	std::vector<uint8_t> pixels;
-	int width{0};
-	int height{0};
-	uint32_t stride{0};
-	uint32_t format{0};
+	int width = 0;
+	int height = 0;
+	uint32_t stride = 0;
+	uint32_t format = 0;
 };
 
 struct ScreencopyData {
-	bool done{false};
-	bool failed{false};
-	int width{0};
-	int height{0};
-	uint32_t format{0};
-	uint32_t stride{0};
-	void* pixels{nullptr};
-	size_t size{0};
+	bool done = false;
+	bool failed = false;
+	int width = 0;
+	int height = 0;
+	uint32_t format = 0;
+	uint32_t stride = 0;
+	void* pixels = nullptr;
+	size_t size = 0;
 };
 
 static const struct zwlr_screencopy_frame_v1_listener frame_listener = {

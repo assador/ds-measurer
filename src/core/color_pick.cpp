@@ -4,10 +4,12 @@
 ColorPick::ColorPick(
 	Point pos,
 	std::optional<Color> color,
+	ColorPickOptions opts,
 	std::string fmt_str
 )
 	: pos(pos)
 	, color(color)
+	, opts(opts)
 	, fmt_str(color ? utils::color_to_fmt_str(*color) : std::move(fmt_str))
 {}
 
@@ -25,3 +27,10 @@ void ColorPick::set_color(const std::optional<Color>& c) {
 	color = c;
 	fmt_str = color ? utils::color_to_fmt_str(*color) : "mmm…";
 }
+
+void ColorPick::hide_labels() { opts.labels_state.show = false; };
+void ColorPick::show_labels() { opts.labels_state.show = true; };
+void ColorPick::toggle_labels() { opts.labels_state.show = !opts.labels_state.show; };
+void ColorPick::hide_labels_back() { opts.labels_state.show_back = false; };
+void ColorPick::show_labels_back() { opts.labels_state.show_back = true; };
+void ColorPick::toggle_labels_back() { opts.labels_state.show_back = !opts.labels_state.show_back; };

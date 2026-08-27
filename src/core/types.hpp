@@ -11,19 +11,20 @@ enum class TextAlignH : std::uint8_t { Left, Center, Right };
 enum class TextAlignV : std::uint8_t { Top, Baseline, Middle, Bottom };
 
 enum class Mode : std::uint8_t { Measurements, Guides, ColorPicks };
+enum class SwitchAction : std::uint8_t { On, Off, Toggle };
 
 struct Color {
-	double r{0.0};
-	double g{0.0};
-	double b{0.0};
-	double a{1.0};
+	double r = 0.0;
+	double g = 0.0;
+	double b = 0.0;
+	double a = 1.0;
 };
 
 struct ColorHSLA {
-	double h{0.0};
-	double s{0.0};
-	double l{0.0};
-	double a{1.0};
+	double h = 0.0;
+	double s = 0.0;
+	double l = 0.0;
+	double a = 1.0;
 };
 
 inline ColorHSLA rgb_to_hsl(double r, double g, double b, double a = 1.0) {
@@ -48,7 +49,7 @@ inline ColorHSLA rgb_to_hsl(double r, double g, double b, double a = 1.0) {
 		h /= 6.0;
 	}
 
-	return ColorHSLA{.h = h * 360.0, .s = s, .l = l, .a = a};
+	return ColorHSLA { .h = h * 360.0, .s = s, .l = l, .a = a };
 }
 
 inline ColorHSLA rgb_to_hsl(const Color& color) {
@@ -56,18 +57,26 @@ inline ColorHSLA rgb_to_hsl(const Color& color) {
 }
 
 struct ColorScheme {
-	Color main{.r  = 0.0, .g = 0.5, .b = 1.0, .a = 0.5};
-	Color basic{.r = 0.0, .g = 0.0, .b = 0.0, .a = 0.25};
-	Color guide{.r = 0.0, .g = 0.0, .b = 0.0, .a = 0.15};
-	Color highlight{.r = 0.0, .g = 0.5, .b = 1.0, .a = 1};
-	Color text_main{.r = 0.0, .g = 0.5, .b = 1.0, .a = 0.6};
-	Color text_basic{.r = 0.0, .g = 0.0, .b = 0.0, .a = 0.75};
-	Color text_faded{.r = 0.0, .g = 0.0, .b = 0.0, .a = 0.4};
+	static constexpr Color default_text_back = { .r = 0.8, .g = 0.8, .b = 0.8, .a = 1 };
+	static constexpr Color default_text_basic = { .r = 0.0, .g = 0.0, .b = 0.0, .a = 0.75 };
+	Color main = { .r = 0.0, .g = 0.5, .b = 1.0, .a = 0.5 };
+	Color basic = { .r = 0.0, .g = 0.0, .b = 0.0, .a = 0.4 };
+	Color guide = { .r = 0.0, .g = 0.0, .b = 0.0, .a = 0.25 };
+	Color highlight = { .r = 0.0, .g = 0.5, .b = 1.0, .a = 1 };
+	Color text_main = { .r = 0.0, .g = 0.5, .b = 1.0, .a = 0.6 };
+	Color text_faded = { .r = 0.0, .g = 0.0, .b = 0.0, .a = 0.4 };
+	Color text_back = default_text_back;
+	Color text_basic = default_text_basic;
+};
+
+struct LabelState {
+	bool show = true;
+	bool show_back = true;
 };
 
 struct Point {
-	int x{0};
-	int y{0};
+	int x = 0;
+	int y = 0;
 
 	Point(double dx, double dy)
 		: x(static_cast<int>(std::round(dx)))
@@ -81,28 +90,45 @@ struct Point {
 	}
 };
 
+struct Box {
+	int t = 0;
+	int r = 0;
+	int b = 0;
+	int l = 0;
+};
+
 struct Rect {
-	int x{0};
-	int y{0};
-	int w{0};
-	int h{0};
+	int x = 0;
+	int y = 0;
+	int w = 0;
+	int h = 0;
 };
 
 struct SelectionGuideRule {
 	std::vector<double> x;
 	std::vector<double> y;
-	bool show{false};
+	bool show = false;
 };
 
 struct TextStyle {
 	std::string font_family = "Sans";
-	double font_size = 10.0;
+	double font_size = 12.0;
 };
 
 struct TextOffset {
 	double h{5.0}, v{5.0}, hs{3.0}, vs{3.0};
 };
+
 struct TextAlign {
 	TextAlignH h{TextAlignH::Left}, hr{TextAlignH::Right};
 	TextAlignV v{TextAlignV::Top}, vr{TextAlignV::Bottom};
+};
+
+struct LabelOpts {
+	TextAlignH halign = TextAlignH::Left;
+	TextAlignV valign = TextAlignV::Baseline;
+	Color color = ColorScheme::default_text_basic;
+	Color color_back = ColorScheme::default_text_back;
+	Box padding = { .t = 0, .r = 3, .b = 1, .l = 3 };
+	bool show_back = true;
 };

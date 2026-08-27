@@ -1,5 +1,5 @@
 # ds-measurer
-**v2.0.0** | [English version](README.md) | [Написать](mailto:assador@gmail.com) | [Boosty](https://boosty.to/assador/donate)
+**v2.0.1** | [English version](README.md) | [Написать](mailto:assador@gmail.com) | [Boosty](https://boosty.to/assador/donate)
 
 `ds-measurer` — экранная мерялка, к которой до кучи присобачено снятие скриншотов выделяемых областей и пипетка (она же колорпикер, прости Господи). Программа очень полезна, в основном, как вспомогашка для несчастных фронтендеров/верстальщиков, но не только. Свободная, AGPLv3. Есть сборки AppImage (x86_64/Linux/Wayland, [описание здесь же](#код-и-сборки)).
 

@@ -15,23 +15,23 @@ enum class ScreenshotTarget : std::uint8_t { Both, Clipboard, File };
 enum class ScreenshotFormat : std::uint8_t { Png };
 
 struct ColorPickConfig {
-	ColorPickTarget target{ColorPickTarget::Both};
+	ColorPickTarget target = ColorPickTarget::Both;
 };
 
 struct ScreenshotConfig {
-	ScreenshotTarget target{ScreenshotTarget::Both};
-	ScreenshotFormat format{ScreenshotFormat::Png};
-	std::string file_pattern{"~/screenshot_%Y_%m_%d_%H_%M_%S.png"};
+	ScreenshotTarget target = ScreenshotTarget::Both;
+	ScreenshotFormat format = ScreenshotFormat::Png;
+	std::string file_pattern = "~/screenshot_%Y_%m_%d_%H_%M_%S.png";
 };
 
 std::string resolve_config_path();
 
 class Config {
 public:
-	std::string copy_format{"{w} × {h}"};
-	bool show_diagonal{true};
-	int snap_distance{10};
-	TextStyle text_style = {.font_family = "Sans", .font_size = 10.0};
+	std::string copy_format = "{w} × {h}";
+	bool show_diagonal = true;
+	int snap_distance = 10;
+	TextStyle text_style = { .font_family = "Sans", .font_size = 12.0 };
 
 	Keybindings keys;
 	AspectRatios ratios;

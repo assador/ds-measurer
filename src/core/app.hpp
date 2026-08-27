@@ -12,7 +12,7 @@
 #include "core/types.hpp"
 
 struct MouseState {
-	bool is_dragging{false};
+	bool is_dragging = false;
 	Point click_pos;
 	Point initial_p0;
 	Point initial_p1;
@@ -22,18 +22,20 @@ struct MouseState {
 struct AppState {
 	Config& config;
 	Cursor cursor;
+
+	LabelState labels;
 	MouseState lmb;
 	MouseState rmb;
 
-	Mode mode{Mode::Measurements};
+	Mode mode = Mode::Measurements;
 
-	double ratio{1.1};
-	bool is_fixed_ratio{false};
-	bool is_from_center{false};
+	double ratio = 1.1;
+	bool is_fixed_ratio = false;
+	bool is_from_center = false;
 
-	bool show_color_picks{true};
-	bool show_guides{true};
-	bool snap_to_guides{true};
+	bool show_color_picks = true;
+	bool show_guides = true;
+	bool snap_to_guides = true;
 
 	std::vector<std::unique_ptr<ColorPick>> color_picks;
 	std::vector<std::unique_ptr<Guide>> guides;
@@ -76,6 +78,10 @@ struct AppState {
 	void apply_from_config();
 	void set_color_scheme(const std::string& name);
 
+	void apply_labels_action(bool LabelState::* field, SwitchAction action);
+	void toggle_labels();
+	void toggle_labels_back();
+
 	void add_guide(Orientation orient);
 	void clear_active();
 	void clear_all();
@@ -93,8 +99,8 @@ struct AppState {
 	void set_from_center(bool is_pressed);
 	void set_ratio(double r);
 	void snap_active_translation();
-	void toggle_grids_of_active(uint32_t kc);
 	void toggle_diagonal_of_active();
+	void toggle_grids_of_active(uint32_t kc);
 
 private:
 
@@ -139,6 +145,23 @@ private:
 		ssize_t next_index = (static_cast<ssize_t>(current_index) + step) % size;
 		if (next_index < 0) next_index += size;
 		active = items[next_index].get();
+	}
+
+	template <typename Container>
+	void switch_container_labels_state(
+		Container& items,
+		bool LabelState::* field,
+		SwitchAction action
+	) {
+		if (items.empty()) return;
+		for (const auto& item : items) {
+			auto& state = item.get()->opts.labels_state;
+			switch (action) {
+				case SwitchAction::Toggle: state.*field = !(state.*field); break;
+				case SwitchAction::On: state.*field = true; break;
+				case SwitchAction::Off: state.*field = false; break;
+			}
+		}
 	}
 };
 
