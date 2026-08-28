@@ -101,5 +101,5 @@ target_sources(${PROJECT_NAME} PRIVATE ${CONFIG_DST})
 
 install(TARGETS ${PROJECT_NAME} DESTINATION ${CMAKE_INSTALL_BINDIR})
 install(FILES ${CONFIG_SRC} DESTINATION ${CMAKE_INSTALL_SYSCONFDIR}/ds-measurer)
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/assets/ds-measurer.desktop DESTINATION ${CMAKE_INSTALL_DATADIR}/applications)
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/assets/org.assador.ds.Measurer.desktop DESTINATION ${CMAKE_INSTALL_DATADIR}/applications)
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/assets/ds-measurer.svg DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor/scalable/apps)
