@@ -6,7 +6,7 @@ common:
 guides:
    snap distance: 10
 pick color:
-   target: both  # both | clipboard | stack
+   target: clipboard  # both | clipboard | stack
 screenshot:
    target: clipboard  # both | clipboard | file
    file:   "~/screenshot_%Y_%m_%d_%H_%M_%S.png"
@@ -44,9 +44,9 @@ aspect ratio shortcuts:
    y: "sqrt(2)"
 selection guides:
    x: { x: [ 0.5                ], y: [ 0.5                ], show: yes }
-   c: { x: [ 0.38197, 0.61803   ], y: [ 0.38197, 0.61803   ], show: no }
-   v: { x: [ 0.33333, 0.66667   ], y: [ 0.33333, 0.66667   ], show: no }
-   b: { x: [ 0.2, 0.4, 0.6, 0.8 ], y: [ 0.2, 0.4, 0.6, 0.8 ], show: no }
+   c: { x: [ 0.38197, 0.61803   ], y: [ 0.38197, 0.61803   ], show: no  }
+   v: { x: [ 0.33333, 0.66667   ], y: [ 0.33333, 0.66667   ], show: no  }
+   b: { x: [ 0.2, 0.4, 0.6, 0.8 ], y: [ 0.2, 0.4, 0.6, 0.8 ], show: no  }
 colors shortcuts:
    default: 1
    dark:    2
@@ -55,56 +55,56 @@ colors shortcuts:
    matrix:  5
 colors:
    default:
-      main:       { r: 0,    g: 0.5,  b: 1,    a: 0.5  }
-      basic:      { r: 0,    g: 0,    b: 0,    a: 0.4  }
+      main:       { r: 0,    g: 0.4,  b: 1,    a: 0.5  }
+      basic:      { r: 0,    g: 0,    b: 0,    a: 0.35 }
       guide:      { r: 0,    g: 0,    b: 0,    a: 0.25 }
-      highlight:  { r: 0,    g: 0.5,  b: 1,    a: 1    }
+      highlight:  { r: 0,    g: 0.4,  b: 1,    a: 1    }
       text back:  { r: 0.8,  g: 0.8,  b: 0.8,  a: 1    }
-      text main:  { r: 0,    g: 0.5,  b: 1,    a: 0.6  }
+      text main:  { r: 0,    g: 0.4,  b: 1,    a: 0.6  }
       text basic: { r: 0,    g: 0,    b: 0,    a: 0.75 }
       text faded: { r: 0,    g: 0,    b: 0,    a: 0.4  }
    dark:
-      main:       { r: 0.2,  g: 0.6,  b: 1,    a: 0.5  }
-      basic:      { r: 1,    g: 1,    b: 1,    a: 0.3  }
-      guide:      { r: 1,    g: 1,    b: 1,    a: 0.2  }
+      main:       { r: 0.2,  g: 0.6,  b: 1,    a: 0.7  }
+      basic:      { r: 1,    g: 1,    b: 1,    a: 0.35 }
+      guide:      { r: 1,    g: 1,    b: 1,    a: 0.25 }
       highlight:  { r: 0.2,  g: 0.6,  b: 1,    a: 1    }
       text back:  { r: 0.2,  g: 0.2,  b: 0.2,  a: 1    }
-      text main:  { r: 0.2,  g: 0.6,  b: 1,    a: 0.6  }
+      text main:  { r: 0.2,  g: 0.6,  b: 1,    a: 0.7  }
       text basic: { r: 1,    g: 1,    b: 1,    a: 0.75 }
       text faded: { r: 1,    g: 1,    b: 1,    a: 0.4  }
    white:
-      main:       { r: 1,    g: 1,    b: 1,    a: 0.8  }
-      basic:      { r: 1,    g: 1,    b: 1,    a: 0.5  }
-      guide:      { r: 1,    g: 1,    b: 1,    a: 0.3  }
+      main:       { r: 1,    g: 1,    b: 1,    a: 1    }
+      basic:      { r: 1,    g: 1,    b: 1,    a: 1    }
+      guide:      { r: 1,    g: 1,    b: 1,    a: 1    }
       highlight:  { r: 1,    g: 1,    b: 1,    a: 1    }
-      text back:  { r: 0.2,  g: 0.2,  b: 0.2,  a: 1    }
-      text main:  { r: 1,    g: 1,    b: 1,    a: 0.9  }
-      text basic: { r: 1,    g: 1,    b: 1,    a: 0.75 }
-      text faded: { r: 1,    g: 1,    b: 1,    a: 0.5  }
+      text back:  { r: 0,    g: 0,    b: 0,    a: 1    }
+      text main:  { r: 1,    g: 1,    b: 1,    a: 1    }
+      text basic: { r: 1,    g: 1,    b: 1,    a: 1    }
+      text faded: { r: 1,    g: 1,    b: 1,    a: 1    }
    black:
-      main:       { r: 0,    g: 0,    b: 0,    a: 0.8  }
-      basic:      { r: 0,    g: 0,    b: 0,    a: 0.5  }
-      guide:      { r: 0,    g: 0,    b: 0,    a: 0.3  }
+      main:       { r: 0,    g: 0,    b: 0,    a: 1    }
+      basic:      { r: 0,    g: 0,    b: 0,    a: 1    }
+      guide:      { r: 0,    g: 0,    b: 0,    a: 1    }
       highlight:  { r: 0,    g: 0,    b: 0,    a: 1    }
-      text back:  { r: 0.8,  g: 0.8,  b: 0.8,  a: 1    }
-      text main:  { r: 0,    g: 0,    b: 0,    a: 0.9  }
-      text basic: { r: 0,    g: 0,    b: 0,    a: 0.75 }
-      text faded: { r: 0,    g: 0,    b: 0,    a: 0.5  }
+      text back:  { r: 1,    g: 1,    b: 1,    a: 1    }
+      text main:  { r: 0,    g: 0,    b: 0,    a: 1    }
+      text basic: { r: 0,    g: 0,    b: 0,    a: 1    }
+      text faded: { r: 0,    g: 0,    b: 0,    a: 1    }
    matrix:
       main:       { r: 0,    g: 1,    b: 0,    a: 0.8  }
       basic:      { r: 0,    g: 1,    b: 0,    a: 0.5  }
       guide:      { r: 0,    g: 1,    b: 0,    a: 0.3  }
       highlight:  { r: 0,    g: 1,    b: 0,    a: 0.8  }
       text back:  { r: 0.2,  g: 0.2,  b: 0.2,  a: 1    }
-      text main:  { r: 0,    g: 1,    b: 0,    a: 0.9  }
-      text basic: { r: 0,    g: 1,    b: 0,    a: 0.75 }
-      text faded: { r: 0,    g: 1,    b: 0,    a: 0.5  }
+      text main:  { r: 0,    g: 1,    b: 0,    a: 0.8  }
+      text basic: { r: 0,    g: 1,    b: 0,    a: 0.8  }
+      text faded: { r: 0,    g: 1,    b: 0,    a: 0.6  }
    highlight:
-      main:       { r: 1,    g: 0.23, b: 0,    a: 0.8  }
-      basic:      { r: 1,    g: 0.23, b: 0,    a: 0.5  }
-      guide:      { r: 1,    g: 0.23, b: 0,    a: 0.3  }
-      highlight:  { r: 1,    g: 0.23, b: 0,    a: 1    }
+      main:       { r: 0.8,  g: 0.2,  b: 0,    a: 0.8  }
+      basic:      { r: 0.8,  g: 0.2,  b: 0,    a: 0.7  }
+      guide:      { r: 0.8,  g: 0.2,  b: 0,    a: 0.5  }
+      highlight:  { r: 0.8,  g: 0.2,  b: 0,    a: 0.8  }
       text back:  { r: 0.4,  g: 0.4,  b: 0.4,  a: 1    }
       text main:  { r: 1,    g: 1,    b: 1,    a: 0.9  }
-      text basic: { r: 1,    g: 1,    b: 1,    a: 0.75 }
-      text faded: { r: 1,    g: 1,    b: 1,    a: 0.5  }
+      text basic: { r: 1,    g: 1,    b: 1,    a: 0.8  }
+      text faded: { r: 1,    g: 1,    b: 1,    a: 0.6  }
